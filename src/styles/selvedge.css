@@ -94,23 +94,19 @@
   width: auto;
 }
 
-/* Selvedge stripe: a 2px red rule running down the left side of the
- * sidebar, evoking the red selvedge thread on a roll of denim. */
+/* Selvedge stripe: a 2px red rule running down the right edge of the
+ * sidebar, evoking the red selvedge thread on a roll of denim.
+ *
+ * IMPORTANT: do NOT set `position: relative` on .sidebar-pane — Starlight
+ * relies on `position: fixed` for desktop layout, and any position
+ * override here will push the sidebar back into flow and crush the main
+ * content area. Use `border-right` instead — it produces the same visual
+ * stripe without touching positioning. */
 .sidebar-pane {
-  position: relative;
+  border-right: 2px solid var(--selvedge-red);
 }
-.sidebar-pane::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 2px;
-  background: var(--selvedge-red);
-  opacity: 0.85;
-}
-:root[data-theme="dark"] .sidebar-pane::before {
-  background: var(--selvedge-red-bright);
+:root[data-theme="dark"] .sidebar-pane {
+  border-right-color: var(--selvedge-red-bright);
 }
 
 /* Code blocks — slightly warmer paper in light mode */
@@ -313,46 +309,23 @@ a[aria-current="page"] {
   border-left-color: var(--selvedge-red-bright);
 }
 
-/* ---- Layout: tighten top whitespace on doc pages ----
- * Starlight reserves a lot of room above the first heading on doc pages
- * (anchored to the splash hero's expected height). On non-splash pages
- * this reads as awkward dead space. Pull the content up. */
-.main-frame > .main-pane > .content-panel:first-of-type {
-  padding-block-start: 1.5rem;
+/* ---- Layout: wider doc content, narrower right TOC ----
+ * Default Starlight content width is 50rem; right "On this page" TOC
+ * reserves ~16rem. We give docs more room and shrink the TOC.
+ *
+ * NOTE: don't override layout-critical properties like `position` on
+ * .sidebar-pane, .main-frame, .content-panel — Starlight's CSS depends
+ * on those exact values for the desktop layout. */
+:root {
+  --sl-content-width: 60rem;
+  --sl-sidebar-width: 17rem;
 }
-main .sl-markdown-content > h1:first-child,
-main h1.heading-text:first-child,
-main > .content-panel:first-child > h1:first-child {
-  margin-block-start: 0;
-}
-/* Page header (title + breadcrumb) — reduce extra padding under the top nav */
-.content-panel.page-header,
-.page-header {
-  padding-block: 1rem !important;
-}
-header.content-panel {
-  padding-block: 0.5rem !important;
-}
-
-/* ---- Layout: narrower right TOC, wider content ----
- * Default Starlight reserves ~16rem for the right "On this page" TOC.
- * On viewports where the doc deserves more room, shrink the TOC to 11rem
- * and let main content fill the slack. */
 @media (min-width: 72rem) {
-  :root {
-    --sl-content-width: 50rem;
-    --sl-sidebar-width: 17rem;
-  }
   .right-sidebar-container {
     max-width: 12rem;
   }
   .right-sidebar-panel,
   .right-sidebar {
     font-size: 0.85rem;
-  }
-}
-@media (min-width: 86rem) {
-  :root {
-    --sl-content-width: 56rem;
   }
 }
