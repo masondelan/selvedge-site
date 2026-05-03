@@ -287,17 +287,72 @@
 }
 
 /* Reduce sidebar font weight contrast — Starlight default is loud */
-.sidebar-content a {
+nav.sidebar a,
+.sidebar a {
   font-weight: 400;
 }
-.sidebar-content a[aria-current="page"] {
-  font-weight: 600;
-  color: var(--selvedge-red);
+
+/* Active sidebar link — Starlight defaults paint a red bg over red text
+ * (the accent color is our red, and the link inherits accent). Force a
+ * transparent bg with a left border indicator and bold red text. The
+ * !importants are needed because Starlight's active rules use higher
+ * specificity than a plain attribute selector. */
+nav.sidebar a[aria-current="page"],
+.sidebar a[aria-current="page"],
+a[aria-current="page"] {
   background: transparent !important;
+  background-color: transparent !important;
+  color: var(--selvedge-red) !important;
+  font-weight: 600 !important;
   border-left: 2px solid var(--selvedge-red);
-  padding-left: calc(var(--sl-sidebar-item-padding-inline) - 2px);
 }
-:root[data-theme="dark"] .sidebar-content a[aria-current="page"] {
-  color: var(--selvedge-red-bright);
+:root[data-theme="dark"] nav.sidebar a[aria-current="page"],
+:root[data-theme="dark"] .sidebar a[aria-current="page"],
+:root[data-theme="dark"] a[aria-current="page"] {
+  color: var(--selvedge-red-bright) !important;
   border-left-color: var(--selvedge-red-bright);
+}
+
+/* ---- Layout: tighten top whitespace on doc pages ----
+ * Starlight reserves a lot of room above the first heading on doc pages
+ * (anchored to the splash hero's expected height). On non-splash pages
+ * this reads as awkward dead space. Pull the content up. */
+.main-frame > .main-pane > .content-panel:first-of-type {
+  padding-block-start: 1.5rem;
+}
+main .sl-markdown-content > h1:first-child,
+main h1.heading-text:first-child,
+main > .content-panel:first-child > h1:first-child {
+  margin-block-start: 0;
+}
+/* Page header (title + breadcrumb) — reduce extra padding under the top nav */
+.content-panel.page-header,
+.page-header {
+  padding-block: 1rem !important;
+}
+header.content-panel {
+  padding-block: 0.5rem !important;
+}
+
+/* ---- Layout: narrower right TOC, wider content ----
+ * Default Starlight reserves ~16rem for the right "On this page" TOC.
+ * On viewports where the doc deserves more room, shrink the TOC to 11rem
+ * and let main content fill the slack. */
+@media (min-width: 72rem) {
+  :root {
+    --sl-content-width: 50rem;
+    --sl-sidebar-width: 17rem;
+  }
+  .right-sidebar-container {
+    max-width: 12rem;
+  }
+  .right-sidebar-panel,
+  .right-sidebar {
+    font-size: 0.85rem;
+  }
+}
+@media (min-width: 86rem) {
+  :root {
+    --sl-content-width: 56rem;
+  }
 }
