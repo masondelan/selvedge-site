@@ -293,4 +293,11 @@
 .sidebar-content a[aria-current="page"] {
   font-weight: 600;
   color: var(--selvedge-red);
+  background: transparent !important;
+  border-left: 2px solid var(--selvedge-red);
+  padding-left: calc(var(--sl-sidebar-item-padding-inline) - 2px);
+}
+:root[data-theme="dark"] .sidebar-content a[aria-current="page"] {
+  color: var(--selvedge-red-bright);
+  border-left-color: var(--selvedge-red-bright);
 }
