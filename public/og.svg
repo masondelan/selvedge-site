@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#1F3057"/>
+  <!-- Selvedge stripe -->
+  <rect x="80" y="80" width="6" height="470" fill="#B23A2A"/>
+  <!-- Wordmark -->
+  <text x="120" y="320"
+    font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+    font-size="120" font-weight="500" letter-spacing="-2" fill="#EDE5D3">selvedge</text>
+  <!-- Tagline -->
+  <text x="120" y="400"
+    font-family="'Inter', -apple-system, system-ui, sans-serif"
+    font-size="36" font-weight="400" fill="#c8c0a8">Long-term memory for AI-coded codebases.</text>
+  <!-- URL -->
+  <text x="120" y="540"
+    font-family="'JetBrains Mono', ui-monospace, monospace"
+    font-size="24" font-weight="400" fill="#B23A2A">selvedge.sh</text>
+  <!-- Repeating stitch motif on right -->
+  <g stroke="#B23A2A" stroke-width="3" stroke-linecap="round" opacity="0.55">
+    <line x1="900" y1="120" x2="970" y2="120"/>
+    <line x1="990" y1="120" x2="1060" y2="120"/>
+    <line x1="1080" y1="120" x2="1120" y2="120"/>
+    <line x1="900" y1="170" x2="950" y2="170"/>
+    <line x1="970" y1="170" x2="1080" y2="170"/>
+    <line x1="900" y1="220" x2="1020" y2="220"/>
+    <line x1="1040" y1="220" x2="1100" y2="220"/>
+  </g>
+</svg>

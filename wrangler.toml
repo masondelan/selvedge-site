@@ -1,0 +1,7 @@
+# Cloudflare Pages doesn't strictly need wrangler.toml — the dashboard config is
+# sufficient — but having one in the repo lets you `npx wrangler pages dev` against
+# a local build, and documents the project name for anyone forking the site.
+
+name = "selvedge-site"
+compatibility_date = "2026-04-26"
+pages_build_output_dir = "dist"

@@ -1,0 +1,296 @@
+/* Selvedge brand — locked palette + typography overrides for Starlight.
+ *
+ * Palette:
+ *   indigo #1F3057  — primary
+ *   red    #B23A2A  — accent / the selvedge stripe
+ *   ecru   #EDE5D3  — warm paper
+ *
+ * Wordmark is lowercase mono. Body is system stack with monospace fallbacks
+ * for code blocks. Everything else is Starlight defaults overridden minimally.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  /* brand */
+  --selvedge-indigo: #1f3057;
+  --selvedge-indigo-deep: #142142;
+  --selvedge-red: #b23a2a;
+  --selvedge-red-bright: #d24a37;
+  --selvedge-ecru: #ede5d3;
+  --selvedge-ecru-dark: #d8cfb9;
+  --selvedge-ink: #0e1525;
+  --selvedge-paper: #faf6ec;
+
+  /* fonts */
+  --__sl-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --__sl-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+    Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Light mode = warm paper + indigo ink */
+:root[data-theme="light"] {
+  --sl-color-accent-low: #f4ebd8;
+  --sl-color-accent: var(--selvedge-red);
+  --sl-color-accent-high: #7a2418;
+
+  --sl-color-white: var(--selvedge-ink);
+  --sl-color-gray-1: #1c2538;
+  --sl-color-gray-2: #2c3550;
+  --sl-color-gray-3: #4a5575;
+  --sl-color-gray-4: #6b7593;
+  --sl-color-gray-5: #8b95b1;
+  --sl-color-gray-6: #c8c0a8;
+  --sl-color-gray-7: #e6dfca;
+  --sl-color-black: var(--selvedge-paper);
+
+  --sl-color-bg: var(--selvedge-paper);
+  --sl-color-bg-nav: #f5efe0;
+  --sl-color-bg-sidebar: #f5efe0;
+  --sl-color-bg-inline-code: #ece4d1;
+
+  --sl-color-text: var(--selvedge-ink);
+  --sl-color-text-accent: var(--selvedge-red);
+  --sl-color-text-invert: var(--selvedge-paper);
+
+  --sl-color-hairline: #d5cdb5;
+  --sl-color-hairline-light: #e3dcc8;
+  --sl-color-hairline-shade: #c8c0a8;
+}
+
+/* Dark mode = deep indigo + ecru */
+:root[data-theme="dark"] {
+  --sl-color-accent-low: #2a1a14;
+  --sl-color-accent: var(--selvedge-red-bright);
+  --sl-color-accent-high: #f6c2b6;
+
+  --sl-color-white: var(--selvedge-ecru);
+  --sl-color-gray-1: #e8dfca;
+  --sl-color-gray-2: #c9bfa6;
+  --sl-color-gray-3: #9b9079;
+  --sl-color-gray-4: #6e6755;
+  --sl-color-gray-5: #4a4537;
+  --sl-color-gray-6: #2e2c25;
+  --sl-color-gray-7: #1c1a14;
+  --sl-color-black: var(--selvedge-indigo-deep);
+
+  --sl-color-bg: #0f1729;
+  --sl-color-bg-nav: #14203a;
+  --sl-color-bg-sidebar: #14203a;
+  --sl-color-bg-inline-code: #1a2746;
+
+  --sl-color-text: var(--selvedge-ecru);
+  --sl-color-text-accent: var(--selvedge-red-bright);
+
+  --sl-color-hairline: #1f2d4f;
+  --sl-color-hairline-light: #283a66;
+  --sl-color-hairline-shade: #14203a;
+}
+
+/* Wordmark always renders in monospace */
+.site-title img {
+  height: 1.6rem;
+  width: auto;
+}
+
+/* Selvedge stripe: a 2px red rule running down the left side of the
+ * sidebar, evoking the red selvedge thread on a roll of denim. */
+.sidebar-pane {
+  position: relative;
+}
+.sidebar-pane::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 2px;
+  background: var(--selvedge-red);
+  opacity: 0.85;
+}
+:root[data-theme="dark"] .sidebar-pane::before {
+  background: var(--selvedge-red-bright);
+}
+
+/* Code blocks — slightly warmer paper in light mode */
+:root[data-theme="light"] .expressive-code {
+  --ec-frm-edBg: #f1e9d2;
+}
+
+/* Pull quotes / callouts inherit the indigo + red palette properly */
+.starlight-aside--note {
+  --sl-color-asides-text-accent: var(--selvedge-indigo);
+  --sl-color-asides-border: var(--selvedge-indigo);
+}
+:root[data-theme="dark"] .starlight-aside--note {
+  --sl-color-asides-text-accent: #7c95d0;
+  --sl-color-asides-border: #4a6aa8;
+}
+
+/* Tables — tighten + stripe for readability */
+.sl-markdown-content table {
+  font-size: 0.92rem;
+}
+.sl-markdown-content table th {
+  background: var(--sl-color-bg-nav);
+  font-weight: 600;
+}
+
+/* Hero overrides (used by SelvedgeHero.astro) */
+.selvedge-hero {
+  --hero-pad-y: clamp(2rem, 5vw, 4rem);
+  padding-block: var(--hero-pad-y);
+  display: grid;
+  gap: 1.6rem;
+  align-items: start;
+}
+
+.selvedge-hero__wordmark {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+}
+
+.selvedge-hero__stripe {
+  width: 4px;
+  height: 3.5rem;
+  background: var(--selvedge-red);
+  border-radius: 1px;
+}
+:root[data-theme="dark"] .selvedge-hero__stripe {
+  background: var(--selvedge-red-bright);
+}
+
+.selvedge-hero__title {
+  font-family: var(--__sl-font-mono);
+  font-weight: 500;
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--sl-color-text);
+  margin: 0;
+}
+
+.selvedge-hero__tag {
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  font-weight: 500;
+  color: var(--sl-color-text);
+  max-width: 38ch;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.selvedge-hero__sub {
+  font-size: 1rem;
+  color: var(--sl-color-gray-2);
+  max-width: 56ch;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.selvedge-hero__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.4rem;
+}
+
+.selvedge-hero__cta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 0.4rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.08s ease, background 0.2s ease;
+}
+.selvedge-hero__cta a:hover {
+  transform: translateY(-1px);
+}
+.selvedge-hero__cta .primary {
+  background: var(--selvedge-indigo);
+  color: var(--selvedge-paper);
+}
+:root[data-theme="dark"] .selvedge-hero__cta .primary {
+  background: var(--selvedge-red);
+  color: white;
+}
+.selvedge-hero__cta .secondary {
+  background: transparent;
+  color: var(--sl-color-text);
+  border-color: var(--sl-color-hairline);
+}
+
+/* Inline install command */
+.selvedge-hero__install {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  font-family: var(--__sl-font-mono);
+  font-size: 0.95rem;
+  background: var(--sl-color-bg-inline-code);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 0.4rem;
+  color: var(--sl-color-text);
+  width: fit-content;
+}
+.selvedge-hero__install::before {
+  content: "$";
+  color: var(--selvedge-red);
+  font-weight: 600;
+}
+
+/* Value props grid (used on landing) */
+.selvedge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+.selvedge-card {
+  padding: 1.2rem 1.3rem;
+  background: var(--sl-color-bg-nav);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--selvedge-red);
+}
+.selvedge-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--sl-color-text);
+}
+.selvedge-card p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--sl-color-gray-2);
+  line-height: 1.5;
+}
+
+/* Footer */
+.selvedge-footer {
+  border-top: 1px solid var(--sl-color-hairline);
+  margin-top: 4rem;
+  padding-block: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--sl-color-gray-3);
+}
+
+/* Reduce sidebar font weight contrast — Starlight default is loud */
+.sidebar-content a {
+  font-weight: 400;
+}
+.sidebar-content a[aria-current="page"] {
+  font-weight: 600;
+  color: var(--selvedge-red);
+}

@@ -1,0 +1,147 @@
+---
+title: Long-term memory for AI-coded codebases.
+description: A git blame for the why — captured live, by the agent, as the change happens. Selvedge is a local MCP server that AI coding agents call as they work.
+template: splash
+hero:
+  tagline: A git blame for the why — captured live, by the agent, as the change happens.
+  actions:
+    - text: Quickstart
+      link: /start/quickstart/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/masondelan/selvedge
+      icon: external
+      variant: secondary
+    - text: Why Selvedge?
+      link: /start/what-is-selvedge/
+      variant: secondary
+---
+
+import { Card, CardGrid, Code } from '@astrojs/starlight/components';
+
+## The problem
+
+Six months ago, your AI agent added a column called `user_tier_v2`. You don't know why.
+`git blame` points to a commit from `claude-code` with a generated message that says
+"Update schema." The session that made the change is long gone — and so is the prompt
+that produced it.
+
+With Selvedge, you run this instead:
+
+```bash
+$ selvedge blame user_tier_v2
+
+  user_tier_v2
+  Changed     2025-10-14 09:31:02
+  Agent       claude-code
+  Commit      3e7a991
+  Reasoning   User asked to add a grandfathering flag for legacy free-tier
+              users during the pricing migration. Stores the original tier
+              so we can backfill discounts without touching billing history.
+```
+
+That reasoning was **captured by the agent in the moment** — written into Selvedge from
+the same context that produced the change. Not inferred from the diff afterward by a
+second LLM. Not a hand-typed commit message.
+
+---
+
+## What Selvedge does, in three lines
+
+<CardGrid>
+  <Card title="Captures the why, live" icon="pencil">
+    AI agents call Selvedge's MCP tools while they work — `log_change` records what they
+    changed and **why**, in the same context window that produced the change.
+  </Card>
+
+  <Card title="Tracks entities, not lines" icon="seti:db">
+    Attribution is at the *thing you actually search for*: `users.email`, `env/STRIPE_SECRET_KEY`,
+    `api/v1/checkout`, `deps/stripe`. Prefix queries work everywhere.
+  </Card>
+
+  <Card title="Stays local, stays simple" icon="seti:lock">
+    Zero deps beyond MCP + Click + Rich. SQLite under `.selvedge/` next to your code.
+    No accounts, no servers, no telemetry.
+  </Card>
+</CardGrid>
+
+---
+
+## Quickstart
+
+Three commands. The third one is interactive — it detects which AI tools are on your
+machine (Claude Code, Cursor, Copilot) and wires Selvedge into each one's config. Every
+modified file gets a `.bak` written before any change reaches disk.
+
+```bash
+pip install selvedge
+cd your-project
+selvedge setup
+```
+
+That's it. Open a second terminal and run `selvedge watch` to live-tail events as your
+agent makes them. Then start asking your codebase questions:
+
+```bash
+selvedge blame payments.amount         # what changed last and why
+selvedge diff users --since 30d        # all changes to users in 30 days
+selvedge changeset add-stripe-billing  # all events for a feature
+selvedge search "stripe"               # full-text search
+```
+
+[Full quickstart →](/start/quickstart/) &nbsp;·&nbsp; [CLI reference →](/reference/cli/) &nbsp;·&nbsp; [MCP tool reference →](/reference/mcp-tools/)
+
+---
+
+## Who it's for
+
+**Teams running long-term, AI-coded codebases.** When the project is big enough that
+someone will touch it again in twelve months, three years — but most of it was written
+by an agent whose context evaporated the day each PR shipped. `git blame` tells you
+*what* changed. Selvedge tells you *why* — even after the agent session, the prompt,
+the developer who asked for it, and the model version are all long gone.
+
+**Solo developers using Claude Code on everyday projects.** Side projects, weekend
+builds, the small internal tool you keep poking at. You don't need enterprise governance
+— you just need to remember why you (or your agent) did the thing you did yesterday,
+last week, last sprint.
+
+If you've ever come back to your own AI-built project and thought "what was this *for*
+again?", Selvedge is the missing piece.
+
+---
+
+## Where Selvedge fits
+
+AI agents call Selvedge as they work. Selvedge captures the *why* into a durable,
+queryable store and emits it back out as Agent Trace records, observability metadata,
+and compliance artifacts.
+
+Selvedge does **not** replace `git` (line-level what/when), PR review tools (review-time
+quality), agent observability (LLM call traces), or general-purpose code-host AI
+features. It sits between them — the provenance-as-first-class-citizen layer that
+everything else references.
+
+[See the comparison table →](/compare/agent-tools/)
+
+---
+
+## Listings
+
+Selvedge is open source (MIT) and lives in three directories beyond GitHub.
+
+<CardGrid>
+  <Card title="PyPI" icon="seti:python">
+    [pypi.org/project/selvedge](https://pypi.org/project/selvedge/) — `pip install selvedge`
+  </Card>
+  <Card title="Smithery" icon="seti:json">
+    [smithery.ai/server/masondelan/selvedge](https://smithery.ai/server/masondelan/selvedge) — MCP catalog
+  </Card>
+  <Card title="Glama" icon="seti:json">
+    [glama.ai/mcp/servers/masondelan/selvedge](https://glama.ai/mcp/servers/masondelan/selvedge) — MCP directory
+  </Card>
+  <Card title="GitHub" icon="github">
+    [github.com/masondelan/selvedge](https://github.com/masondelan/selvedge) — source, issues, releases
+  </Card>
+</CardGrid>

@@ -1,0 +1,19 @@
+{
+  "name": "selvedge-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Marketing site and docs for Selvedge — selvedge.sh",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.30.4",
+    "astro": "^5.1.5",
+    "sharp": "^0.33.5"
+  }
+}
