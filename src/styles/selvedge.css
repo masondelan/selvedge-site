@@ -193,6 +193,11 @@
   margin-top: 0.4rem;
 }
 
+/* All three hero CTAs share the same outlined-indigo styling — no
+ * primary/secondary visual split. The .primary / .secondary classes
+ * still render on the anchors (from the hero data variant field), but
+ * they intentionally resolve to identical styling here so the buttons
+ * read as one consistent group against the muted ecru background. */
 .selvedge-hero__cta a {
   display: inline-flex;
   align-items: center;
@@ -202,38 +207,23 @@
   font-weight: 500;
   font-size: 0.95rem;
   text-decoration: none;
-  border: 1px solid transparent;
-  transition: transform 0.08s ease, background 0.2s ease;
+  background: transparent;
+  color: var(--selvedge-indigo);
+  border: 1px solid var(--selvedge-indigo);
+  transition: transform 0.08s ease, background 0.2s ease, color 0.2s ease;
 }
 .selvedge-hero__cta a:hover {
   transform: translateY(-1px);
-}
-.selvedge-hero__cta .primary {
   background: var(--selvedge-indigo);
   color: var(--selvedge-paper);
 }
-:root[data-theme="dark"] .selvedge-hero__cta .primary {
-  background: var(--selvedge-red);
-  color: white;
-}
-.selvedge-hero__cta .secondary {
-  background: transparent;
-  color: var(--selvedge-indigo);
-  border-color: var(--selvedge-indigo);
-}
-.selvedge-hero__cta .secondary:hover {
-  background: var(--selvedge-indigo);
-  color: var(--selvedge-paper);
-  border-color: var(--selvedge-indigo);
-}
-:root[data-theme="dark"] .selvedge-hero__cta .secondary {
+:root[data-theme="dark"] .selvedge-hero__cta a {
   color: var(--selvedge-ecru);
   border-color: var(--selvedge-ecru);
 }
-:root[data-theme="dark"] .selvedge-hero__cta .secondary:hover {
+:root[data-theme="dark"] .selvedge-hero__cta a:hover {
   background: var(--selvedge-ecru);
   color: var(--selvedge-indigo-deep);
-  border-color: var(--selvedge-ecru);
 }
 
 /* Inline install command */
