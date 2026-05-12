@@ -253,7 +253,6 @@ Prometheus). If you're on v0.2.x, `5m` will read as five months — upgrade.
 | `SELVEDGE_DB` | Force a specific DB path (per-session override) |
 | `SELVEDGE_LOG_LEVEL` | `DEBUG` / `INFO` / `WARNING` / `ERROR` (default `WARNING`) |
 | `SELVEDGE_QUIET=1` | Suppress the global-fallback stderr warning |
-| `SELVEDGE_DESTRUCTIVE=1` | Required (along with confirmation prompt) for any command that can permanently delete events |
 
 [**Configuration page →**](/reference/configuration/) for full details on DB resolution
 and project / global precedence.

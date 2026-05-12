@@ -218,8 +218,22 @@
 }
 .selvedge-hero__cta .secondary {
   background: transparent;
-  color: var(--sl-color-text);
-  border-color: var(--sl-color-hairline);
+  color: var(--selvedge-indigo);
+  border-color: var(--selvedge-indigo);
+}
+.selvedge-hero__cta .secondary:hover {
+  background: var(--selvedge-indigo);
+  color: var(--selvedge-paper);
+  border-color: var(--selvedge-indigo);
+}
+:root[data-theme="dark"] .selvedge-hero__cta .secondary {
+  color: var(--selvedge-ecru);
+  border-color: var(--selvedge-ecru);
+}
+:root[data-theme="dark"] .selvedge-hero__cta .secondary:hover {
+  background: var(--selvedge-ecru);
+  color: var(--selvedge-indigo-deep);
+  border-color: var(--selvedge-ecru);
 }
 
 /* Inline install command */
