@@ -1,9 +1,12 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 
+import cloudflare from "@astrojs/cloudflare";
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://selvedge.sh",
+
   integrations: [
     starlight({
       title: "selvedge",
@@ -81,4 +84,6 @@ export default defineConfig({
       tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
     }),
   ],
+
+  adapter: cloudflare()
 });
