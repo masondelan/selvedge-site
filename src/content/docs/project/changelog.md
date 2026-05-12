@@ -7,6 +7,46 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent two minor versions for
 at-a-glance browsing.
 
+## v0.3.5 — 2026-05-11
+
+The recovery-basics release. v0.3.1 made the runtime safe; v0.3.2 made problems
+visible; v0.3.5 ships the *minimum viable* "what happens when something has gone
+wrong" surface. **Drop-in upgrade for anyone on 0.3.4.**
+
+### Added
+
+- **`selvedge verify` — DB-correctness gate with two exit tiers.** Walks the store
+  and reports each check as PASS / WARN / FAIL. Must-fail conditions (SQLite
+  corruption from `PRAGMA integrity_check`, schema mismatch against the declared
+  `MIGRATIONS`, empty `entity_path`, unknown `change_type` in the store, unparseable
+  timestamps, malformed `tool_calls` rows) exit non-zero. Should-warn conditions
+  (singleton `changeset_id` groups, events past the 60-minute backfill window with
+  no `git_commit`) print warnings but exit 0 by default. Pass `--strict` to
+  escalate warnings to failures — the tiering means `selvedge verify` can drop into
+  CI on day one without `|| true`. `--json` for machine output. Tier mapping is
+  locked in by `selvedge.verify.CHECK_TIERS`.
+- **`selvedge backup` — online SQLite snapshot via `VACUUM INTO`.** Default
+  destination `.selvedge/backups/selvedge-YYYYMMDD-HHMMSS.db`. Hardcoded
+  `keep_last=7`; the setting becomes `backup_keep_last` in `.selvedge/config.toml`
+  when that file lands in v0.3.10. Two backups within the same second don't
+  collide. `--output <path>` overrides the default destination and is excluded
+  from rotation. `--json` for scripting.
+- **`.selvedge/backups/` added to the project `.gitignore`.** `selvedge init`
+  writes it on fresh repos; the first `selvedge backup` run on an existing repo
+  appends it the same way. Idempotent.
+- **Doctor — `Last backup` row.** INFO when the newest backup is ≤7 days old,
+  WARN when older, FAIL when no backups exist *and* the events table has ≥10,000
+  rows (the threshold where no-backups becomes a real data-loss exposure rather
+  than a CI/scratch DB).
+- **Doctor — `Schema version` now FAILs on downgrade.** When `schema_migrations`
+  contains a version not declared in the current `MIGRATIONS` tuple, the row fails
+  rather than silently passing.
+
+### Tests
+
+- 24 new tests: `test_verify.py` (13), `test_backup.py` (7), `test_doctor.py`
+  extension (4). Within the ≤25 budget for Phase 2.11. Suite is now ≈359 tests.
+
 ## v0.3.4 — 2026-04-26
 
 The first-run release. The install funnel was six manual steps with three documentation
@@ -53,47 +93,12 @@ from inside the tool instead of from the README. **Drop-in upgrade for anyone on
 - 54 new tests across `test_setup.py` (18), `test_prompt.py` (18), `test_watch.py`
   (18). Suite is now ≈336 tests.
 
-## v0.3.3 — 2026-04-26
-
-A discoverability + ergonomics release. No new MCP tools, no behavior changes that
-affect stored data — but the live tool schema is substantially richer for the agents
-that read it. **Drop-in upgrade for anyone on 0.3.2.**
-
-### Added
-
-- **Per-parameter descriptions on every MCP tool.** All 6 tools now declare each
-  parameter via `Annotated[T, Field(description=...)]`. Coverage went 0/21 → 21/21.
-- **MCP tool annotations on every tool.** `readOnlyHint`, `destructiveHint`,
-  `idempotentHint`, `openWorldHint`, plus a human-friendly `title`. `log_change` is
-  the only writer. The five readers are read-only + idempotent. None are open-world.
-- **`outputSchema` on `log_change` and `blame`.** New `LogChangeResult` and
-  `BlameResult` TypedDicts give the JSON-RPC layer something concrete to advertise.
-- **Custom server icon.** A "stitched timeline" mark — a horizontal running stitch
-  where each visible stitch is a captured change event. Lives at `assets/icon.svg`.
-
-### Changed
-
-- **`log_change` always returns a complete result payload.** `id`, `timestamp`,
-  `status`, `error`, `warnings` — every key always populated. Easier to type-check
-  without branching.
-- **`blame` returns a stable shape on miss.** Empty-history responses populate every
-  event field with the empty value of its type and set `error` to the "no history
-  found" message.
-- **Tool-level descriptions are dedented at startup.** Each tool's docstring is run
-  through `inspect.cleandoc` once at import time so `tools/list` doesn't leak the
-  function-body indent.
-
-### Documentation
-
-- **`CLAUDE.md` ↔ `docs/architecture.md` split.** `CLAUDE.md` is now a thin
-  agent-instructions file. The architecture, data model, MCP tool reference, full CLI
-  reference, phase plan, and non-goals all moved to `docs/architecture.md`.
-
 ---
 
 [**Full CHANGELOG.md →**](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md)
-in the source repo. Includes 0.3.0 (correctness fixes), 0.3.1 (concurrency hardening),
-0.3.2 (observability + doctor), 0.2.x (changesets, import/export), and the 0.1.0
-initial release.
+in the source repo. Includes 0.3.3 (per-tool annotations, output schemas, custom
+icon), 0.3.2 (observability + doctor), 0.3.1 (concurrency hardening), 0.3.0
+(correctness fixes), 0.2.x (changesets, import/export), and the 0.1.0 initial
+release.
 
 [**Roadmap →**](/project/roadmap/) for what's planned through v1.0.0.
