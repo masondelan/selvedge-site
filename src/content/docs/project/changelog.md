@@ -7,6 +7,81 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent two minor versions for
 at-a-glance browsing.
 
+## v0.3.6 — 2026-05-24
+
+Two themes in one release as a one-time exception to the single-theme
+cadence: **stay-current** (background PyPI version check) and
+**retention basics** (`selvedge prune` for the `tool_calls` table).
+**Drop-in upgrade for anyone on 0.3.5.**
+
+### Stay-current
+
+**Background version check in `selvedge` (the CLI only — never the MCP
+server).** A daemon thread fetches the latest published version from
+PyPI's JSON endpoint, caches the result at
+`~/.selvedge/update_check.json` (user-global so you don't re-check per
+project), and on process exit prints to stderr:
+
+```
+selvedge: v0.3.7 available (you're on 0.3.6) — https://selvedge.sh/upgrade
+```
+
+The notice is printed via `atexit` so it appears *after* the command's
+output, never interleaved. Cache TTL is 24h, matching `gh` and `npm`.
+
+**Generous suppression.** The check is disabled when any of
+`SELVEDGE_NO_UPDATE_CHECK=1`, `SELVEDGE_QUIET=1`, or `CI` is set in
+the environment, when stderr isn't a TTY (piping, agent stdio,
+`--json` to a file), and on dev / editable installs. The TTY gate is
+re-checked at print time too — even a cached notice can't pollute
+redirected output. The 1.5s fetch timeout and the no-raise posture of
+every code path mean a network blip can't slow or break the CLI.
+
+**`selvedge-server` stays silent.** The check is wired into the CLI
+group callback only — the MCP server's stdio is the JSON-RPC channel
+and an inadvertent stderr write would surface in the calling agent's
+logs as noise.
+
+### Retention basics
+
+**`selvedge prune` — trim old `tool_calls` rows.** Default retention
+is 90 days; `--days N` overrides. The default is long enough that the
+previous month's agents are still in the data. Every run appends a
+tab-separated audit line to `.selvedge/prune.log` so the cadence is
+visible later — even empty prunes log, so you can tell the difference
+between "no prunes yet" and "nothing to prune."
+
+```
+selvedge prune                # 90-day default
+selvedge prune --days 30      # tighter window
+selvedge prune --json         # for cron / scripting
+```
+
+Only `tool_calls` is pruned in this release. The destructive
+events-table path waits for `.selvedge/config.toml` in v0.3.10 and
+will require both `SELVEDGE_DESTRUCTIVE=1` *and* an interactive
+confirmation — the cron / non-interactive `--yes` footgun is
+defended against by design.
+
+**Doctor — `Last prune` row + oversized-`tool_calls` WARN.** The
+doctor table now surfaces the tail of `.selvedge/prune.log` (most
+recent timestamp, rows pruned, day threshold) and WARNs when the
+`tool_calls` table exceeds 100k rows so users get a nudge to run
+`selvedge prune` before the noise table gets large.
+
+### Note on cadence
+
+This release combines two themes — a **one-time exception** to the
+single-theme-per-release discipline locked in on 2026-05-10. The
+retention work could have slipped to v0.3.7 (entity foundation +
+`prior_attempts` wedge), but combining here avoided a renumbering
+pass on the phase plan. Single-theme resumes at v0.3.7.
+
+### Tests
+
+- 36 new tests: `test_update_check.py` (24), `test_prune.py` (10),
+  `test_doctor.py` extension (2). Suite is now ≈403 tests.
+
 ## v0.3.5 — 2026-05-11
 
 The recovery-basics release. v0.3.1 made the runtime safe; v0.3.2 made problems
@@ -47,58 +122,13 @@ wrong" surface. **Drop-in upgrade for anyone on 0.3.4.**
 - 24 new tests: `test_verify.py` (13), `test_backup.py` (7), `test_doctor.py`
   extension (4). Within the ≤25 budget for Phase 2.11. Suite is now ≈359 tests.
 
-## v0.3.4 — 2026-04-26
-
-The first-run release. The install funnel was six manual steps with three documentation
-lookups; v0.3.4 collapses it to one command and makes the agent integration discoverable
-from inside the tool instead of from the README. **Drop-in upgrade for anyone on
-0.3.3.**
-
-### Added
-
-- **`selvedge setup` — interactive first-run wizard.** Detects Claude Code, Cursor,
-  Copilot on the machine and walks through every install step in one pass: writes the
-  MCP entry into each tool's config, drops the canonical agent-instructions block into
-  the project's prompt file, runs `selvedge init`, installs the post-commit hook. Every
-  modified file gets a `.bak` written next to it before any change reaches disk.
-  Re-running on an already-set-up project is a no-op (idempotent). For CI / devcontainer
-  `postCreateCommand`: `selvedge setup --non-interactive --yes`.
-- **`selvedge prompt` — canonical agent instructions on tap.** Prints the recommended
-  system-prompt block to stdout (pipe-friendly), or installs it idempotently into a
-  target file with `--install <file>`. Sentinel-bracketed
-  (`<!-- selvedge:start -->` / `<!-- selvedge:end -->`) so re-running `--install`
-  updates the bracketed region without disturbing anything else in the file.
-- **`selvedge watch` — live tail of newly-logged events.** Polls the SQLite store at
-  `--interval` (default 1s) and prints each new event as it lands. Filters mirror
-  `selvedge history`. `--json` for `jq`. WAL mode means polling never blocks the
-  writer.
-- **`selvedge.prompt.PROMPT_BLOCK` is now public.** Library users can import the
-  canonical agent-instructions block as a constant for templating into their own
-  onboarding flows.
-
-### Changed
-
-- **Better empty-state diagnosis in `selvedge status`.** Decision-tree-driven hint:
-  MCP entry installed but agent hasn't reloaded → restart-your-agent grace; MCP entry
-  not detected anywhere → run `selvedge setup`. Surfaces the actual config path in
-  either case.
-- **`selvedge doctor`'s "MCP wiring" check now points at `selvedge setup`.** Same
-  diagnostic improvement, surfaced through the doctor table.
-- **`server.json` regenerated from live `server.py`.** Was still showing v0.3.2 tool
-  descriptions through v0.3.3; now in lockstep with `manifest.json`. Folded into the
-  version-bump checklist so this can't drift again.
-
-### Tests
-
-- 54 new tests across `test_setup.py` (18), `test_prompt.py` (18), `test_watch.py`
-  (18). Suite is now ≈336 tests.
-
 ---
 
 [**Full CHANGELOG.md →**](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md)
-in the source repo. Includes 0.3.3 (per-tool annotations, output schemas, custom
-icon), 0.3.2 (observability + doctor), 0.3.1 (concurrency hardening), 0.3.0
-(correctness fixes), 0.2.x (changesets, import/export), and the 0.1.0 initial
-release.
+in the source repo. Includes 0.3.4 (first-run wizard, prompt, watch),
+0.3.3 (per-tool annotations, output schemas, custom icon), 0.3.2
+(observability + doctor), 0.3.1 (concurrency hardening), 0.3.0
+(correctness fixes), 0.2.x (changesets, import/export), and the 0.1.0
+initial release.
 
 [**Roadmap →**](/project/roadmap/) for what's planned through v1.0.0.

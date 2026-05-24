@@ -26,11 +26,12 @@ The "find out what's wrong, take a safe snapshot" release. See the
 - **Doctor — `Last backup` row + `Schema version` downgrade
   detection.**
 
-## v0.3.6 — retention basics (Phase 2.12)
+## v0.3.6 — stay-current + retention basics ✅ shipped 2026-05-24
 
-The orthogonal half of the recovery-and-retention theme. Bound the
-noise table; no destructive operations on the events table yet —
-events-prune waits for `.selvedge/config.toml` in v0.3.10.
+Shipped 2026-05-24 as a combined release with stay-current (PyPI
+version check) — a one-time exception to single-theme cadence.
+Single-theme discipline resumes at v0.3.7. See the
+[changelog](/project/changelog/#v036--2026-05-24) for the full notes.
 
 - **`selvedge prune` — `tool_calls` only**, hardcoded 90-day default,
   `--days N` override. **No `--include-events` flag in v0.3.6.** Every
@@ -38,6 +39,9 @@ events-prune waits for `.selvedge/config.toml` in v0.3.10.
   visible to later tooling.
 - **Doctor — `prune.log` tail row + oversized-`tool_calls` warning**
   (WARN at >100k rows in `tool_calls`).
+- **Background PyPI version check in the CLI** (stay-current, deferred
+  from v0.3.5). Cache TTL 24h; suppressed in CI / non-TTY / dev
+  installs. `selvedge-server` stays silent — wired in `cli.py` only.
 
 ## v0.3.7 — `prior_attempts` wedge + entity foundation (Phase 2.13)
 
