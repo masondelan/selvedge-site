@@ -71,6 +71,7 @@ export default defineConfig({
           label: "Project",
           items: [
             { label: "What's new", link: "/project/changelog/" },
+            { label: "Upgrading", link: "/upgrade/" },
             { label: "Roadmap", link: "/project/roadmap/" },
             { label: "FAQ", link: "/project/faq/" },
           ],
