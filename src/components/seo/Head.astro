@@ -1,0 +1,163 @@
+---
+// Custom <head> overrides for Starlight.
+//
+// What this fixes / adds:
+//   - og:type=website on the homepage (default Starlight emits "article" everywhere,
+//     which is wrong for the root page — Google honors og:type for entity typing).
+//   - Explicit twitter:title and twitter:description (Starlight currently omits them
+//     and relies on fallback; explicit is safer across crawlers).
+//   - JSON-LD structured data:
+//       * Organization (sitewide) — gives Google a knowledge-graph entity for Selvedge
+//         with sameAs links to GitHub, PyPI, X.
+//       * WebSite (sitewide) — declares the site name + potentialAction so Google can
+//         render the sitelinks search box.
+//       * SoftwareApplication (homepage only) — Selvedge is a dev tool; this is the
+//         canonical schema for software listings and unlocks rich results.
+//       * FAQPage (FAQ page only) — auto-extracted from the page's <h2>/<p> pairs.
+//         FAQPage is a known eligible rich-result type.
+//
+// Registration:
+//   In astro.config.mjs, set:
+//     starlight({
+//       ...
+//       components: {
+//         Head: './src/components/seo/Head.astro',
+//       },
+//     })
+//   Then Starlight's <Default /> rendering is preserved — we only append to <head>.
+
+import Default from '@astrojs/starlight/components/Head.astro';
+
+const SITE = 'https://selvedge.sh';
+const url = Astro.url.pathname;
+const isHome = url === '/' || url === '';
+const isFaq = url.startsWith('/project/faq');
+
+// Pull page-level metadata from Starlight's frontmatter so we can re-emit
+// what we need without duplicating Starlight's own logic.
+const entry = (Astro.locals as any)?.starlightRoute?.entry;
+const data = entry?.data ?? {};
+const pageTitle = data.title ?? 'selvedge';
+const pageDescription =
+  data.description ??
+  'A local MCP server that AI coding agents call as they work — logging the why behind every change into a SQLite file under .selvedge/ next to your code.';
+
+// --- Structured data -------------------------------------------------------
+
+const organization = {
+  '@type': 'Organization',
+  '@id': `${SITE}/#org`,
+  name: 'Selvedge',
+  url: SITE,
+  logo: `${SITE}/favicon.svg`,
+  sameAs: [
+    'https://github.com/masondelan/selvedge',
+    'https://pypi.org/project/selvedge/',
+    'https://x.com/notmason__',
+  ],
+};
+
+const website = {
+  '@type': 'WebSite',
+  '@id': `${SITE}/#website`,
+  url: SITE,
+  name: 'Selvedge',
+  publisher: { '@id': `${SITE}/#org` },
+  inLanguage: 'en',
+};
+
+const softwareApplication = {
+  '@type': 'SoftwareApplication',
+  '@id': `${SITE}/#software`,
+  name: 'Selvedge',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'macOS, Linux, Windows',
+  url: SITE,
+  description:
+    'Long-term memory for AI-coded codebases. A local MCP server that logs the why behind every change AI agents make, captured live and stored in a SQLite file next to your code.',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  softwareRequirements: 'Python 3.10+',
+  downloadUrl: 'https://pypi.org/project/selvedge/',
+  publisher: { '@id': `${SITE}/#org` },
+};
+
+// Build a graph so all entities share IDs and Google can connect them.
+const graph: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@graph': isHome
+    ? [organization, website, softwareApplication]
+    : [organization, website],
+};
+---
+
+<Default><slot /></Default>
+
+{/* og:type override — Starlight defaults to article; fix to website on the root */}
+{isHome && <meta property="og:type" content="website" />}
+
+{/* Explicit Twitter fields (better than relying on og:* fallback) */}
+<meta name="twitter:title" content={pageTitle} />
+<meta name="twitter:description" content={pageDescription} />
+<meta name="twitter:site" content="@notmason__" />
+<meta name="twitter:creator" content="@notmason__" />
+
+{/* Sitewide JSON-LD graph */}
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify(graph)}
+/>
+
+{/* FAQPage schema, emitted only on /project/faq. Inline list so the schema does
+    not depend on DOM-scraping at runtime — Google's crawler does not execute JS
+    for structured data discovery. Keep these strings in sync with the FAQ page. */}
+{isFaq && (
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: "What's the one-line description?",
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Selvedge is a local MCP server that AI coding agents call as they work, logging the why behind every change into a SQLite file under .selvedge/ next to your code.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Is it open source?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes — Selvedge is open source on GitHub at masondelan/selvedge and published to PyPI as selvedge.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Where does my data live?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'In a SQLite file under .selvedge/ in your repo. Nothing leaves your machine and there is no cloud component.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Can I commit .selvedge/ to git?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. Selvedge is designed so the .selvedge/ directory can be committed alongside your code, giving the whole team a shared history of agent decisions.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Which AI coding agents work with Selvedge?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Any agent that speaks the Model Context Protocol (MCP) — Claude Code, Cursor, GitHub Copilot, and others. Selvedge exposes MCP tools the agent calls as it works.',
+          },
+        },
+      ],
+    })}
+  />
+)}

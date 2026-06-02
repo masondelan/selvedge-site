@@ -40,6 +40,10 @@ export default defineConfig({
         // Override the default Starlight hero with our own that includes
         // the wordmark + selvedge stripe + install command.
         Hero: "./src/components/SelvedgeHero.astro",
+        // SEO: adds JSON-LD (Organization, WebSite, SoftwareApplication,
+        // FAQPage), fixes og:type on the homepage, and emits explicit
+        // twitter:title / twitter:description. Wraps the default <Head>.
+        Head: "./src/components/seo/Head.astro",
       },
       sidebar: [
         {
