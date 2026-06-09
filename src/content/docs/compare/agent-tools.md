@@ -8,13 +8,13 @@ Selvedge fits — and where it deliberately doesn't.
 
 ## The comparison table
 
-|  | Reasoning source | Granularity | Mechanism | Grouping | Storage |
-|---|---|---|---|---|---|
-| **Selvedge** | **Captured live**, by the agent in the same context that produced the change | **Entity** — DB column, table, env var, dep, API route, function | **MCP server** — agent calls it as work happens | **Changesets** — named feature/task slugs across many entities | SQLite, zero deps |
-| AgentDiff | **Inferred post-hoc** by Claude Haiku from the diff at session end | Line | Git pre/post-commit hook | None | JSONL on disk |
-| Origin | Captured at commit time | Line | Git hook | None | Local |
-| Git AI | Attribution metadata | Line | Git hook + Agent Trace alliance | None | Git notes |
-| BlamePrompt | Prompt-only | Line | Git hook | None | Local |
+|  | Reasoning source | Granularity | Mechanism | Grouping | Prior attempts | Storage |
+|---|---|---|---|---|---|---|
+| **Selvedge** | **Captured live**, by the agent in the same context that produced the change | **Entity** — DB column, table, env var, dep, API route, function | **MCP server** — agent calls it as work happens | **Changesets** — named feature/task slugs across many entities | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | SQLite, zero deps |
+| AgentDiff | **Inferred post-hoc** by Claude Haiku from the diff at session end | Line | Git pre/post-commit hook | None | None | JSONL on disk |
+| Origin | Captured at commit time | Line | Git hook | None | None | Local |
+| Git AI | Attribution metadata | Line | Git hook + Agent Trace alliance | None | None | Git notes |
+| BlamePrompt | Prompt-only | Line | Git hook | None | None | Local |
 
 ## Why "captured live" matters
 
@@ -60,6 +60,21 @@ back later — even if the original PR was broken into eight smaller ones over a
 Line-level tools have no way to express "these unrelated-looking changes are part of
 the same feature."
 
+## Why "prior attempts" matters
+
+Line attribution answers *"who wrote this, and roughly why."* It can't answer the
+question an agent actually has **before** it starts: *"has this been tried before, and
+how did it turn out?"* Selvedge's `prior_attempts` tool (v0.3.7) answers exactly that —
+given an entity, it returns the **alternatives that were tried and the paths that got
+rejected**, each with the original reasoning *and* the reason it was reverted. An agent
+about to re-add a column that was already pulled for a good reason finds out first, and
+changes its plan.
+
+It's deliberately conservative: the default returns only the clear "tried, then
+reverted" signal, so an empty result is a trustworthy "nothing to worry about" rather
+than noise. No second LLM is involved — it's a templated query over the reasoning agents
+wrote live. None of the line-attribution tools surface rejected paths at all.
+
 ## What Selvedge isn't trying to be
 
 Selvedge **is not**:
@@ -80,6 +95,9 @@ reference.
 ## What Selvedge is uniquely better at
 
 - **Knowing the agent's actual reason.** Live capture, no second-LLM guess.
+- **Surfacing what was already tried and rejected.** `prior_attempts` warns an agent
+  off a path the team already abandoned — with the reason why. No line-attribution tool
+  has an analogue.
 - **Surviving an agent session ending.** The reasoning is in your SQLite file, not in a
   conversation that's been GC'd.
 - **Cross-file feature scope.** Changesets group changes that touch unrelated-looking

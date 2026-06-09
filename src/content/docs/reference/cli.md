@@ -27,6 +27,7 @@ selvedge backfill-commit --hash HASH    Backfill git_commit on recent events
 selvedge import PATH                    Import migration files (SQL / Alembic)
 selvedge export [--format json|csv]     Export history
 selvedge log ENTITY CHANGE_TYPE         Manually log a change
+selvedge migrate-paths [--apply]        Re-canonicalize stored entity paths
 ```
 
 ---
@@ -188,7 +189,35 @@ index_add | index_remove | migrate
 
 Invalid types are caught at argument parsing with the full list of valid choices.
 
-Other flags: `--agent`, `--commit`, `--project`, `--changeset`.
+Other flags: `--agent`, `--commit`, `--project`, `--changeset`, `--rename-from`.
+
+`--rename-from OLD` (with `CHANGE_TYPE` = `rename`, and the **new** path as `ENTITY`)
+records the dual-event rename — a `rename` on the old path and a `create` on the new
+path with `metadata.renamed_from` set — so history follows the entity:
+
+```bash
+selvedge log src/auth/session.py::login rename --rename-from src/auth.py::login
+```
+
+### `selvedge migrate-paths [--apply] [--agent NAME] [--json]`
+
+Re-canonicalizes every stored `entity_path` (strip leading `./`, collapse `//`,
+normalize separators, trim — **case preserved**), so older rows written before v0.3.7
+match the canonical form used on every write today.
+
+**Dry-run is the default** — nothing is written until you pass `--apply`. A dry run
+prints the planned rewrites (`old → canonical`) and a **collisions report**: distinct
+pre-canonicalization paths that would converge to the same value, i.e. histories the
+migration would *merge*. Inspect those before applying.
+
+```bash
+selvedge migrate-paths            # dry run: rewrites + collisions report
+selvedge migrate-paths --apply    # write the canonical paths
+```
+
+Idempotent on the event data — re-running after `--apply` rewrites nothing. Each
+`--apply` run records one audit row in the `path_migrations` table (surfaced by
+`selvedge doctor`).
 
 ---
 

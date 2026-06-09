@@ -118,5 +118,5 @@ repo). Low coverage usually means the system prompt needs strengthening.
 ## Next
 
 [**CLI reference →**](/reference/cli/) — every flag, every subcommand.
-[**MCP tools →**](/reference/mcp-tools/) — the six tools agents call.
+[**MCP tools →**](/reference/mcp-tools/) — the seven tools agents call.
 [**FAQ →**](/project/faq/) — common questions, gotchas, and limits.

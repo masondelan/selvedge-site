@@ -1,9 +1,9 @@
 ---
 title: MCP tools
-description: The six tools Selvedge exposes over MCP, their parameters, and what they return. This is what your AI agent actually calls.
+description: The seven tools Selvedge exposes over MCP, their parameters, and what they return. This is what your AI agent actually calls.
 ---
 
-`selvedge-server` exposes six MCP tools. Five are read-only and idempotent; one
+`selvedge-server` exposes seven MCP tools. Six are read-only and idempotent; one
 (`log_change`) is the writer. Every tool ships with full per-parameter descriptions, an
 output schema, and tool-level annotations — so MCP-aware agents and directories can
 gate, surface, and pick between them appropriately.
@@ -18,6 +18,7 @@ gate, surface, and pick between them appropriately.
 | `history` | Filtered history across entities | Read | Yes |
 | `changeset` | All events under a slug | Read | Yes |
 | `search` | Full-text search | Read | Yes |
+| `prior_attempts` | Prior attempts on an entity + inferred outcome | Read | Yes |
 
 None are `openWorldHint: true`. None touch the network.
 
@@ -41,6 +42,14 @@ Record a change event. The only writer.
 | `git_commit` | `string` | Commit hash. Usually unset at log time and backfilled by the post-commit hook. |
 | `project` | `string` | Project name. Defaults to the project root's basename. |
 | `changeset_id` | `string` | A slug grouping related changes under one feature/task. Indexed. |
+| `rename_from` | `string` | The entity's previous path, for renames. Set it with `change_type="rename"` and put the **new** path in `entity_path`. Selvedge then writes the dual-event pattern — a `rename` on the old path and a `create` on the new path with `metadata.renamed_from` set — so `blame` / `diff` / `prior_attempts` on the new path keep the history. A `rename_from` without `change_type="rename"` is rejected. Rename is a parameter, **not** a separate tool. |
+
+`entity_path` is **canonicalized on write** (strip leading `./`, collapse `//`,
+normalize separators to `/`, trim — case preserved on purpose) at a single storage
+chokepoint shared by the MCP and CLI write paths, so `src/auth.py::login` and
+`./src/auth.py::login` resolve to the same entity. `entity_path` is also shape-checked
+per `entity_type` (e.g. a `function` path without `::`) — a soft warning in the
+`warnings` array, never a rejection.
 
 ### Returns (`LogChangeResult`)
 
@@ -177,6 +186,47 @@ matches); a future version may add `--score` ranking.
 
 ---
 
+## `prior_attempts`
+
+Prior change attempts on an entity, each with an inferred outcome. **Call this before
+editing an entity** — if the same change was tried before and reverted, you get the
+prior reasoning and *why it was rejected*, so you can change your plan instead of
+repeating it. New in v0.3.7; this is Selvedge's wedge.
+
+### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| `entity_path` | `string` | The entity you're about to change. Exact + prefix match (`users` also covers `users.email`). Provide this **or** `description`. |
+| `description` | `string` | Free-text description, when you don't have an exact path. Matched as a substring against prior reasoning / diffs / paths. `entity_path` wins if both are given. |
+| `min_confidence` | `string` | `proximity_high` (default) returns only the clear "tried then reverted" cases; `proximity_low` widens to the noisy tail (still-active changes, far-apart reverts). |
+| `window_minutes` | `int` | Proximity window for the add→remove revert heuristic. Within it ⇒ `proximity_high`, beyond ⇒ `proximity_low`. Default `10080` (7 days). |
+| `limit` | `int` | Default 20. |
+
+### Returns
+
+Array of event objects (newest-first), each with three extra fields:
+
+```json
+[
+  { "...event fields...": "...",
+    "outcome": "reverted" | "active",
+    "confidence": "proximity_high" | "proximity_low",
+    "outcome_reasoning": "why it was reverted, or \"\" while still active" }
+]
+```
+
+Outcome is inferred from **add→remove proximity** — v0.3.7 has no explicit
+`reject` / `revert` change types yet (those arrive in v0.3.11). The output is templated
+and deterministic — **no LLM call** — and the tool is **pull-only**: it never writes and
+never pushes; you decide when to ask.
+
+**Conservative by design.** `min_confidence` defaults to `proximity_high`, so an empty
+list — nothing clearly tried-and-rejected — is the normal, preferred answer over a
+speculative false positive. You get one shot at the agent's trust budget.
+
+---
+
 ## Tool annotations
 
 Every tool advertises:
@@ -188,6 +238,7 @@ blame        readOnly=true   destructive=false  idempotent=true   openWorld=fals
 history      readOnly=true   destructive=false  idempotent=true   openWorld=false
 changeset    readOnly=true   destructive=false  idempotent=true   openWorld=false
 search       readOnly=true   destructive=false  idempotent=true   openWorld=false
+prior_attempts readOnly=true destructive=false  idempotent=true   openWorld=false
 ```
 
 `log_change` is **append-only** — `destructive: false` even though it writes — but
@@ -203,8 +254,8 @@ picking which tool to call read these directly at tool-call time, so they're a D
 surface, not just directory metadata.
 
 This was a major v0.3.3 fix — earlier versions left the rich descriptions in the
-function body where agents couldn't see them. Coverage is now 21/21 across all six
-tools.
+function body where agents couldn't see them. Coverage is 100% — every parameter on all
+seven tools.
 
 ## Where to read more
 

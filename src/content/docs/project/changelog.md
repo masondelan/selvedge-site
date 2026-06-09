@@ -7,6 +7,62 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent two minor versions for
 at-a-glance browsing.
 
+## v0.3.7 — 2026-06-08
+
+The brand-defining release: the **`prior_attempts`** MCP tool — an agent
+about to change an entity asks *"was this tried before, and how did it turn
+out?"* before it starts — plus the **entity-canonicalization foundation** it
+sits on. One new MCP tool (→ **7** total). **Drop-in upgrade for anyone on
+0.3.6.**
+
+### The wedge
+
+**`prior_attempts` MCP tool.** Given an `entity_path` or a free-text
+`description`, returns prior change attempts on the entity, each annotated
+with an inferred `outcome` (`reverted` / `active`), a `confidence` tier
+(`proximity_high` / `proximity_low`), and `outcome_reasoning` (why a reverted
+attempt was rejected). Outcome is inferred from add→remove proximity within a
+configurable window — explicit `reject` / `revert` change types arrive in
+v0.3.11. **Conservative-recall**: `min_confidence` defaults to
+`proximity_high`, so an empty list is the preferred answer over a false
+positive. Templated, no LLM, pull-only.
+
+### Entity foundation (lands first)
+
+**Canonicalization on write.** `src/auth.py::login` and
+`./src/auth.py::login` used to resolve to *different* entities. Now every
+write routes through one chokepoint
+(`selvedge.storage.canonicalize_entity_path`) that strips `./`, collapses
+`//`, normalizes separators, and trims — **preserving case on purpose**
+(filesystems differ; lowercasing would collapse genuinely distinct entities
+on case-sensitive Linux). `selvedge doctor` warns on sibling paths that differ
+only by case instead of merging them.
+
+**`selvedge migrate-paths`** backfills existing rows. **Dry-run is the
+default** and prints a collisions report (paths that would converge, i.e.
+histories that would merge) so you inspect before `--apply` writes.
+Idempotent, with a `path_migrations` audit row per run.
+
+**Rename folded into `log_change`.** Pass `rename_from` with
+`change_type="rename"` and Selvedge records the dual-event pattern — a rename
+on the old path, a create on the new path with `metadata.renamed_from` — so
+blame / diff / `prior_attempts` on the new path keep the history. No new tool.
+
+**Soft entity-path shape warnings** — a `function` path without `::`, a
+`column` without `.`, a `file` without a separator or extension get a nudge,
+never a rejection.
+
+**`selvedge.aggregates.summary()`** ships as a schema-versioned **library**
+helper (not a tool, not a CLI command) — the seed that v0.3.9's `selvedge
+audit` / `digest` will consume.
+
+### Tests
+
+- 47 new tests (suite ≈450, coverage 86.6%) — over the standard ≤30 per-phase
+  budget because the entity foundation and the wedge ship together, plus a
+  review pass that hardened the acceptance-criteria edges. Called out in the
+  source CHANGELOG.
+
 ## v0.3.6 — 2026-05-24
 
 Two themes in one release as a one-time exception to the single-theme
@@ -82,50 +138,11 @@ pass on the phase plan. Single-theme resumes at v0.3.7.
 - 36 new tests: `test_update_check.py` (24), `test_prune.py` (10),
   `test_doctor.py` extension (2). Suite is now ≈403 tests.
 
-## v0.3.5 — 2026-05-11
-
-The recovery-basics release. v0.3.1 made the runtime safe; v0.3.2 made problems
-visible; v0.3.5 ships the *minimum viable* "what happens when something has gone
-wrong" surface. **Drop-in upgrade for anyone on 0.3.4.**
-
-### Added
-
-- **`selvedge verify` — DB-correctness gate with two exit tiers.** Walks the store
-  and reports each check as PASS / WARN / FAIL. Must-fail conditions (SQLite
-  corruption from `PRAGMA integrity_check`, schema mismatch against the declared
-  `MIGRATIONS`, empty `entity_path`, unknown `change_type` in the store, unparseable
-  timestamps, malformed `tool_calls` rows) exit non-zero. Should-warn conditions
-  (singleton `changeset_id` groups, events past the 60-minute backfill window with
-  no `git_commit`) print warnings but exit 0 by default. Pass `--strict` to
-  escalate warnings to failures — the tiering means `selvedge verify` can drop into
-  CI on day one without `|| true`. `--json` for machine output. Tier mapping is
-  locked in by `selvedge.verify.CHECK_TIERS`.
-- **`selvedge backup` — online SQLite snapshot via `VACUUM INTO`.** Default
-  destination `.selvedge/backups/selvedge-YYYYMMDD-HHMMSS.db`. Hardcoded
-  `keep_last=7`; the setting becomes `backup_keep_last` in `.selvedge/config.toml`
-  when that file lands in v0.3.10. Two backups within the same second don't
-  collide. `--output <path>` overrides the default destination and is excluded
-  from rotation. `--json` for scripting.
-- **`.selvedge/backups/` added to the project `.gitignore`.** `selvedge init`
-  writes it on fresh repos; the first `selvedge backup` run on an existing repo
-  appends it the same way. Idempotent.
-- **Doctor — `Last backup` row.** INFO when the newest backup is ≤7 days old,
-  WARN when older, FAIL when no backups exist *and* the events table has ≥10,000
-  rows (the threshold where no-backups becomes a real data-loss exposure rather
-  than a CI/scratch DB).
-- **Doctor — `Schema version` now FAILs on downgrade.** When `schema_migrations`
-  contains a version not declared in the current `MIGRATIONS` tuple, the row fails
-  rather than silently passing.
-
-### Tests
-
-- 24 new tests: `test_verify.py` (13), `test_backup.py` (7), `test_doctor.py`
-  extension (4). Within the ≤25 budget for Phase 2.11. Suite is now ≈359 tests.
-
 ---
 
 [**Full CHANGELOG.md →**](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md)
-in the source repo. Includes 0.3.4 (first-run wizard, prompt, watch),
+in the source repo. Includes 0.3.5 (recovery basics — `selvedge verify`,
+`selvedge backup`), 0.3.4 (first-run wizard, prompt, watch),
 0.3.3 (per-tool annotations, output schemas, custom icon), 0.3.2
 (observability + doctor), 0.3.1 (concurrency hardening), 0.3.0
 (correctness fixes), 0.2.x (changesets, import/export), and the 0.1.0

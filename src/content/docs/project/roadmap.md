@@ -43,13 +43,15 @@ Single-theme discipline resumes at v0.3.7. See the
   from v0.3.5). Cache TTL 24h; suppressed in CI / non-TTY / dev
   installs. `selvedge-server` stays silent — wired in `cli.py` only.
 
-## v0.3.7 — `prior_attempts` wedge + entity foundation (Phase 2.13)
+## v0.3.7 — `prior_attempts` wedge + entity foundation (Phase 2.13) ✅ shipped 2026-06-08
 
 Brand-defining release. `prior_attempts` is the MCP tool that makes
 Selvedge's decision-archaeology positioning legible — an agent about
 to attempt X gets told "this was tried before and rejected, here's
-why." Ships *with* the positioning artifacts (demo, comparison page,
-README) so the wedge is visible the day it lands.
+why." Shipped *with* the positioning artifacts (demo transcript,
+comparison page, README) so the wedge was visible the day it landed.
+See the [changelog](/project/changelog/#v037--2026-06-08) for the full
+notes.
 
 - **Entity-path canonicalization on write** — fixes the silent
   history-split where `src/auth.py::login` and `./src/auth.py::login`
