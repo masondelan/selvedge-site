@@ -32,9 +32,13 @@ export default defineConfig({
           attrs: { name: "twitter:site", content: "@notmason__" },
         },
       ],
-      social: {
-        github: "https://github.com/masondelan/selvedge",
-      },
+      social: [
+        {
+          icon: "github",
+          label: "GitHub",
+          href: "https://github.com/masondelan/selvedge",
+        },
+      ],
       customCss: ["./src/styles/selvedge.css"],
       components: {
         // Override the default Starlight hero with our own that includes

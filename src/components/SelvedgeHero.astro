@@ -3,9 +3,10 @@
 // Uses Starlight's hero data (title/tagline/actions) + adds the selvedge stripe
 // + an inline install command. Wraps everything in semantic HTML so it
 // matches Starlight's accessibility expectations.
-import type { Props } from "@astrojs/starlight/props";
-
-const { entry } = Astro.props;
+//
+// Route data moved from `Astro.props` to `Astro.locals.starlightRoute` in
+// Starlight 0.32 — read the entry from there so the override keeps working.
+const { entry } = Astro.locals.starlightRoute;
 const data = entry.data.hero;
 ---
 
