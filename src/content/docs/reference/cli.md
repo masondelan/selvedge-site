@@ -21,6 +21,8 @@ selvedge blame ENTITY                   Most recent change + context
 selvedge history [...filters]           Browse all history
 selvedge changeset [ID|--list]          Events grouped by changeset
 selvedge search QUERY [--limit N]       Full-text search
+selvedge prior-attempts [ENTITY]        Prior attempts on an entity + outcome
+selvedge stale [...filters]             Dated decisions due for a revisit
 selvedge stats [--since SINCE]          Tool-call coverage report
 selvedge install-hook [--path PATH]     Install git post-commit hook
 selvedge backfill-commit --hash HASH    Backfill git_commit on recent events
@@ -161,6 +163,45 @@ Full-text search across reasoning + diff + entity_path. Properly escapes SQL `LI
 wildcards (`_`, `%`, `\`) so `selvedge search "stripe_customer_id"` won't accidentally
 match `stripeXcustomerXid`.
 
+### `selvedge prior-attempts [ENTITY] [--description TEXT] [--all] [--window WHEN] [--limit N]`
+
+Prior change attempts on an entity, each with an inferred outcome — the CLI parity
+for the `prior_attempts` MCP tool (new in v0.3.8). A thin presenter over the same
+`get_prior_attempts` store, so `--json` is byte-identical to what the MCP tool returns
+and the two surfaces can't diverge.
+
+Pass an `ENTITY` positional **xor** `--description TEXT` (free-text, when you don't have
+an exact path) — not both. By default only the clear "tried then reverted"
+(`proximity_high`) cases come back; `--all` widens recall to `proximity_low`. `--window`
+(e.g. `7d`, `60m`) maps onto the add→remove proximity window.
+
+```bash
+selvedge prior-attempts users.auth_token       # exact entity
+selvedge prior-attempts --description "persistent login token"
+selvedge prior-attempts users.auth_token --all --json
+```
+
+An empty result is the normal, good answer — exit 0, nothing clearly tried-and-rejected.
+Records on the same coverage counter as the MCP tool, so `selvedge stats` reflects both
+surfaces.
+
+### `selvedge stale [--entity ENTITY] [--project PROJECT] [--agent AGENT] [--limit N]`
+
+Dated decisions that are due for a revisit — the CLI mirror of the `stale_decisions`
+MCP tool (new in v0.3.8). Surfaces events whose `revisit_after` has passed **and** whose
+entity is still in active use; pure age never surfaces. Most-overdue-first. `--json` for
+cron / Slack / digest jobs.
+
+```bash
+selvedge stale                       # everything past its revisit date and still live
+selvedge stale --entity deps/stripe  # scope to one entity
+selvedge stale --json                # for cron / morning reports
+```
+
+Each row carries the revisit due date, days overdue, the active-use signals that fired,
+and a templated reason. Composes with reporting jobs the same way `selvedge digest`
+(v0.3.9) will.
+
 ### `selvedge stats [--since SINCE]`
 
 Tool-call coverage report:
@@ -189,7 +230,17 @@ index_add | index_remove | migrate
 
 Invalid types are caught at argument parsing with the full list of valid choices.
 
-Other flags: `--agent`, `--commit`, `--project`, `--changeset`, `--rename-from`.
+Other flags: `--agent`, `--commit`, `--project`, `--changeset`, `--rename-from`,
+`--revisit-after`.
+
+`--revisit-after WHEN` (new in v0.3.8) sets a revisit date on the change — an ISO-8601
+date or a relative offset (`90d`, `6mo`), normalized like `--since`. The decision then
+surfaces in `selvedge stale` / the `stale_decisions` MCP tool once the date passes and
+the entity is still in active use:
+
+```bash
+selvedge log deps/stripe add --reasoning "Pinned to v11 for billing." --revisit-after 180d
+```
 
 `--rename-from OLD` (with `CHANGE_TYPE` = `rename`, and the **new** path as `ENTITY`)
 records the dual-event rename — a `rename` on the old path and a `create` on the new
