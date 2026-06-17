@@ -72,25 +72,37 @@ notes.
   it directly. Schema-versioned so it can lift to MCP later if
   telemetry warrants.
 
-## v0.3.8 — active memory v1, date-based (Phase 2.14)
+## v0.3.8 — active memory v1, date-based (Phase 2.14) ✅ shipped 2026-06-17
 
-Selvedge's append-only log learns when its own data is stale. The
-date-based half ships here; the pattern-based half waits for v0.3.11.
-**The v3 schema migration adds both nullable columns** even though
+Selvedge's append-only log learned when its own data is stale. The
+date-based half shipped here; the pattern-based half waits for v0.3.11.
+**The v3 schema migration added both nullable columns** even though
 the second column's evaluator doesn't land until v0.3.11 — one
-migration is cheaper than two.
+migration is cheaper than two. Also bundled CLI parity for the v0.3.7
+wedge (`selvedge prior-attempts`) and a CLI-awareness section in the
+agent-instructions block. See the
+[changelog](/project/changelog/#v038--2026-06-17) for the full notes.
 
 - **Schema migration v3** — adds `revisit_after` and `expires_when`
-  (nullable) to `events`. Perf gates at 10k / 100k / 1M events.
-- **`stale_decisions` MCP tool** — events whose `revisit_after` has
-  passed. **Active-use weighting**: pure age does not surface as
-  stale; a recent `blame`/`diff`/`prior_attempts` query of the entity
-  is also required.
+  (nullable) to `events`. Perf gated at 10k / 100k / 1M events. The
+  `expires_when` evaluator is deferred to v0.3.11; the column ships now
+  so that release needs no second migration.
+- **`stale_decisions` MCP tool** (→ **8** total) — events whose
+  `revisit_after` has passed. **Active-use weighting**: pure age does
+  not surface as stale; a recent `blame`/`diff`/`prior_attempts` query
+  of the entity (or later changeset activity) is also required. Each
+  result carries `revisit_due`, `days_overdue`, `active_use_signals`,
+  and a templated `stale_reason`.
+- **`revisit_after` on `log_change` + `selvedge log`** — an ISO date
+  or relative offset (`90d`, `6mo`), normalized like `--since`.
 - **`selvedge stale` CLI** — terminal-formatted same data surface,
   composes with `selvedge digest` for morning reports.
-- **Doctor — signal-to-noise curation pass.** Review every existing
-  row, retire ones that have become wallpaper. Net warning count
-  should not monotonically grow.
+- **`selvedge prior-attempts` CLI** — CLI parity for the v0.3.7 wedge,
+  the only MCP tool that had no CLI command. Thin presenter over the
+  same store; `--json` byte-identical to the MCP tool.
+- **Doctor — signal-to-noise curation pass.** Reviewed every existing
+  row; the new stale-decisions row is INFO-tier so the net WARN count
+  did not grow with the release.
 
 ## v0.3.9 — developer ergonomics (Phase 2.15)
 

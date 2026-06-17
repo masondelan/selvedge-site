@@ -1,9 +1,9 @@
 ---
 title: MCP tools
-description: The seven tools Selvedge exposes over MCP, their parameters, and what they return. This is what your AI agent actually calls.
+description: The eight tools Selvedge exposes over MCP, their parameters, and what they return. This is what your AI agent actually calls.
 ---
 
-`selvedge-server` exposes seven MCP tools. Six are read-only and idempotent; one
+`selvedge-server` exposes eight MCP tools. Seven are read-only and idempotent; one
 (`log_change`) is the writer. Every tool ships with full per-parameter descriptions, an
 output schema, and tool-level annotations — so MCP-aware agents and directories can
 gate, surface, and pick between them appropriately.
@@ -19,6 +19,7 @@ gate, surface, and pick between them appropriately.
 | `changeset` | All events under a slug | Read | Yes |
 | `search` | Full-text search | Read | Yes |
 | `prior_attempts` | Prior attempts on an entity + inferred outcome | Read | Yes |
+| `stale_decisions` | Dated decisions that are due for a revisit *and* still active | Read | Yes |
 
 None are `openWorldHint: true`. None touch the network.
 
@@ -43,6 +44,7 @@ Record a change event. The only writer.
 | `project` | `string` | Project name. Defaults to the project root's basename. |
 | `changeset_id` | `string` | A slug grouping related changes under one feature/task. Indexed. |
 | `rename_from` | `string` | The entity's previous path, for renames. Set it with `change_type="rename"` and put the **new** path in `entity_path`. Selvedge then writes the dual-event pattern — a `rename` on the old path and a `create` on the new path with `metadata.renamed_from` set — so `blame` / `diff` / `prior_attempts` on the new path keep the history. A `rename_from` without `change_type="rename"` is rejected. Rename is a parameter, **not** a separate tool. |
+| `revisit_after` | `string` | A revisit date for the decision — an ISO-8601 date (`2026-12-01`) **or** a relative offset from the event's timestamp (`90d`, `6mo`), normalized with the same grammar as `--since`. Consumed by `stale_decisions` / `selvedge stale`. New in v0.3.8. |
 
 `entity_path` is **canonicalized on write** (strip leading `./`, collapse `//`,
 normalize separators to `/`, trim — case preserved on purpose) at a single storage
@@ -227,6 +229,45 @@ speculative false positive. You get one shot at the agent's trust budget.
 
 ---
 
+## `stale_decisions`
+
+Dated decisions that have come due for a revisit — but only the ones whose entity is
+**still in active use**. A decision logged with a `revisit_after` surfaces here once that
+date has passed *and* the entity is still live, so an old-but-correct decision nobody
+touches never nags. New in v0.3.8; the date-based half of active memory.
+
+### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| `entity_path` | `string` | Filter to one entity (exact + prefix match). Omit to scan all dated decisions. |
+| `project` | `string` | Exact match. |
+| `agent` | `string` | Exact match. |
+| `limit` | `int` | Default 20. Results are ordered most-overdue-first. |
+
+### Returns
+
+Array of event objects (most-overdue-first), each with four extra fields:
+
+```json
+[
+  { "...event fields...": "...",
+    "revisit_due": "2026-...Z",
+    "days_overdue": 12,
+    "active_use_signals": ["queried"],
+    "stale_reason": "past its revisit date and still active — the entity was queried (blame/diff/prior_attempts) after the decision." }
+]
+```
+
+**Active-use weighting — pure age never surfaces.** A decision only comes back if its
+entity is still live: it was queried (`blame` / `diff` / `prior_attempts`) at or after the
+decision was logged, or its `changeset_id` saw later sibling activity. `active_use_signals`
+lists which signals fired. A dated decision nobody has touched is filtered out — that's the
+noise defense against old-but-correct decisions. The output is templated and deterministic —
+**no LLM call** — and the tool is **read-only**.
+
+---
+
 ## Tool annotations
 
 Every tool advertises:
@@ -239,6 +280,7 @@ history      readOnly=true   destructive=false  idempotent=true   openWorld=fals
 changeset    readOnly=true   destructive=false  idempotent=true   openWorld=false
 search       readOnly=true   destructive=false  idempotent=true   openWorld=false
 prior_attempts readOnly=true destructive=false  idempotent=true   openWorld=false
+stale_decisions readOnly=true destructive=false idempotent=true   openWorld=false
 ```
 
 `log_change` is **append-only** — `destructive: false` even though it writes — but
@@ -255,7 +297,7 @@ surface, not just directory metadata.
 
 This was a major v0.3.3 fix — earlier versions left the rich descriptions in the
 function body where agents couldn't see them. Coverage is 100% — every parameter on all
-seven tools.
+eight tools.
 
 ## Where to read more
 
