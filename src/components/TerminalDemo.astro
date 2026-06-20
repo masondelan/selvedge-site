@@ -63,19 +63,27 @@
         /* cross-origin or not ready — keep the CSS fallback height */
       }
     };
+    // The reasoning box reveals ~9s into the animation, so poll fit() briefly
+    // (every 250ms for ~12s) — a one-shot observer can miss that late growth.
+    const pollFit = () => {
+      let n = 0;
+      const iv = setInterval(() => { fit(); if (++n > 48) clearInterval(iv); }, 250);
+    };
+    // Replay the reveal via the demo's exposed restart hook (same-origin).
+    const replay = () => {
+      try {
+        const w = frame.contentWindow as any;
+        if (w && typeof w.selvedgeReplay === "function") { w.selvedgeReplay(); pollFit(); }
+      } catch { /* no-op */ }
+    };
+
     frame.addEventListener("load", () => {
       fit();
       try {
         const body = frame.contentWindow?.document.body;
         if (body) new ResizeObserver(fit).observe(body);
-      } catch {
-        /* no-op */
-      }
-      // The demo's reasoning box reveals ~8-9s into the one-shot animation;
-      // poll briefly so the final height is always captured even if the
-      // ResizeObserver misses that late growth.
-      let n = 0;
-      const iv = setInterval(() => { fit(); if (++n > 48) clearInterval(iv); }, 250);
+      } catch { /* no-op */ }
+      pollFit();
     });
     let t: ReturnType<typeof setTimeout>;
     window.addEventListener("resize", () => {
@@ -83,5 +91,23 @@
       frame.style.height = "200px"; // allow shrink on rotate, then re-grow to fit
       t = setTimeout(fit, 120);
     });
+
+    // Replay the animation each time the demo scrolls into view. It plays once
+    // on first load (the demo's own mount), then replays on every re-entry.
+    // The first appearance is skipped so it doesn't double up with that play.
+    if ("IntersectionObserver" in window) {
+      let visible = false, seen = false;
+      new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting && !visible) {
+            visible = true;
+            if (seen) replay();
+            seen = true;
+          } else if (!e.isIntersecting) {
+            visible = false;
+          }
+        });
+      }, { threshold: 0.3 }).observe(frame);
+    }
   }
 </script>
