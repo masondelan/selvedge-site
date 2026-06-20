@@ -71,9 +71,11 @@
       } catch {
         /* no-op */
       }
-      // The demo unpacks + animates asynchronously after 'load'; re-fit a few
-      // times so the final reveal height is captured even if the observer is late.
-      [200, 700, 1500, 3000].forEach((ms) => setTimeout(fit, ms));
+      // The demo's reasoning box reveals ~8-9s into the one-shot animation;
+      // poll briefly so the final height is always captured even if the
+      // ResizeObserver misses that late growth.
+      let n = 0;
+      const iv = setInterval(() => { fit(); if (++n > 48) clearInterval(iv); }, 250);
     });
     let t: ReturnType<typeof setTimeout>;
     window.addEventListener("resize", () => {
