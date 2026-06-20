@@ -30,23 +30,11 @@ that produced it.
 
 With Selvedge, you run this instead:
 
-```bash
-$ selvedge blame user_tier_v2
-
-  user_tier_v2
-  Changed     2025-10-14 09:31:02
-  Agent       claude-code
-  Commit      3e7a991
-  Reasoning   User asked to add a grandfathering flag for legacy free-tier
-              users during the pricing migration. Stores the original tier
-              so we can backfill discounts without touching billing history.
-```
+<TerminalDemo />
 
 That reasoning was **captured by the agent in the moment** — written into Selvedge from
 the same context that produced the change. Not inferred from the diff afterward by a
 second LLM. Not a hand-typed commit message.
-
-<TerminalDemo />
 
 ---
 
