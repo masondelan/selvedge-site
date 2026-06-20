@@ -1,0 +1,85 @@
+---
+// Animated `selvedge blame` reveal, embedded from /terminal-demo.html
+// (a self-contained bundle — fonts + runtime inlined — that lives in public/).
+//
+// The demo is a fluid `min-height: 100vh` page, so locking the iframe to a
+// fixed aspect-ratio would clip its reasoning box on narrow screens. Instead
+// the script below auto-fits the iframe to the demo's real content height.
+// The demo and this page are same-origin (both served from selvedge.sh), so
+// the parent can read the inner document height directly.
+---
+
+<figure class="terminal-demo">
+  <div class="terminal-demo__frame">
+    <iframe
+      id="selvedge-terminal-demo"
+      src="/terminal-demo.html"
+      title="Animated selvedge blame demo — the reasoning behind a change, revealed live in the terminal"
+      loading="lazy"
+      style="height: 640px;"></iframe>
+  </div>
+  <figcaption>
+    The same <code>selvedge blame</code> output, drawn live in the terminal —
+    captured by the agent in the moment, then read straight back out of the store.
+  </figcaption>
+</figure>
+
+<style>
+  .terminal-demo {
+    margin: 1.75rem 0 0;
+  }
+  .terminal-demo__frame {
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--selvedge-ecru);
+  }
+  .terminal-demo__frame iframe {
+    display: block;
+    width: 100%;
+    border: 0;
+  }
+  .terminal-demo figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--sl-color-gray-3);
+  }
+</style>
+
+<script>
+  // Auto-fit the iframe to the demo's true content height (same-origin) so the
+  // reasoning box — the whole point of the reveal — is never clipped at any
+  // viewport width. 640px is just the pre-load fallback; the demo needs JS to
+  // render anyway, so this always runs.
+  const frame = document.getElementById("selvedge-terminal-demo") as HTMLIFrameElement | null;
+  if (frame) {
+    const fit = () => {
+      try {
+        const doc = frame.contentWindow?.document;
+        const h = doc?.body ? doc.body.scrollHeight : 0;
+        if (h && Math.abs(h - frame.clientHeight) > 2) frame.style.height = h + "px";
+      } catch {
+        /* cross-origin or not ready — keep the CSS fallback height */
+      }
+    };
+    frame.addEventListener("load", () => {
+      fit();
+      try {
+        const body = frame.contentWindow?.document.body;
+        if (body) new ResizeObserver(fit).observe(body);
+      } catch {
+        /* no-op */
+      }
+      // The demo unpacks + animates asynchronously after 'load'; re-fit a few
+      // times so the final reveal height is captured even if the observer is late.
+      [200, 700, 1500, 3000].forEach((ms) => setTimeout(fit, ms));
+    });
+    let t: ReturnType<typeof setTimeout>;
+    window.addEventListener("resize", () => {
+      clearTimeout(t);
+      frame.style.height = "200px"; // allow shrink on rotate, then re-grow to fit
+      t = setTimeout(fit, 120);
+    });
+  }
+</script>
