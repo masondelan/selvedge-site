@@ -8,7 +8,7 @@ structuredData:
     - name: "Install Selvedge"
       text: "Run pip install selvedge to put the selvedge-server MCP command and the selvedge CLI on your PATH."
     - name: "Add the MCP server to Claude Code"
-      text: "Register the stdio server: run claude mcp add selvedge -- selvedge-server, or add the selvedge-server command to your MCP config."
+      text: "Register the stdio server: run claude mcp add selvedge -- uvx --from selvedge selvedge-server, or add the selvedge-server command to your MCP config."
     - name: "Tell your agent to use it"
       text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
     - name: "Verify the connection"
@@ -19,20 +19,20 @@ Claude Code has a first-class MCP CLI, so the fastest path is a single `claude m
 
 ## Before you start
 
-`pip install selvedge` puts the `selvedge-server` command (the MCP server) and the `selvedge` CLI on your PATH:
+`pip install selvedge` gives you the `selvedge` CLI (`selvedge setup`, `selvedge blame`, and the `selvedge prompt` helper below):
 
 ```bash
 pip install selvedge
 ```
 
-If your editor can't find the server later, `pipx install selvedge` keeps it isolated and reliably on PATH.
+The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so it starts reliably even when your editor doesn't share your shell's PATH — it just needs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.
 
 ## Add the MCP server
 
 The fastest path — register the stdio server with one command:
 
 ```bash
-claude mcp add selvedge -- selvedge-server
+claude mcp add selvedge -- uvx --from selvedge selvedge-server
 ```
 
 Add `--scope user` to make it available across all your projects, or `--scope project` to write a shared `.mcp.json` you can commit so the whole team gets it. Local scope (the default) keeps it to you in the current project.
@@ -43,7 +43,8 @@ That writes the equivalent MCP config to `~/.claude.json` (local/user scope) or 
 {
   "mcpServers": {
     "selvedge": {
-      "command": "selvedge-server"
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
     }
   }
 }
@@ -76,7 +77,7 @@ Run `/mcp` inside Claude Code (or `claude mcp list` in a terminal). `selvedge` s
 
 ## If it doesn't connect
 
-If `claude mcp list` shows selvedge as *failed*, `selvedge-server` isn't on PATH for the shell Claude Code spawns. `pip install selvedge` (or `pipx install selvedge`) in that environment, then re-run.
+If `claude mcp list` shows selvedge as *failed*, `uvx` (from uv) isn't on the PATH Claude Code spawns with — install uv, then re-run. Prefer a global install? Register `-- selvedge-server` after `pip install selvedge` instead.
 
 ## Next
 

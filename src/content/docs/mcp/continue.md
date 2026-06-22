@@ -19,13 +19,13 @@ Continue configures MCP servers in YAML. Add a `selvedge` entry under `mcpServer
 
 ## Before you start
 
-`pip install selvedge` puts the `selvedge-server` command (the MCP server) and the `selvedge` CLI on your PATH:
+`pip install selvedge` gives you the `selvedge` CLI (`selvedge setup`, `selvedge blame`, and the `selvedge prompt` helper below):
 
 ```bash
 pip install selvedge
 ```
 
-If your editor can't find the server later, `pipx install selvedge` keeps it isolated and reliably on PATH.
+The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so it starts reliably even when your editor doesn't share your shell's PATH — it just needs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.
 
 ## Add the MCP server
 
@@ -34,7 +34,8 @@ Add this to `~/.continue/config.yaml` (global) — or a workspace file under `.c
 ```yaml
 mcpServers:
   - name: selvedge
-    command: selvedge-server
+    command: uvx
+    args: ["--from", "selvedge", "selvedge-server"]
 ```
 
 ## Tell your agent when to call it
@@ -53,7 +54,7 @@ Switch Continue to **Agent** mode and open its tools list — the `selvedge` too
 
 ## If it doesn't connect
 
-Continue's YAML config supports stdio servers only (which is all Selvedge needs). Keep the two-space indentation exactly as shown — YAML is whitespace-sensitive. `selvedge-server` must be on PATH.
+Continue's YAML config supports stdio servers only (which is all Selvedge needs). Keep the two-space indentation exactly as shown — YAML is whitespace-sensitive. The config calls `uvx`, so `uv` must be installed (or `pip install selvedge` and use `command: selvedge-server`).
 
 ## Next
 

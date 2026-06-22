@@ -19,17 +19,17 @@ Cursor speaks MCP natively, so wiring in Selvedge takes one config file (or one 
 
 ## Before you start
 
-`pip install selvedge` puts the `selvedge-server` command (the MCP server) and the `selvedge` CLI on your PATH:
+`pip install selvedge` gives you the `selvedge` CLI (`selvedge setup`, `selvedge blame`, and the `selvedge prompt` helper below):
 
 ```bash
 pip install selvedge
 ```
 
-If your editor can't find the server later, `pipx install selvedge` keeps it isolated and reliably on PATH.
+The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so it starts reliably even when your editor doesn't share your shell's PATH — it just needs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.
 
 ## Add the MCP server
 
-One click — [![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=selvedge&config=eyJjb21tYW5kIjoic2VsdmVkZ2Utc2VydmVyIn0=)
+One click — [![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=selvedge&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJzZWx2ZWRnZSIsInNlbHZlZGdlLXNlcnZlciJdfQ==)
 
 …or wire it up by hand:
 
@@ -39,7 +39,8 @@ Add this to `~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` (this proj
 {
   "mcpServers": {
     "selvedge": {
-      "command": "selvedge-server"
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
     }
   }
 }
@@ -63,7 +64,7 @@ Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools (
 
 ## If it doesn't connect
 
-`selvedge-server` has to be on the PATH Cursor launches with. If Cursor can't start the server, you installed the package into a different environment than Cursor sees — install with `pipx install selvedge` (isolated, always on PATH) or point `command` at the absolute path that `which selvedge-server` prints.
+These configs run the server with `uvx`, which ships with [uv](https://docs.astral.sh/uv/) — so the one prerequisite is `uv` on the PATH Cursor launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install instead? `pip install selvedge` and set `command` to `selvedge-server`.
 
 ## Next
 

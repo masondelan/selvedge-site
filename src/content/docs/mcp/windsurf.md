@@ -19,13 +19,13 @@ Windsurf's Cascade agent loads MCP servers from a single JSON config. Add Selved
 
 ## Before you start
 
-`pip install selvedge` puts the `selvedge-server` command (the MCP server) and the `selvedge` CLI on your PATH:
+`pip install selvedge` gives you the `selvedge` CLI (`selvedge setup`, `selvedge blame`, and the `selvedge prompt` helper below):
 
 ```bash
 pip install selvedge
 ```
 
-If your editor can't find the server later, `pipx install selvedge` keeps it isolated and reliably on PATH.
+The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so it starts reliably even when your editor doesn't share your shell's PATH — it just needs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.
 
 ## Add the MCP server
 
@@ -35,7 +35,8 @@ Add this to `~/.codeium/windsurf/mcp_config.json` — or open it from the **MCPs
 {
   "mcpServers": {
     "selvedge": {
-      "command": "selvedge-server"
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
     }
   }
 }
@@ -57,7 +58,7 @@ Back in the Cascade **MCPs** panel, refresh the server list — `selvedge` shoul
 
 ## If it doesn't connect
 
-After editing `mcp_config.json`, **fully quit and reopen Windsurf** — closing the window alone doesn't reload MCP servers. And as always, `selvedge-server` must be on PATH (`pipx install selvedge` if in doubt).
+After editing `mcp_config.json`, **fully quit and reopen Windsurf** — closing the window alone doesn't reload MCP servers. The config calls `uvx`, so make sure `uv` is installed (or `pip install selvedge` and use `command: selvedge-server`).
 
 ## Next
 

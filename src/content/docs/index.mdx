@@ -18,7 +18,7 @@ hero:
       variant: secondary
 ---
 
-import { Card, CardGrid, Code } from '@astrojs/starlight/components';
+import { Card, CardGrid, Code, LinkCard } from '@astrojs/starlight/components';
 import TerminalDemo from '../../components/TerminalDemo.astro';
 
 ## The problem
@@ -71,14 +71,6 @@ cd your-project
 selvedge setup
 ```
 
-Already in Cursor or VS Code? Add the `selvedge-server` MCP server in one click (run `pip install selvedge` first so the command is on your PATH):
-
-<p align="center">
-  <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=selvedge&amp;config=eyJjb21tYW5kIjoic2VsdmVkZ2Utc2VydmVyIn0="><img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Add selvedge to Cursor" height="32" /></a>
-  &nbsp;
-  <a href="https://insiders.vscode.dev/redirect/mcp/install?name=selvedge&amp;config=%7B%22command%22%3A%22selvedge-server%22%7D"><img src="https://img.shields.io/badge/Install_in_VS_Code-0098FF?style=for-the-badge&amp;logo=visualstudiocode&amp;logoColor=white" alt="Install selvedge in VS Code" height="32" /></a>
-</p>
-
 That's it. Open a second terminal and run `selvedge watch` to live-tail events as your
 agent makes them. Then start asking your codebase questions:
 
@@ -90,6 +82,30 @@ selvedge search "stripe"               # full-text search
 ```
 
 [Full quickstart →](/start/quickstart/) &nbsp;·&nbsp; [CLI reference →](/reference/cli/) &nbsp;·&nbsp; [MCP tool reference →](/reference/mcp-tools/)
+
+---
+
+## Add it to your editor
+
+`selvedge setup` already wires the editors it finds. To add the `selvedge-server`
+MCP server to one yourself, every editor has a step-by-step page — and Cursor and
+VS Code take a one-click install:
+
+<p align="center">
+  <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=selvedge&amp;config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJzZWx2ZWRnZSIsInNlbHZlZGdlLXNlcnZlciJdfQ=="><img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Add selvedge to Cursor" height="32" /></a>
+  &nbsp;
+  <a href="https://insiders.vscode.dev/redirect/mcp/install?name=selvedge&amp;config=%7B%22name%22%3A%22selvedge%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22selvedge%22%2C%22selvedge-server%22%5D%7D"><img src="https://img.shields.io/badge/Install_in_VS_Code-0098FF?style=for-the-badge&amp;logo=visualstudiocode&amp;logoColor=white" alt="Install selvedge in VS Code" height="32" /></a>
+</p>
+
+<p align="center"><sub>The one-click buttons run the server with <a href="https://docs.astral.sh/uv/">uvx</a>, so they work without a global install — just have <code>uv</code> on your machine. Prefer pip? <code>pip install selvedge</code> and point your editor at the <code>selvedge-server</code> command.</sub></p>
+
+<CardGrid>
+  <LinkCard title="Cursor" description="One-click, or paste the MCP config." href="/mcp/cursor/" />
+  <LinkCard title="Claude Code" description="claude mcp add, or the plugin marketplace." href="/mcp/claude-code/" />
+  <LinkCard title="Cline" description="The autonomous VS Code agent." href="/mcp/cline/" />
+  <LinkCard title="Windsurf" description="Cascade MCP config." href="/mcp/windsurf/" />
+  <LinkCard title="Continue" description="config.yaml mcpServers block." href="/mcp/continue/" />
+</CardGrid>
 
 ---
 

@@ -71,13 +71,13 @@ function clientPage(c) {
   body.push("", c.blurb, "");
   body.push("## Before you start", "");
   body.push(
-    "`pip install selvedge` puts the `selvedge-server` command (the MCP server) and the `selvedge` CLI on your PATH:",
+    "`pip install selvedge` gives you the `selvedge` CLI (`selvedge setup`, `selvedge blame`, and the `selvedge prompt` helper below):",
     "",
     "```bash",
     "pip install selvedge",
     "```",
     "",
-    "If your editor can't find the server later, `pipx install selvedge` keeps it isolated and reliably on PATH.",
+    "The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so it starts reliably even when your editor doesn't share your shell's PATH — it just needs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.",
     "",
   );
 

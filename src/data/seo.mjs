@@ -28,7 +28,7 @@ export const clients = [
       "Cursor speaks MCP natively, so wiring in Selvedge takes one config file (or one click). Once it's connected, the agent can call `log_change` as it works and `prior_attempts` before it edits.",
     oneClick: {
       label: "Add to Cursor",
-      href: "cursor://anysphere.cursor-deeplink/mcp/install?name=selvedge&config=eyJjb21tYW5kIjoic2VsdmVkZ2Utc2VydmVyIn0=",
+      href: "cursor://anysphere.cursor-deeplink/mcp/install?name=selvedge&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJzZWx2ZWRnZSIsInNlbHZlZGdlLXNlcnZlciJdfQ==",
       img: "https://cursor.com/deeplink/mcp-install-dark.svg",
     },
     configPath: "`~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` (this project only)",
@@ -36,7 +36,8 @@ export const clients = [
     configSnippet: `{
   "mcpServers": {
     "selvedge": {
-      "command": "selvedge-server"
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
     }
   }
 }`,
@@ -44,7 +45,7 @@ export const clients = [
     verify:
       "Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools (`log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`). Or run `selvedge watch` in a terminal and make a change — the event prints within a second.",
     gotcha:
-      "`selvedge-server` has to be on the PATH Cursor launches with. If Cursor can't start the server, you installed the package into a different environment than Cursor sees — install with `pipx install selvedge` (isolated, always on PATH) or point `command` at the absolute path that `which selvedge-server` prints.",
+      "These configs run the server with `uvx`, which ships with [uv](https://docs.astral.sh/uv/) — so the one prerequisite is `uv` on the PATH Cursor launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install instead? `pip install selvedge` and set `command` to `selvedge-server`.",
     docsUrl: "https://cursor.com/docs/context/mcp",
   },
   {
@@ -58,7 +59,7 @@ export const clients = [
     command: {
       intro: "The fastest path — register the stdio server with one command:",
       lang: "bash",
-      snippet: `claude mcp add selvedge -- selvedge-server`,
+      snippet: `claude mcp add selvedge -- uvx --from selvedge selvedge-server`,
       note: "Add `--scope user` to make it available across all your projects, or `--scope project` to write a shared `.mcp.json` you can commit so the whole team gets it. Local scope (the default) keeps it to you in the current project.",
     },
     altInstall: {
@@ -73,7 +74,8 @@ export const clients = [
     configSnippet: `{
   "mcpServers": {
     "selvedge": {
-      "command": "selvedge-server"
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
     }
   }
 }`,
@@ -81,7 +83,7 @@ export const clients = [
     verify:
       "Run `/mcp` inside Claude Code (or `claude mcp list` in a terminal). `selvedge` should show as connected with its 8 tools.",
     gotcha:
-      "If `claude mcp list` shows selvedge as *failed*, `selvedge-server` isn't on PATH for the shell Claude Code spawns. `pip install selvedge` (or `pipx install selvedge`) in that environment, then re-run.",
+      "If `claude mcp list` shows selvedge as *failed*, `uvx` (from uv) isn't on the PATH Claude Code spawns with — install uv, then re-run. Prefer a global install? Register `-- selvedge-server` after `pip install selvedge` instead.",
     docsUrl: "https://code.claude.com/docs/en/mcp",
   },
   {
@@ -97,7 +99,8 @@ export const clients = [
     configSnippet: `{
   "mcpServers": {
     "selvedge": {
-      "command": "selvedge-server"
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
     }
   }
 }`,
@@ -105,7 +108,7 @@ export const clients = [
     verify:
       "Open Cline's **MCP Servers** panel — `selvedge` should appear with a green dot and its 8 tools listed. Then ask Cline to make a structural change and confirm it calls `log_change`.",
     gotcha:
-      "Cline runs the command in your VS Code environment. If the server won't start, `selvedge-server` isn't on that PATH — `pipx install selvedge` is the most reliable fix, or set `command` to the absolute path from `which selvedge-server`.",
+      "Cline runs the command in your VS Code environment. If the server won't start, make sure `uv` is installed there (the config calls `uvx`, which ships with uv). Prefer a global install? `pip install selvedge` and set `command` to `selvedge-server`.",
     docsUrl: "https://github.com/masondelan/selvedge",
   },
   {
@@ -122,7 +125,8 @@ export const clients = [
     configSnippet: `{
   "mcpServers": {
     "selvedge": {
-      "command": "selvedge-server"
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
     }
   }
 }`,
@@ -130,7 +134,7 @@ export const clients = [
     verify:
       "Back in the Cascade **MCPs** panel, refresh the server list — `selvedge` should connect and expose its 8 tools.",
     gotcha:
-      "After editing `mcp_config.json`, **fully quit and reopen Windsurf** — closing the window alone doesn't reload MCP servers. And as always, `selvedge-server` must be on PATH (`pipx install selvedge` if in doubt).",
+      "After editing `mcp_config.json`, **fully quit and reopen Windsurf** — closing the window alone doesn't reload MCP servers. The config calls `uvx`, so make sure `uv` is installed (or `pip install selvedge` and use `command: selvedge-server`).",
     docsUrl: "https://docs.windsurf.com/windsurf/cascade/mcp",
   },
   {
@@ -146,12 +150,13 @@ export const clients = [
     configLang: "yaml",
     configSnippet: `mcpServers:
   - name: selvedge
-    command: selvedge-server`,
+    command: uvx
+    args: ["--from", "selvedge", "selvedge-server"]`,
     autoDetect: false,
     verify:
       "Switch Continue to **Agent** mode and open its tools list — the `selvedge` tools should be available. (MCP tools are only callable in agent/chat-with-tools mode.)",
     gotcha:
-      "Continue's YAML config supports stdio servers only (which is all Selvedge needs). Keep the two-space indentation exactly as shown — YAML is whitespace-sensitive. `selvedge-server` must be on PATH.",
+      "Continue's YAML config supports stdio servers only (which is all Selvedge needs). Keep the two-space indentation exactly as shown — YAML is whitespace-sensitive. The config calls `uvx`, so `uv` must be installed (or `pip install selvedge` and use `command: selvedge-server`).",
     docsUrl: "https://docs.continue.dev/customize/deep-dives/mcp",
   },
 ];
