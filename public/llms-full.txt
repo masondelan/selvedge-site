@@ -1,0 +1,95 @@
+# Selvedge — full reference for AI agents
+
+> Long-term memory for AI-coded codebases. A `git blame` for AI agents — but for the *why*, not just which line which model touched. Captured live, by the agent, as the change happens. Local MCP server, SQLite storage, zero dependencies, MIT. `pip install selvedge`.
+
+This file is a single self-contained reference an AI agent can ingest to understand what Selvedge is, when to use it, and how to call it.
+
+## What it is
+
+Selvedge is a local Model Context Protocol (MCP) server. AI coding agents (Claude Code, Cursor, Copilot) call it as they work to log structured change events with reasoning, and to read prior reasoning before they act. The data stays in a SQLite file under `.selvedge/` next to the code. No cloud, no external dependencies.
+
+The problem it solves: human-written code leaks intent everywhere — commit messages, PR descriptions, inline comments, the chat that preceded it. AI-written code doesn't. The agent has perfect clarity about *why* it made each decision, but that context lives in the prompt and evaporates when the conversation ends. Six months later `git blame` tells you *what* changed and *when* — it can't tell you *why*. Selvedge captures the why, live, by the agent itself, as the change is made.
+
+Why "captured live" matters: tools like AgentDiff and Origin generate reasoning *after* the change by feeding the diff back to a second LLM. Selvedge's reasoning is the agent's own intent, written from the same context window that produced the change — no inference, no hallucinated explanations, and an empty `reasoning` field is itself a useful signal.
+
+Why "entity-level" matters: most tools attribute *lines*. Selvedge attributes the things you actually search for — `users.email`, `env/STRIPE_SECRET_KEY`, `api/v1/checkout`, `deps/stripe`. The first question after `git blame` is usually "what's the history of this column", not "what's the history of lines 40–48".
+
+## Install and setup
+
+```
+pip install selvedge
+cd your-project
+selvedge setup
+```
+
+`selvedge setup` is an interactive wizard: it detects which AI tools you have (Claude Code, Cursor, Copilot), writes the MCP entry into each one's config, drops the canonical agent-instructions block into your prompt file (`CLAUDE.md` / `.cursorrules` / `copilot-instructions.md`), runs `selvedge init`, and installs the post-commit hook. Every modified file gets a `.bak` first. Re-running is a no-op.
+
+Claude Code plugin (alternative): `/plugin marketplace add masondelan/selvedge` then `/plugin install selvedge@selvedge` (run `pip install selvedge` first).
+
+## The 8 MCP tools
+
+- `log_change` — record a change event with entity, diff, and reasoning. Pass `rename_from` with `change_type="rename"` for the dual-event rename pattern.
+- `diff` — history for an entity or entity prefix.
+- `blame` — most recent change + context for an exact entity.
+- `history` — filtered history across all entities.
+- `changeset` — all events grouped under a named feature/task slug.
+- `search` — full-text search across all events.
+- `prior_attempts` — prior change attempts on an entity + inferred outcome (was it tried and reverted?). Call it before editing. Conservative by design: `min_confidence` defaults to `proximity_high`, so an empty list is a trustworthy "nothing to worry about".
+- `stale_decisions` — dated decisions past their `revisit_after` that are *still in active use*. Pure age never surfaces — a dated decision nobody has touched won't nag.
+
+## Entity-path conventions
+
+```
+users.email           DB column (table.column)
+users                 DB table
+src/auth.py::login    Function in a file (path::symbol)
+src/auth.py           File
+api/v1/users          API route
+deps/stripe           Dependency
+env/STRIPE_SECRET_KEY Environment variable
+```
+
+Prefix queries work everywhere: `users` returns `users`, `users.email`, `users.created_at`, etc.
+
+## The canonical agent-instructions block
+
+This is what `selvedge setup` / `selvedge prompt` installs into your project's `CLAUDE.md` / `.cursorrules`. It is the single source of truth for when an agent should call Selvedge:
+
+```
+## Selvedge — change tracking
+
+You have access to Selvedge (MCP server: `selvedge`) for change tracking.
+
+Rules:
+- Call `selvedge.log_change` immediately after adding, modifying, or removing any DB column, table, function, API endpoint, dependency, or env variable.
+- Set `reasoning` to the user's original request or the problem being solved. Write at least one full sentence.
+- Set `agent` to "claude-code" (or whichever agent you are).
+- Set `git_commit` to the commit hash once you know it.
+- For multi-entity changes, set a shared `changeset_id` on all related calls (a short slug like `add-stripe-billing`).
+- Before editing an entity, call `selvedge.prior_attempts` on it — if the same change was tried before and reverted, you'll see the prior reasoning and why it was rejected, and can change your plan instead of repeating a rejected approach.
+- Then call `selvedge.diff` or `selvedge.blame` for the entity's broader history before conflicting with past decisions.
+
+The same operations are on your shell: `selvedge prior-attempts <entity>`, `selvedge blame <entity>`, `selvedge log <entity> <change_type> --reasoning "<why>"`, `selvedge search "<query>"`, `selvedge history --since 7d`, `selvedge stale`. Add `--json` to any read command.
+```
+
+## How Selvedge compares
+
+| | Reasoning source | Granularity | Mechanism | Grouping | Storage |
+|---|---|---|---|---|---|
+| Selvedge | Captured live, by the agent in the same context that produced the change | Entity (column, table, env var, dep, route, function) | MCP server — agent calls it as work happens | Changesets across many entities | SQLite, zero deps |
+| AgentDiff | Inferred post-hoc by an LLM from the diff at session end | Line | Git hook | None | JSONL |
+| Origin | Captured at commit time | Line | Git hook | None | Local |
+| Git AI | Attribution metadata | Line | Git hook + Agent Trace | None | Git notes |
+
+Selvedge does not replace git (line-level what/when), PR review tools, or agent observability (LLM call traces). It sits between them — the provenance-as-first-class-citizen layer.
+
+## Agent Trace
+
+[Agent Trace](https://github.com/cursor/agent-trace) (Cursor + Cognition, backed by Cloudflare, Vercel, Google Jules, Amp, OpenCode, git-ai) is an emerging open standard for AI code attribution traces. Selvedge is a compatible *producer*: Agent Trace is the wire format; Selvedge is the live capture + query layer that emits it.
+
+## Links
+
+- Home: https://selvedge.sh
+- GitHub: https://github.com/masondelan/selvedge
+- PyPI: https://pypi.org/project/selvedge/ (`pip install selvedge`)
+- Changelog: https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md

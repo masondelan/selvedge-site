@@ -56,6 +56,7 @@ export default defineConfig({
             { label: "What is Selvedge?", link: "/start/what-is-selvedge/" },
             { label: "Quickstart", link: "/start/quickstart/" },
             { label: "How it works", link: "/start/how-it-works/" },
+            { label: "Agent prompt block", link: "/prompt-block/" },
           ],
         },
         {

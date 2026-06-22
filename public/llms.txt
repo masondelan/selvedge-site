@@ -1,0 +1,33 @@
+# Selvedge
+
+> Long-term memory for AI-coded codebases — a `git blame` for AI agents, but for the *why*, not just which line which model touched. Selvedge is a local MCP server that AI coding agents (Claude Code, Cursor, Copilot) call as they work to log structured change events with reasoning — and that agents query before they act, so they can see whether a change was tried and reverted before repeating it. Data stays in a local SQLite file under `.selvedge/`. Zero dependencies, MIT licensed.
+
+The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by the agent, in the same context that produced the change — not inferred post-hoc from the diff by a second model. Install with `pip install selvedge`, then `selvedge setup`.
+
+## Start here
+- [Home](https://selvedge.sh): what Selvedge is, who it's for, the quickstart.
+- [Quickstart](https://selvedge.sh/start/quickstart/): `pip install selvedge`, the `selvedge setup` wizard, wiring into Claude Code / Cursor / Copilot.
+- [Agent prompt block](https://selvedge.sh/prompt-block): the copy-paste `CLAUDE.md` / `.cursorrules` block that tells an agent when and how to call Selvedge. Also emitted by `selvedge prompt`.
+- [How Selvedge compares](https://selvedge.sh/compare/agent-tools/): Selvedge vs. AgentDiff / Origin / Git AI — captured-live + entity-level + changesets.
+
+## MCP tools (8, over stdio)
+- `log_change`: record a change event with entity, diff, and reasoning (pass `rename_from` with `change_type="rename"` for renames).
+- `prior_attempts`: prior change attempts on an entity + inferred outcome — was it tried and reverted? Call it *before* editing.
+- `blame`: most recent change + context for an exact entity.
+- `diff`: history for an entity or entity prefix.
+- `history`: filtered history across all entities.
+- `changeset`: all events grouped under a named feature/task slug.
+- `search`: full-text search across all events.
+- `stale_decisions`: dated decisions past their `revisit_after` that are still in active use (pure age never surfaces).
+
+## Reference
+- [README](https://github.com/masondelan/selvedge/blob/main/README.md): full overview, MCP tool table, CLI reference, entity-path conventions.
+- [Changelog](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md): what shipped, per version.
+- [Architecture](https://github.com/masondelan/selvedge/blob/main/docs/architecture.md): data model, phase plan, non-goals.
+- [Agent Trace interop](https://selvedge.sh/compare/agent-trace/): Selvedge as a compatible producer of Cursor + Cognition's Agent Trace standard.
+- [prior_attempts demo](https://github.com/masondelan/selvedge/blob/main/docs/demos/prior-attempts.md): worked transcript of an agent checking history and changing its plan.
+
+## Install
+- PyPI: https://pypi.org/project/selvedge/ — `pip install selvedge`
+- GitHub: https://github.com/masondelan/selvedge
+- Claude Code plugin: `/plugin marketplace add masondelan/selvedge` then `/plugin install selvedge@selvedge`
