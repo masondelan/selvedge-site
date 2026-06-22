@@ -33,14 +33,26 @@ const url = Astro.url.pathname;
 const isHome = url === '/' || url === '';
 const isFaq = url.startsWith('/project/faq');
 
+// The canonical product one-liner. Kept identical to the README's lead so the
+// SoftwareApplication description never drifts from the source of truth.
+const ONE_LINER =
+  'Long-term memory for AI-coded codebases. A git blame for AI agents — but for the why, not just which line which model touched. Captured live, by the agent, as the change happens.';
+
 // Pull page-level metadata from Starlight's frontmatter so we can re-emit
 // what we need without duplicating Starlight's own logic.
-const entry = (Astro.locals as any)?.starlightRoute?.entry;
+const route = (Astro.locals as any)?.starlightRoute;
+const entry = route?.entry;
 const data = entry?.data ?? {};
 const pageTitle = data.title ?? 'selvedge';
 const pageDescription =
   data.description ??
   'A local MCP server that AI coding agents call as they work — logging the why behind every change into a SQLite file under .selvedge/ next to your code.';
+
+// Per-page JSON-LD hint (see src/content.config.ts). Pages default to
+// TechArticle; setup/tutorial pages declare structuredData.type: howto.
+const structuredData = data.structuredData ?? { type: 'techarticle' };
+const lastUpdated: Date | undefined = route?.lastUpdated;
+const pageUrl = `${SITE}${url}`;
 
 // --- Structured data -------------------------------------------------------
 
@@ -73,20 +85,63 @@ const softwareApplication = {
   applicationCategory: 'DeveloperApplication',
   operatingSystem: 'macOS, Linux, Windows',
   url: SITE,
-  description:
-    'Long-term memory for AI-coded codebases. A local MCP server that logs the why behind every change AI agents make, captured live and stored in a SQLite file next to your code.',
+  description: ONE_LINER,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   softwareRequirements: 'Python 3.10+',
   downloadUrl: 'https://pypi.org/project/selvedge/',
   publisher: { '@id': `${SITE}/#org` },
 };
 
+// Per-page content node. The homepage is a SoftwareApplication listing and the
+// FAQ page carries FAQPage (below), so neither gets an article/howto node.
+// Everything else is a TechArticle unless it opts into HowTo.
+let pageNode: Record<string, unknown> | null = null;
+if (!isHome && !isFaq) {
+  if (structuredData.type === 'howto') {
+    pageNode = {
+      '@type': 'HowTo',
+      '@id': `${pageUrl}#howto`,
+      name: pageTitle,
+      description: pageDescription,
+      url: pageUrl,
+      inLanguage: 'en',
+      publisher: { '@id': `${SITE}/#org` },
+      ...(structuredData.steps?.length
+        ? {
+            step: structuredData.steps.map(
+              (s: { name: string; text: string; url?: string }, i: number) => ({
+                '@type': 'HowToStep',
+                position: i + 1,
+                name: s.name,
+                text: s.text,
+                ...(s.url ? { url: `${SITE}${s.url}` } : {}),
+              }),
+            ),
+          }
+        : {}),
+    };
+  } else {
+    pageNode = {
+      '@type': 'TechArticle',
+      '@id': `${pageUrl}#article`,
+      headline: pageTitle,
+      description: pageDescription,
+      url: pageUrl,
+      inLanguage: 'en',
+      author: { '@id': `${SITE}/#org` },
+      publisher: { '@id': `${SITE}/#org` },
+      isPartOf: { '@id': `${SITE}/#website` },
+      ...(lastUpdated ? { dateModified: lastUpdated.toISOString() } : {}),
+    };
+  }
+}
+
 // Build a graph so all entities share IDs and Google can connect them.
 const graph: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@graph': isHome
     ? [organization, website, softwareApplication]
-    : [organization, website],
+    : [organization, website, ...(pageNode ? [pageNode] : [])],
 };
 ---
 

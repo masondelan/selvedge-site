@@ -1,6 +1,17 @@
 ---
 title: Quickstart
 description: Three commands. The third one is an interactive wizard that detects your AI tools and wires Selvedge into each one. Backups before any disk write.
+structuredData:
+  type: howto
+  steps:
+    - name: Install Selvedge
+      text: "Run pip install selvedge to put the selvedge CLI and selvedge-server MCP command on your PATH."
+    - name: Open your project
+      text: "cd into the project you want Selvedge to track."
+    - name: Run the setup wizard
+      text: "Run selvedge setup — it detects Claude Code, Cursor, and Copilot, writes each one's MCP config, installs the agent-instructions block into your prompt file, runs selvedge init, and installs the post-commit hook. Every modified file gets a .bak first."
+    - name: Verify the wiring
+      text: "Open a second terminal and run selvedge watch, then make a change in your AI tool — the event should print within a second. If nothing arrives, run selvedge doctor."
 ---
 
 ```bash

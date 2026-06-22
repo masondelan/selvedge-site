@@ -1,6 +1,15 @@
 ---
 title: Upgrading Selvedge
 description: How to upgrade Selvedge across PyPI, Smithery, Glama, and source installs — plus how to silence the version-check notice if you don't want it.
+structuredData:
+  type: howto
+  steps:
+    - name: Upgrade the package
+      text: "Run pip install -U selvedge (or pipx upgrade selvedge if you installed with pipx). Schema migrations run automatically on the first command after upgrading."
+    - name: Verify the version
+      text: "Run selvedge --version to confirm you're on the new release."
+    - name: Run the health check
+      text: "Run selvedge doctor — a single-command check across DB resolution, hook installation, and agent-tool wiring that surfaces anything that regressed."
 ---
 
 If you landed here from a one-line stderr notice like
