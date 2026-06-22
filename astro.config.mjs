@@ -1,5 +1,7 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+// Generated from src/data/seo.mjs by scripts/gen-seo-pages.mjs.
+import { mcpItems, compareItems } from "./src/data/seo-nav.mjs";
 
 // https://astro.build/config
 export default defineConfig({
@@ -69,11 +71,16 @@ export default defineConfig({
           ],
         },
         {
+          label: "Set up your editor",
+          items: mcpItems,
+        },
+        {
           label: "Compare",
           items: [
             { label: "Selvedge vs. git blame", link: "/compare/git-blame/" },
             { label: "Selvedge vs. AgentDiff & friends", link: "/compare/agent-tools/" },
             { label: "Agent Trace interop", link: "/compare/agent-trace/" },
+            ...compareItems,
           ],
         },
         {
