@@ -26,8 +26,8 @@ selvedge stale [...filters]             Dated decisions due for a revisit
 selvedge stats [--since SINCE]          Tool-call coverage report
 selvedge install-hook [--path PATH]     Install git post-commit hook
 selvedge backfill-commit --hash HASH    Backfill git_commit on recent events
-selvedge import PATH                    Import migration files (SQL / Alembic)
-selvedge export [--format json|csv]     Export history
+selvedge import PATH                    Import migrations (SQL / Alembic) or an Agent Trace file
+selvedge export [--format json|csv|agent-trace]  Export history (Agent Trace v0.1.0 since 0.3.9)
 selvedge log ENTITY CHANGE_TYPE         Manually log a change
 selvedge migrate-paths [--apply]        Re-canonicalize stored entity paths
 ```
@@ -274,7 +274,7 @@ Idempotent on the event data — re-running after `--apply` rewrites nothing. Ea
 
 ## Backfill / interop
 
-### `selvedge import PATH [--format auto|sql|alembic] [--project NAME] [--dry-run]`
+### `selvedge import PATH [--format auto|sql|alembic|agent-trace] [--project NAME] [--dry-run]`
 
 Parse migration files and backfill schema history.
 
@@ -283,6 +283,10 @@ Parse migration files and backfill schema history.
 - **Alembic Python migrations** — `op.add_column`, `op.drop_column`, `op.create_table`,
   `op.drop_table`, `op.alter_column`, `op.rename_table`, `op.create_index`,
   `op.drop_index`, `op.execute()` (with inline SQL parsing)
+- **Agent Trace** (`--format agent-trace`, since v0.3.9) — PATH is an Agent Trace
+  JSON/NDJSON file. Round-trips a `selvedge export --format agent-trace` losslessly
+  (entity, change type, and reasoning survive in `dev.selvedge` metadata); foreign
+  producers import best-effort (`change_type="modify"`, empty reasoning).
 
 Directories are walked recursively; files are sorted by name for chronological order.
 Bulk inserts are wrapped in a single transaction so a long Alembic history imports
@@ -292,9 +296,18 @@ A `CREATE TABLE users (id INT, email TEXT)` emits a `table.create` event for `us
 **and** a `column.add` event for each column, so `selvedge blame users.email` works
 even when the column was defined only in the initial schema.
 
-### `selvedge export [--format json|csv] [--since] [--entity] [--output FILE]`
+### `selvedge export [--format json|csv|agent-trace] [--since] [--entity] [--output FILE]`
 
 Dump change history to JSON or CSV with full filter support.
+
+**`--format agent-trace`** (since v0.3.9) emits [Agent Trace](https://github.com/cursor/agent-trace)
+**v0.1.0** records — one per change event by default, wrapped in a self-describing
+bundle (`{agent_trace_version, producer, note, records: [...]}`). Two agent-trace-only
+flags: `--ndjson` streams one record per line for large histories, and
+`--collapse-by-session` merges events sharing a `session_id` into a single record.
+Selvedge's reasoning and entity-level provenance ride along in each record's
+`metadata` under the reverse-domain `dev.selvedge` namespace. See the
+[Agent Trace interop page](/compare/agent-trace/) for the full mapping.
 
 ### `selvedge backfill-commit --hash HASH [--window MIN]`
 

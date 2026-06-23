@@ -104,23 +104,33 @@ agent-instructions block. See the
   row; the new stale-decisions row is INFO-tier so the net WARN count
   did not grow with the release.
 
-## v0.3.9 — developer ergonomics (Phase 2.15)
+## v0.3.9 — Agent Trace export interop ✅ shipped 2026-06-22
 
-The supporting CLI surface that moves `prior_attempts` + `summary`
-into the developer's existing review and reporting workflow.
+`selvedge export --format agent-trace` ships — Selvedge becomes a
+compatible **producer** for the [Agent Trace](https://github.com/cursor/agent-trace)
+open standard (Cursor + Cognition AI). **Pulled forward from Phase 3**
+(v0.4.0): only the exporter moved up; Postgres and the HTTP layer remain
+the v0.4.0 markers. Opt-in and additive — the MCP surface stays at
+**8** tools. See the
+[changelog](/project/changelog/#v039--2026-06-22) for the full notes.
 
-- **`selvedge audit`** — PR-review-ready quality report for a branch
-  or commit range. `--format markdown` for PR-comment use.
-- **`selvedge digest`** — terminal rendering of the `summary`
-  helper. Default `--since 24h`, designed for cron / Slack / email.
-- **`selvedge pr-comment --pr 123`** — formats `audit` for
-  `gh pr comment`. Every generated comment wrapped in
-  `<!-- selvedge:pr-comment v1 -->` sentinels — format versioned
-  from day one so downstream parsers survive evolution.
-- **Setup detection version contract** — `selvedge setup` and
-  `selvedge doctor` flag when an upstream agent (Claude Code,
-  Cursor, Copilot) moves its config path. Treats detection paths as
-  a versioned contract.
+- **`selvedge export --format agent-trace`** — one Agent Trace v0.1.0
+  record per change event, with `--ndjson` (one record per line) and
+  `--collapse-by-session`. Selvedge's reasoning + entity provenance ride
+  in each record's `dev.selvedge` metadata.
+- **`selvedge import --format agent-trace`** — lossless round-trip of a
+  Selvedge export; best-effort ingest of foreign producers.
+- **`selvedge.exporters.agent_trace`** — the pure, no-LLM converter
+  behind both directions, plus a vendored v0.1.0 JSON Schema for
+  reference.
+- **Honest fidelity** — entity-level / migration-imported events with no
+  line range carry `range_unknown: true` and an empty `files[]` rather
+  than a fabricated `[1, 1]` placeholder.
+
+> **Plan note.** The developer-ergonomics CLI surface originally scoped
+> for v0.3.9 (`selvedge audit` / `digest` / `pr-comment`, Phase 2.15) was
+> deferred when the Agent Trace exporter was pulled forward. It remains
+> planned; its release slot is being re-sequenced.
 
 ## v0.3.10 — config + advanced retention (Phase 2.16)
 

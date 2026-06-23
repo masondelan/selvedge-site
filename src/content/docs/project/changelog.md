@@ -7,6 +7,60 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent two minor versions for
 at-a-glance browsing.
 
+## v0.3.9 — 2026-06-22
+
+**Agent Trace export — Selvedge is a compatible producer.** New
+`selvedge export --format agent-trace` emits
+[Agent Trace](https://github.com/cursor/agent-trace) **v0.1.0** records — the
+open AI code-attribution wire format from Cursor + Cognition AI — so your
+captured history travels to any tool that reads the standard. Agent Trace is the
+wire format; Selvedge is the live capture + query layer that emits it. **Drop-in
+upgrade for anyone on 0.3.8.** The MCP surface is unchanged (still **8** tools).
+
+**Pulled forward, deliberately.** The exporter was planned for v0.4.0 (Phase 3).
+It ships now in the 0.3.x line as an **opt-in, additive** interop format —
+nothing about the native model, the MCP tools, or SQLite storage changes.
+Postgres and the HTTP layer remain the v0.4.0 markers; only the exporter moved
+up.
+
+### `selvedge export --format agent-trace`
+
+One Agent Trace v0.1.0 record per change event. The default JSON form is a
+self-describing bundle (`{agent_trace_version, producer, note, records: [...]}`).
+`--ndjson` streams one record per line for large histories;
+`--collapse-by-session` merges events sharing a `session_id` into a single
+record.
+
+Selvedge's reasoning and entity-level provenance ride along in each record's
+`metadata` under the reverse-domain `dev.selvedge` namespace. Records conform to
+the real v0.1.0 spec: line ranges live in `files[].conversations[].ranges[]`, a
+`contributor` of type `ai`/`unknown` (no `model_id` is fabricated — Selvedge
+stores the agent name, not a models.dev id), `tool = {name: "selvedge", ...}`,
+and `vcs` from `git_commit`.
+
+### `selvedge import --format agent-trace`
+
+Round-trips a Selvedge export losslessly — entity, change type, and reasoning
+survive in `dev.selvedge` metadata — and ingests foreign producers best-effort
+(`change_type="modify"`, empty reasoning).
+
+### Honest fidelity
+
+Entity-level events (DB column, env var, dependency) and migration-imported
+events have no line range, so they carry `metadata.dev.selvedge.range_unknown:
+true` and an empty `files[]` rather than a fabricated `[1, 1]` placeholder. The
+export bundle's preamble explains this to consumers up front.
+
+See the [Agent Trace interop page](/compare/agent-trace/) for the full mapping,
+or [`docs/agent-trace-interop.md`](https://github.com/masondelan/selvedge/blob/main/docs/agent-trace-interop.md)
+in the source repo.
+
+### Tests
+
+- `tests/test_agent_trace_export.py` (25 tests): round-trip, non-file entity
+  preservation, line-range extraction, collapse-by-session, reasoning-quality
+  passthrough, schema validation, and CLI integration.
+
 ## v0.3.8 — 2026-06-17
 
 **Active memory v1 (date-based).** Selvedge's append-only log learns to know
@@ -122,85 +176,12 @@ audit` / `digest` will consume.
   review pass that hardened the acceptance-criteria edges. Called out in the
   source CHANGELOG.
 
-## v0.3.6 — 2026-05-24
-
-Two themes in one release as a one-time exception to the single-theme
-cadence: **stay-current** (background PyPI version check) and
-**retention basics** (`selvedge prune` for the `tool_calls` table).
-**Drop-in upgrade for anyone on 0.3.5.**
-
-### Stay-current
-
-**Background version check in `selvedge` (the CLI only — never the MCP
-server).** A daemon thread fetches the latest published version from
-PyPI's JSON endpoint, caches the result at
-`~/.selvedge/update_check.json` (user-global so you don't re-check per
-project), and on process exit prints to stderr:
-
-```
-selvedge: v0.3.7 available (you're on 0.3.6) — https://selvedge.sh/upgrade
-```
-
-The notice is printed via `atexit` so it appears *after* the command's
-output, never interleaved. Cache TTL is 24h, matching `gh` and `npm`.
-
-**Generous suppression.** The check is disabled when any of
-`SELVEDGE_NO_UPDATE_CHECK=1`, `SELVEDGE_QUIET=1`, or `CI` is set in
-the environment, when stderr isn't a TTY (piping, agent stdio,
-`--json` to a file), and on dev / editable installs. The TTY gate is
-re-checked at print time too — even a cached notice can't pollute
-redirected output. The 1.5s fetch timeout and the no-raise posture of
-every code path mean a network blip can't slow or break the CLI.
-
-**`selvedge-server` stays silent.** The check is wired into the CLI
-group callback only — the MCP server's stdio is the JSON-RPC channel
-and an inadvertent stderr write would surface in the calling agent's
-logs as noise.
-
-### Retention basics
-
-**`selvedge prune` — trim old `tool_calls` rows.** Default retention
-is 90 days; `--days N` overrides. The default is long enough that the
-previous month's agents are still in the data. Every run appends a
-tab-separated audit line to `.selvedge/prune.log` so the cadence is
-visible later — even empty prunes log, so you can tell the difference
-between "no prunes yet" and "nothing to prune."
-
-```
-selvedge prune                # 90-day default
-selvedge prune --days 30      # tighter window
-selvedge prune --json         # for cron / scripting
-```
-
-Only `tool_calls` is pruned in this release. The destructive
-events-table path waits for `.selvedge/config.toml` in v0.3.10 and
-will require both `SELVEDGE_DESTRUCTIVE=1` *and* an interactive
-confirmation — the cron / non-interactive `--yes` footgun is
-defended against by design.
-
-**Doctor — `Last prune` row + oversized-`tool_calls` WARN.** The
-doctor table now surfaces the tail of `.selvedge/prune.log` (most
-recent timestamp, rows pruned, day threshold) and WARNs when the
-`tool_calls` table exceeds 100k rows so users get a nudge to run
-`selvedge prune` before the noise table gets large.
-
-### Note on cadence
-
-This release combines two themes — a **one-time exception** to the
-single-theme-per-release discipline locked in on 2026-05-10. The
-retention work could have slipped to v0.3.7 (entity foundation +
-`prior_attempts` wedge), but combining here avoided a renumbering
-pass on the phase plan. Single-theme resumes at v0.3.7.
-
-### Tests
-
-- 36 new tests: `test_update_check.py` (24), `test_prune.py` (10),
-  `test_doctor.py` extension (2). Suite is now ≈403 tests.
-
 ---
 
 [**Full CHANGELOG.md →**](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md)
-in the source repo. Includes 0.3.5 (recovery basics — `selvedge verify`,
+in the source repo. Includes 0.3.6 (stay-current + retention basics —
+background PyPI version check, `selvedge prune` for `tool_calls`),
+0.3.5 (recovery basics — `selvedge verify`,
 `selvedge backup`), 0.3.4 (first-run wizard, prompt, watch),
 0.3.3 (per-tool annotations, output schemas, custom icon), 0.3.2
 (observability + doctor), 0.3.1 (concurrency hardening), 0.3.0
