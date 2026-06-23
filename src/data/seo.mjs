@@ -49,6 +49,37 @@ export const clients = [
     docsUrl: "https://cursor.com/docs/context/mcp",
   },
   {
+    slug: "vscode",
+    name: "VS Code",
+    description:
+      "Add Selvedge to VS Code as an MCP server so Copilot's agent logs why it changed code and checks prior reverted attempts before editing. One-click or one config file.",
+    blurb:
+      "VS Code supports MCP servers natively, so wiring in Selvedge takes one config file (or one click). Once it's connected, Copilot's agent mode can call `log_change` as it works and `prior_attempts` before it edits.",
+    oneClick: {
+      label: "Install in VS Code",
+      href: "https://insiders.vscode.dev/redirect/mcp/install?name=selvedge&config=%7B%22name%22%3A%22selvedge%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22selvedge%22%2C%22selvedge-server%22%5D%7D",
+      img: "https://img.shields.io/badge/Install_in_VS_Code-0098FF?style=for-the-badge&logo=visualstudiocode&logoColor=white",
+    },
+    configPath:
+      "`.vscode/mcp.json` (this workspace) — or your user `mcp.json` via the Command Palette's **MCP: Open User Configuration**",
+    configLang: "json",
+    configSnippet: `{
+  "servers": {
+    "selvedge": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
+    }
+  }
+}`,
+    autoDetect: false,
+    verify:
+      "Open the **Chat** view, switch to **Agent** mode, and open the tools picker — `selvedge` should be listed with its 8 tools (`log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`). Or run **MCP: List Servers** from the Command Palette and confirm `selvedge` shows as *Running*.",
+    gotcha:
+      "MCP tools only surface in the Chat view's **Agent** mode. The config runs the server with `uvx` (which ships with [uv](https://docs.astral.sh/uv/)), so make sure `uv` is on the PATH VS Code launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install? `pip install selvedge` and set `command` to `selvedge-server`.",
+    docsUrl: "https://code.visualstudio.com/docs/copilot/chat/mcp-servers",
+  },
+  {
     slug: "claude-code",
     name: "Claude Code",
     description:

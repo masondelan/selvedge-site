@@ -6,6 +6,10 @@ export const mcpItems = [
     "link": "/mcp/cursor/"
   },
   {
+    "label": "VS Code",
+    "link": "/mcp/vscode/"
+  },
+  {
     "label": "Claude Code",
     "link": "/mcp/claude-code/"
   },
