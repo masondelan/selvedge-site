@@ -129,8 +129,9 @@ the v0.4.0 markers. Opt-in and additive — the MCP surface stays at
 
 > **Plan note.** The developer-ergonomics CLI surface originally scoped
 > for v0.3.9 (`selvedge audit` / `digest` / `pr-comment`, Phase 2.15) was
-> deferred when the Agent Trace exporter was pulled forward. It remains
-> planned; its release slot is being re-sequenced.
+> deferred when the Agent Trace exporter was pulled forward. It is now
+> re-homed to **v0.3.16 (Phase 2.22)** — the last 0.3.x feature release,
+> just before the v0.4.0 tool-consolidation review.
 
 ## v0.3.10 — config + advanced retention (Phase 2.16)
 
@@ -242,6 +243,27 @@ corruption incidents that backup-restoration alone doesn't address.
 - **Doctor — `last_backup` escalation** — once repair is shippable,
   the WARN/FAIL thresholds tighten.
 
+## v0.3.16 — developer ergonomics (Phase 2.22)
+
+The CLI surface that moves Selvedge into the developer's existing
+review and reporting workflow — the supporting cast that turns
+`prior_attempts` + `summary` into an everyday surface. **Deferred from
+v0.3.9** when the Agent Trace exporter was pulled forward; re-homed as
+the last 0.3.x feature release, right before the v0.4.0 consolidation
+review that decides whether `digest` / `audit` become pure CLI views of
+`summary`.
+
+- **`selvedge audit`** — PR-review-ready quality report for a branch or
+  commit range. `--format markdown` for PR-comment use.
+- **`selvedge digest`** — terminal rendering of the `summary` helper.
+  Default `--since 24h`, designed for cron / Slack / email.
+- **`selvedge pr-comment --pr 123`** — formats `audit` for
+  `gh pr comment`, wrapped in versioned `<!-- selvedge:pr-comment v1 -->`
+  sentinels. No GitHub API calls in core.
+- **Setup detection version contract** — `selvedge setup` / `doctor`
+  flag when an upstream agent (Claude Code, Cursor, Copilot) moves its
+  config path. Detection paths treated as a versioned contract.
+
 ## v0.4.0 — backend rewrite + tool rename (Phase 3)
 
 First release in the breaking-changes window. Bundles the storage
@@ -281,23 +303,26 @@ design — local-only, agent and server on the same machine.
 - **`selvedge-server-http`** entry point alongside the existing
   stdio `selvedge-server`.
 
-## v0.4.2 — Agent Trace interop (Phase 3.2)
+## v0.4.2 — Agent Trace interop (Phase 3.2) ✅ delivered early in v0.3.9
 
-Selvedge becomes a compatible producer of
+Selvedge became a compatible producer of
 [Agent Trace](https://github.com/cursor/agent-trace), the open RFC
-for AI code attribution traces. Purely additive export/import
-formats — non-breaking. Ships after v0.4.1 so the AT spec settles
-during the v0.4.0 / v0.4.1 window.
+for AI code attribution traces — **shipped ahead of schedule in
+v0.3.9**, pulled forward from this slot once the standard gained
+backing. Purely additive and non-breaking. The delivered scope is in
+the [v0.3.9 notes](/project/changelog/#v039--2026-06-22) and the
+[Agent Trace interop page](/compare/agent-trace/); records use the
+reverse-domain `metadata["dev.selvedge"]` namespace from the published
+v0.1.0 spec (not the `extensions.selvedge.*` shape this slot originally
+assumed).
 
-- **`selvedge export --format agent-trace`** — AT v0.1.0 records
-  from the local store. Reasoning, non-file entities, changeset_id,
-  and project land in `extensions.selvedge.*`.
-- **`selvedge import --format agent-trace`** — best-effort round-trip.
-  Other tools' AT output won't populate `extensions.selvedge.*`;
-  Selvedge fills defaults and the validator warns at log time.
-- **`range_unknown` preamble** — Selvedge events from migrations,
-  DB columns, env vars, and dependencies don't have line ranges;
-  the export says so rather than fabricating `[1, 1]` placeholders.
+- **`selvedge export --format agent-trace`** — shipped in v0.3.9. AT
+  v0.1.0 records from the local store, with `--ndjson` and
+  `--collapse-by-session`.
+- **`selvedge import --format agent-trace`** — shipped in v0.3.9.
+  Lossless Selvedge round-trip; best-effort foreign-producer ingest.
+- **`range_unknown` preamble** — shipped in v0.3.9. Entity-level and
+  migration-imported events say so rather than fabricating `[1, 1]`.
 
 ## Phase 4 — hosted platform
 
