@@ -88,19 +88,14 @@ selvedge search "stripe"               # full-text search
 ## Add it to your editor
 
 `selvedge setup` already wires the editors it finds. To add the `selvedge-server`
-MCP server to one yourself, every editor has a step-by-step page — and Cursor and
-VS Code take a one-click install:
+MCP server to one yourself, every editor below has a step-by-step page — Cursor and
+VS Code include a one-click install on theirs:
 
-<p align="center">
-  <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=selvedge&amp;config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJzZWx2ZWRnZSIsInNlbHZlZGdlLXNlcnZlciJdfQ=="><img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Add selvedge to Cursor" height="32" /></a>
-  &nbsp;
-  <a href="https://insiders.vscode.dev/redirect/mcp/install?name=selvedge&amp;config=%7B%22name%22%3A%22selvedge%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22selvedge%22%2C%22selvedge-server%22%5D%7D"><img src="https://img.shields.io/badge/Install_in_VS_Code-0098FF?style=for-the-badge&amp;logo=visualstudiocode&amp;logoColor=white" alt="Install selvedge in VS Code" height="32" /></a>
-</p>
-
-<p align="center"><sub>The one-click buttons run the server with <a href="https://docs.astral.sh/uv/">uvx</a>, so they work without a global install — just have <code>uv</code> on your machine. Prefer pip? <code>pip install selvedge</code> and point your editor at the <code>selvedge-server</code> command.</sub></p>
+<p align="center"><sub>Each page's config runs the server with <a href="https://docs.astral.sh/uv/">uvx</a>, so it works without a global install — just have <code>uv</code> on your machine. Prefer pip? <code>pip install selvedge</code> and point your editor at the <code>selvedge-server</code> command.</sub></p>
 
 <CardGrid>
   <LinkCard title="Cursor" description="One-click, or paste the MCP config." href="/mcp/cursor/" />
+  <LinkCard title="VS Code" description="One-click, or a .vscode/mcp.json block." href="/mcp/vscode/" />
   <LinkCard title="Claude Code" description="claude mcp add, or the plugin marketplace." href="/mcp/claude-code/" />
   <LinkCard title="Cline" description="The autonomous VS Code agent." href="/mcp/cline/" />
   <LinkCard title="Windsurf" description="Cascade MCP config." href="/mcp/windsurf/" />
