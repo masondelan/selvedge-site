@@ -17,6 +17,15 @@ export default defineConfig({
       },
       favicon: "/favicon.svg",
       head: [
+        // PNG favicon fallbacks for clients that don't render the SVG favicon.
+        {
+          tag: "link",
+          attrs: { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
+        },
+        {
+          tag: "link",
+          attrs: { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+        },
         {
           tag: "meta",
           attrs: { property: "og:image", content: "https://selvedge.sh/og.png" },
