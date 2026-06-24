@@ -140,6 +140,7 @@ const SELVEDGE_ROW = {
   granularity: "**Entity** — DB column, table, env var, dep, API route, function",
   mechanism: "**MCP server** — the agent calls it as work happens",
   grouping: "**Changesets** — named feature/task slugs across many entities",
+  priorAttempts: "**Yes** — `prior_attempts` surfaces tried-and-rejected paths",
   storage: "SQLite, zero deps",
 };
 
@@ -157,6 +158,7 @@ function comparePage(cmp) {
     ["Granularity", SELVEDGE_ROW.granularity, cmp.them.granularity],
     ["Mechanism", SELVEDGE_ROW.mechanism, cmp.them.mechanism],
     ["Grouping", SELVEDGE_ROW.grouping, cmp.them.grouping],
+    ["Prior attempts", SELVEDGE_ROW.priorAttempts, cmp.them.priorAttempts],
     ["Storage", SELVEDGE_ROW.storage, cmp.them.storage],
   ];
 

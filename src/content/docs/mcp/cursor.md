@@ -12,7 +12,7 @@ structuredData:
     - name: "Tell your agent to use it"
       text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
     - name: "Verify the connection"
-      text: "Open Cursor Settings → MCP. selvedge should be listed with its 8 tools (log_change, prior_attempts, blame, diff, history, changeset, search, stale_decisions). Or run selvedge watch in a terminal and make a change — the event prints within a second."
+      text: "Open Cursor Settings → MCP. selvedge should be listed with its 8 tools. Or run selvedge watch in a terminal and make a change — the event prints within a second."
 ---
 
 Cursor speaks MCP natively, so wiring in Selvedge takes one config file (or one click). Once it's connected, the agent can call `log_change` as it works and `prior_attempts` before it edits.
@@ -60,7 +60,7 @@ It's also a copy-paste block on the site: [the Selvedge agent prompt block](/pro
 
 ## Verify
 
-Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools (`log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`). Or run `selvedge watch` in a terminal and make a change — the event prints within a second.
+Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools. Or run `selvedge watch` in a terminal and make a change — the event prints within a second.
 
 ## If it doesn't connect
 

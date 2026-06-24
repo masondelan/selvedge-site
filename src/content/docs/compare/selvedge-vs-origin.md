@@ -12,6 +12,7 @@ Origin captures at commit time through a git hook. Selvedge captures *during* th
 | **Granularity** | **Entity** — DB column, table, env var, dep, API route, function | Line |
 | **Mechanism** | **MCP server** — the agent calls it as work happens | Git hook |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
+| **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None |
 | **Storage** | SQLite, zero deps | Local |
 
 ## Where Selvedge is different

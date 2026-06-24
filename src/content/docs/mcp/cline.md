@@ -64,4 +64,4 @@ Cline runs the command in your VS Code environment. If the server won't start, m
 
 - [Quickstart →](/start/quickstart/) — the three-command setup and what `selvedge setup` automates.
 - [MCP tools →](/reference/mcp-tools/) — the eight tools Cline will be able to call.
-- [Cline MCP docs →](https://github.com/masondelan/selvedge) — the upstream reference.
+- [Cline MCP docs →](https://docs.cline.bot/mcp/configuring-mcp-servers) — the upstream reference.

@@ -10,7 +10,9 @@
 //
 // Per-client config snippets were verified against each tool's current docs
 // (June 2026). `selvedge-server` is the stdio command the Python package puts on
-// your PATH after `pip install selvedge`.
+// your PATH after `pip install selvedge`. The MCP tool count/names referenced in
+// the verify steps are owned by `selvedge/server.py` in the codebase repo — re-check
+// there (not here) whenever the tool surface changes.
 
 export const ONE_LINER =
   "Long-term memory for AI-coded codebases. A git blame for AI agents — but for the why, not just which line which model touched. Captured live, by the agent, as the change happens.";
@@ -43,7 +45,7 @@ export const clients = [
 }`,
     autoDetect: true,
     verify:
-      "Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools (`log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`). Or run `selvedge watch` in a terminal and make a change — the event prints within a second.",
+      "Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools. Or run `selvedge watch` in a terminal and make a change — the event prints within a second.",
     gotcha:
       "These configs run the server with `uvx`, which ships with [uv](https://docs.astral.sh/uv/) — so the one prerequisite is `uv` on the PATH Cursor launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install instead? `pip install selvedge` and set `command` to `selvedge-server`.",
     docsUrl: "https://cursor.com/docs/context/mcp",
@@ -74,7 +76,7 @@ export const clients = [
 }`,
     autoDetect: false,
     verify:
-      "Open the **Chat** view, switch to **Agent** mode, and open the tools picker — `selvedge` should be listed with its 8 tools (`log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`). Or run **MCP: List Servers** from the Command Palette and confirm `selvedge` shows as *Running*.",
+      "Open the **Chat** view, switch to **Agent** mode, and open the tools picker — `selvedge` should be listed with its 8 tools. Or run **MCP: List Servers** from the Command Palette and confirm `selvedge` shows as *Running*.",
     gotcha:
       "MCP tools only surface in the Chat view's **Agent** mode. The config runs the server with `uvx` (which ships with [uv](https://docs.astral.sh/uv/)), so make sure `uv` is on the PATH VS Code launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install? `pip install selvedge` and set `command` to `selvedge-server`.",
     docsUrl: "https://code.visualstudio.com/docs/copilot/chat/mcp-servers",
@@ -140,7 +142,7 @@ export const clients = [
       "Open Cline's **MCP Servers** panel — `selvedge` should appear with a green dot and its 8 tools listed. Then ask Cline to make a structural change and confirm it calls `log_change`.",
     gotcha:
       "Cline runs the command in your VS Code environment. If the server won't start, make sure `uv` is installed there (the config calls `uvx`, which ships with uv). Prefer a global install? `pip install selvedge` and set `command` to `selvedge-server`.",
-    docsUrl: "https://github.com/masondelan/selvedge",
+    docsUrl: "https://docs.cline.bot/mcp/configuring-mcp-servers",
   },
   {
     slug: "windsurf",
@@ -205,6 +207,7 @@ export const comparisons = [
       granularity: "Line",
       mechanism: "Git pre/post-commit hook",
       grouping: "None",
+      priorAttempts: "None",
       storage: "JSONL on disk",
     },
     differences: [
@@ -228,6 +231,7 @@ export const comparisons = [
       granularity: "Line",
       mechanism: "Git hook",
       grouping: "None",
+      priorAttempts: "None",
       storage: "Local",
     },
     differences: [
@@ -251,6 +255,7 @@ export const comparisons = [
       granularity: "Line",
       mechanism: "Git hook + Agent Trace alliance",
       grouping: "None",
+      priorAttempts: "None",
       storage: "Git notes",
     },
     differences: [
@@ -274,6 +279,7 @@ export const comparisons = [
       granularity: "Line",
       mechanism: "Git hook",
       grouping: "None",
+      priorAttempts: "None",
       storage: "Local",
     },
     differences: [

@@ -12,7 +12,7 @@ structuredData:
     - name: "Tell your agent to use it"
       text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
     - name: "Verify the connection"
-      text: "Open the Chat view, switch to Agent mode, and open the tools picker — selvedge should be listed with its 8 tools (log_change, prior_attempts, blame, diff, history, changeset, search, stale_decisions). Or run MCP: List Servers from the Command Palette and confirm selvedge shows as *Running*."
+      text: "Open the Chat view, switch to Agent mode, and open the tools picker — selvedge should be listed with its 8 tools. Or run MCP: List Servers from the Command Palette and confirm selvedge shows as *Running*."
 ---
 
 VS Code supports MCP servers natively, so wiring in Selvedge takes one config file (or one click). Once it's connected, Copilot's agent mode can call `log_change` as it works and `prior_attempts` before it edits.
@@ -59,7 +59,7 @@ It's also a copy-paste block on the site: [the Selvedge agent prompt block](/pro
 
 ## Verify
 
-Open the **Chat** view, switch to **Agent** mode, and open the tools picker — `selvedge` should be listed with its 8 tools (`log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`). Or run **MCP: List Servers** from the Command Palette and confirm `selvedge` shows as *Running*.
+Open the **Chat** view, switch to **Agent** mode, and open the tools picker — `selvedge` should be listed with its 8 tools. Or run **MCP: List Servers** from the Command Palette and confirm `selvedge` shows as *Running*.
 
 ## If it doesn't connect
 

@@ -12,6 +12,7 @@ Git AI stores attribution metadata in git notes and plugs into the Agent Trace a
 | **Granularity** | **Entity** — DB column, table, env var, dep, API route, function | Line |
 | **Mechanism** | **MCP server** — the agent calls it as work happens | Git hook + Agent Trace alliance |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
+| **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None |
 | **Storage** | SQLite, zero deps | Git notes |
 
 ## Where Selvedge is different
