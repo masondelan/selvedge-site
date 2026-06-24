@@ -60,8 +60,8 @@ A few reasons:
 - **Process boundary, not network boundary.** Latency is microseconds. The agent calls
   `log_change` ten times in a session and you don't notice it.
 
-A REST API for team / cross-machine / dashboard use cases is on the roadmap (Phase 3 —
-v0.4.0), but the local-first MCP server is the canonical interface and will stay so.
+A REST API for team / cross-machine / dashboard use cases is on the roadmap (Phase 3.1 —
+v0.4.1), but the local-first MCP server is the canonical interface and will stay so.
 
 ## What "captured live" means in practice
 
@@ -92,8 +92,8 @@ reconstruction.
 `log_change` runs incoming reasoning through a quality validator. Empty, too-short
 (under 20 characters), or generic-placeholder reasoning (`"user request"`, `"done"`,
 `"n/a"`, `"see above"`, etc.) produces a `warnings` array in the response. The event is
-still logged — warnings are advisory — but they show up in
-`selvedge stats --missing-reasoning` so you can spot agents that are calling the tool
+still logged — warnings are advisory — but they surface in the default `selvedge stats`
+output as a low-quality-reasoning count, so you can spot agents that are calling the tool
 but not actually capturing intent.
 
 The validator lives at `selvedge.validation` and the same patterns are used by the

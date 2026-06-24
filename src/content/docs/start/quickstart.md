@@ -116,15 +116,10 @@ That's the same four steps the wizard runs.
 
 ## Coverage checking
 
-Wondering how often your agent actually calls `log_change`?
-
-```bash
-selvedge stats
-```
-
-Per-agent breakdown, missing-reasoning count, and last call timestamp. Cross-reference
-against git commits with `python scripts/coverage_check.py --since 30d` (in the source
-repo). Low coverage usually means the system prompt needs strengthening.
+Wondering how often your agent actually calls `log_change`? `selvedge stats` (above)
+gives the per-agent breakdown, low-quality-reasoning count, and last call timestamp. To
+cross-reference against git commits, run `python scripts/coverage_check.py --since 30d`
+(in the source repo). Low coverage usually means the system prompt needs strengthening.
 
 ## Next
 

@@ -19,7 +19,7 @@ In a SQLite file under `.selvedge/selvedge.db` next to your code (or
 
 It does not leave your machine. There's no telemetry, no remote endpoint, no opt-in or
 opt-out — the data simply doesn't go anywhere by default. The roadmap includes an
-optional HTTP layer (v0.4.0) for self-hosted team servers; it's never sending data to
+optional HTTP layer (v0.4.1) for self-hosted team servers; it's never sending data to
 us.
 
 ## Can I commit `.selvedge/` to git?
@@ -66,12 +66,14 @@ repo for guidance.
 
 - Empty reasoning
 - Reasoning under 20 characters
-- Generic placeholders: `"user request"`, `"done"`, `"n/a"`, `"see above"`,
-  `"fix"`/`"fixed"`, `"add"`/`"added"`, `"update"`/`"updated"`, `"change"`/`"changed"`
+- Generic placeholders: `"user request"`, `"as requested"`, `"per request"`, `"done"`,
+  `"n/a"`, `"none"`, `"todo"`, `"see diff"`/`"see code"`/`"see pr"`,
+  `"fix"`/`"fixed"`, `"add"`/`"added"`, `"remove"`/`"removed"`, `"update"`/`"updated"`,
+  `"change"`/`"changed"`
 
-Failed reasoning still gets logged (warnings are advisory) but appears in
-`selvedge stats --missing-reasoning`. The point is to surface the agent silently
-shipping low-quality logs so you can fix the prompt.
+Failed reasoning still gets logged (warnings are advisory) but appears in the default
+`selvedge stats` output as a low-quality-reasoning count. The point is to surface the
+agent silently shipping low-quality logs so you can fix the prompt.
 
 ## Why no LLM in core?
 

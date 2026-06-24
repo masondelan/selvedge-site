@@ -16,6 +16,7 @@ selvedge prompt [--install FILE]        Print canonical agent-instructions block
 selvedge watch                          Live-tail new events
 selvedge status                         Recent activity summary
 selvedge doctor [--json]                Health check
+selvedge verify [--strict] [--json]     Correctness checks against the store
 selvedge diff ENTITY [--limit N]        History for an entity / prefix
 selvedge blame ENTITY                   Most recent change + context
 selvedge history [...filters]           Browse all history
@@ -30,6 +31,8 @@ selvedge import PATH                    Import migrations (SQL / Alembic) or an 
 selvedge export [--format json|csv|agent-trace]  Export history (Agent Trace v0.1.0 since 0.3.9)
 selvedge log ENTITY CHANGE_TYPE         Manually log a change
 selvedge migrate-paths [--apply]        Re-canonicalize stored entity paths
+selvedge backup [--output FILE]         Snapshot the store via VACUUM INTO
+selvedge prune [--days N]               Trim old tool_calls telemetry (90-day default)
 ```
 
 ---
@@ -116,6 +119,19 @@ Single-command health check. Each row is `PASS` / `WARN` / `FAIL` / `INFO`:
 
 Exits 1 if any `FAIL` row is present so doctor can be wired into CI.
 
+### `selvedge verify [--strict] [--json]`
+
+Correctness checks against the Selvedge store, in two tiers:
+
+- **`must_fail`** — SQLite corruption, schema mismatch, invariant violations (empty
+  `entity_path`, unknown `change_type`, bad timestamps)
+- **`should_warn`** — soft signals (singleton changesets, events past the backfill
+  window with no `git_commit`)
+
+Exit 0 when clean or only should-warn rows triggered; exit 1 on any must-fail row.
+`--strict` escalates should-warn rows to failures too, so you can wire `selvedge verify`
+into CI without `|| true` on day one and promote the soft tier once the team is ready.
+
 ### `selvedge watch [--interval N] [--since] [--entity] [--project] [--agent] [--json]`
 
 Polls the SQLite store at `--interval` (default 1s) and prints each new event as it
@@ -166,9 +182,9 @@ match `stripeXcustomerXid`.
 ### `selvedge prior-attempts [ENTITY] [--description TEXT] [--all] [--window WHEN] [--limit N]`
 
 Prior change attempts on an entity, each with an inferred outcome — the CLI parity
-for the `prior_attempts` MCP tool (new in v0.3.8). A thin presenter over the same
-`get_prior_attempts` store, so `--json` is byte-identical to what the MCP tool returns
-and the two surfaces can't diverge.
+(new in v0.3.8) for the `prior_attempts` MCP tool, which shipped in v0.3.7. A thin
+presenter over the same `get_prior_attempts` store, so `--json` is byte-identical to what
+the MCP tool returns and the two surfaces can't diverge.
 
 Pass an `ENTITY` positional **xor** `--description TEXT` (free-text, when you don't have
 an exact path) — not both. By default only the clear "tried then reverted"
@@ -200,7 +216,7 @@ selvedge stale --json                # for cron / morning reports
 
 Each row carries the revisit due date, days overdue, the active-use signals that fired,
 and a templated reason. Composes with reporting jobs the same way `selvedge digest`
-(v0.3.9) will.
+(planned for v0.3.16) will.
 
 ### `selvedge stats [--since SINCE]`
 
@@ -314,6 +330,35 @@ Selvedge's reasoning and entity-level provenance ride along in each record's
 Manually backfill `git_commit` on recent events within a configurable time window.
 Called by the post-commit hook automatically; you only run this manually if the hook
 isn't installed and you want to associate a recent commit with already-logged events.
+
+---
+
+## Maintenance
+
+### `selvedge backup [--output FILE] [--json]`
+
+Snapshots the store with SQLite `VACUUM INTO`. Defaults to
+`.selvedge/backups/selvedge-YYYYMMDD-HHMMSS.db`, keeping the most recent 7 snapshots and
+pruning older ones (custom `--output` destinations outside that directory are never
+pruned). The backups directory is kept out of git — `selvedge init` (v0.3.5+) appends it
+to the project `.gitignore`, and the first `selvedge backup` run backfills that entry on
+older repos.
+
+### `selvedge prune [--days N] [--json]`
+
+Trims old `tool_calls` **telemetry rows only** — it never deletes change events. Default
+retention is 90 days; pass `--days N` to override. Every run appends a one-liner to
+`.selvedge/prune.log` so the cadence shows up in `selvedge doctor`.
+
+There is **no `--include-events` flag yet** — the destructive events-prune path lands in
+v0.3.10 alongside `.selvedge/config.toml`, and will require both `SELVEDGE_DESTRUCTIVE=1`
+and an interactive confirmation.
+
+```bash
+selvedge prune              # trim tool_calls older than 90 days
+selvedge prune --days 30
+selvedge prune --json
+```
 
 ---
 

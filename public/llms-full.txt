@@ -80,12 +80,20 @@ The same operations are on your shell: `selvedge prior-attempts <entity>`, `selv
 | AgentDiff | Inferred post-hoc by an LLM from the diff at session end | Line | Git hook | None | JSONL |
 | Origin | Captured at commit time | Line | Git hook | None | Local |
 | Git AI | Attribution metadata | Line | Git hook + Agent Trace | None | Git notes |
+| BlamePrompt | Prompt-only | Line | Git hook | None | Local |
 
 Selvedge does not replace git (line-level what/when), PR review tools, or agent observability (LLM call traces). It sits between them — the provenance-as-first-class-citizen layer.
 
 ## Agent Trace
 
 [Agent Trace](https://github.com/cursor/agent-trace) (Cursor + Cognition, backed by Cloudflare, Vercel, Google Jules, Amp, OpenCode, git-ai) is an emerging open standard for AI code attribution traces. Selvedge is a compatible *producer*: Agent Trace is the wire format; Selvedge is the live capture + query layer that emits it.
+
+```
+selvedge export --format agent-trace    # emit Agent Trace v0.1.0 records (--ndjson, --collapse-by-session)
+selvedge import --format agent-trace     # round-trip a Selvedge export, or ingest foreign producers best-effort
+```
+
+Selvedge's reasoning and entity-level provenance ride along in each record's `metadata` under the reverse-domain `dev.selvedge` namespace.
 
 ## Links
 

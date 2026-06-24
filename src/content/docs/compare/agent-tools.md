@@ -1,10 +1,14 @@
 ---
-title: Selvedge vs. AgentDiff & friends
-description: A fast-growing "git blame for AI agents" category is emerging. Here's where Selvedge fits — and where it deliberately doesn't.
+title: How Selvedge compares to other AI-attribution tools
+description: A fast-growing "git blame for AI agents" category is emerging — AgentDiff, Origin, Git AI, and more. Here's where Selvedge fits across the category, and where it deliberately doesn't.
 ---
 
-A fast-growing category is emerging around "git blame for AI agents." Here's where
-Selvedge fits — and where it deliberately doesn't.
+A fast-growing category is emerging around "git blame for AI agents." What sets Selvedge
+apart: it captures reasoning **live**, by the agent in the same context that produced the
+change — not inferred post-hoc from a diff. Here's where it fits across the category, and
+where it deliberately doesn't.
+
+Agent Trace is the wire format. Selvedge is the live capture + query layer that emits it.
 
 ## The comparison table
 
@@ -113,9 +117,6 @@ reference.
 emerging open standard for AI code attribution traces. Selvedge **is not a competitor
 to it** — it's a compatible producer. The design for `selvedge export --format
 agent-trace` is at the [Agent Trace interop page](/compare/agent-trace/).
-
-Agent Trace is the wire format. Selvedge is the live capture + query layer that emits
-it.
 
 ## Next
 

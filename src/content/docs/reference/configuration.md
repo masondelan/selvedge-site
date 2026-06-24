@@ -3,8 +3,9 @@ title: Configuration
 description: How Selvedge resolves the DB path, environment variables, project vs. global precedence, and the destructive-action opt-in flag.
 ---
 
-Selvedge has very few knobs by design. Everything lives in either an environment
-variable or a flag.
+Selvedge has very few knobs by design. As of v0.3.9 every setting lives in either an
+environment variable or a flag — a first-class `.selvedge/config.toml` file lands in
+v0.3.10 (see [below](#coming-in-v0310-selvedgeconfigtoml)).
 
 ## DB path resolution
 
@@ -30,12 +31,13 @@ DB are we using?" answer is unambiguous.
 | `SELVEDGE_DB` | unset | Path to a specific SQLite file. Overrides walk-up + global. |
 | `SELVEDGE_LOG_LEVEL` | `WARNING` | `DEBUG` / `INFO` / `WARNING` / `ERROR`. Controls the `selvedge.*` logger namespace. |
 | `SELVEDGE_QUIET` | unset | If set, suppresses the one-time stderr warning when the global fallback DB is used. |
-| `SELVEDGE_DESTRUCTIVE` | unset | **Required** for any command that can permanently delete events (e.g. `selvedge prune --include-events`). Must be set in the environment AND the command must be confirmed at the prompt. |
+| `SELVEDGE_DESTRUCTIVE` | unset | **Lands in v0.3.10.** Will be **required** for any command that can permanently delete events (e.g. `selvedge prune --include-events`) — it will need to be set in the environment AND the command confirmed at the prompt. No event-deleting command ships as of v0.3.9. |
 
-The destructive-action opt-in is a deliberate footgun defense — the most common way
-event-deleting commands get triggered by accident is through `--yes` flags in cron jobs
-or non-interactive scripts. `SELVEDGE_DESTRUCTIVE=1` is the second factor that prevents
-that.
+The destructive-action opt-in (v0.3.10) is a deliberate footgun defense — the most common
+way event-deleting commands get triggered by accident is through `--yes` flags in cron
+jobs or non-interactive scripts. `SELVEDGE_DESTRUCTIVE=1` will be the second factor that
+prevents that, gating `selvedge prune --include-events` behind both the env var and an
+interactive confirmation.
 
 ## Per-project initialization
 
@@ -98,6 +100,27 @@ You can `.gitignore` everything except `.selvedge/.gitkeep` if you want fresh DB
 checkout — useful for monorepos where each microservice maintains its own history.
 For most projects, committing the DB is fine; SQLite + WAL handles concurrent CI
 checkouts well.
+
+## Coming in v0.3.10: `.selvedge/config.toml`
+
+v0.3.9 has no config file — the settings above are the whole surface. A first-class
+project config arrives in **v0.3.10**: `.selvedge/config.toml`, read on every entry
+point, backwards compatible (a missing file means today's defaults). Expected keys:
+
+| Key | Default | Purpose |
+|---|---|---|
+| `retention_days_events` | ∞ | Event retention for `prune --include-events` (opt-in deletion) |
+| `retention_days_tool_calls` | 90 | Telemetry retention for `selvedge prune` |
+| `backup_keep_last` | 7 | Snapshots kept by `selvedge backup` |
+| `diff_bytes` | 65536 | Per-event diff truncation limit |
+| `reasoning_bytes` | 32768 | Per-event reasoning truncation limit |
+| `db_size_warn_mb` | 500 | Doctor warns past this DB size |
+| `stale_days` | off | Fallback window for `stale_decisions` |
+
+**Precedence (canonical):** `SELVEDGE_DB` always wins for DB-path resolution. For every
+other setting: CLI flags > env vars > project-local `.selvedge/config.toml` > global
+`~/.selvedge/config.toml` > hardcoded defaults. `selvedge doctor` will print which
+precedence step produced each effective setting.
 
 ## What's not configurable
 

@@ -9,29 +9,10 @@ file under `.selvedge/` next to your code.
 
 ## The problem it solves
 
-Human-written code leaks intent everywhere — commit messages, PR descriptions, inline
-comments, the Slack thread that preceded it. **AI-written code doesn't.** The agent has
-perfect clarity about why it made each decision, but that context lives in the prompt
-and evaporates when the conversation ends.
-
-Six months later, your team is debugging a schema decision with no trail. `git blame`
-tells you *what* changed and *when*. It can't tell you *why*.
-
-Selvedge captures the why — live, by the agent itself, as the change is made. The diff
-is git's job. The why is Selvedge's.
-
-## How that's different from "ask an LLM about the diff"
-
-The category that's emerging around this — sometimes called "git blame for AI agents" —
-mostly works by feeding the diff back to a second LLM after the fact and asking it to
-reconstruct intent. That's better than nothing, but it's a guess. The agent that made
-the change knew exactly why; by the time you ask a fresh LLM to explain the diff, that
-context is gone.
-
-Selvedge takes the other approach: it gives the *original* agent a way to record its
-intent **as it works**. The reasoning is the agent's own — written from the same context
-window that produced the change. No inference, no hallucinated explanations. And an
-empty `reasoning` field is itself a useful signal: the agent didn't have one.
+Human-written code leaks intent everywhere — commits, PRs, comments, Slack threads.
+**AI-written code doesn't:** the agent's perfect clarity about each decision lives in the
+prompt and evaporates when the conversation ends. Selvedge captures the why — live, by
+the agent itself, as the change is made. The diff is git's job. The why is Selvedge's.
 
 ## What Selvedge captures
 
@@ -82,6 +63,19 @@ Selvedge is **not**:
 - A code-host AI assistant — GitHub Copilot's PR summaries answer a different question.
 
 It's the provenance-as-first-class-citizen layer that those tools can reference.
+
+## How that's different from "ask an LLM about the diff"
+
+The category that's emerging around this — sometimes called "git blame for AI agents" —
+mostly works by feeding the diff back to a second LLM after the fact and asking it to
+reconstruct intent. That's better than nothing, but it's a guess. The agent that made
+the change knew exactly why; by the time you ask a fresh LLM to explain the diff, that
+context is gone.
+
+Selvedge takes the other approach: it gives the *original* agent a way to record its
+intent **as it works**. The reasoning is the agent's own — written from the same context
+window that produced the change. No inference, no hallucinated explanations. And an
+empty `reasoning` field is itself a useful signal: the agent didn't have one.
 
 ## Next
 

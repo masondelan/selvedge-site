@@ -1,10 +1,10 @@
 ---
 title: What's new
-description: Recent Selvedge releases. Every shipped change is in CHANGELOG.md in the source repo — this page mirrors the latest two minor versions for at-a-glance browsing.
+description: Recent Selvedge releases. Every shipped change is in CHANGELOG.md in the source repo — this page mirrors the three most recent releases for at-a-glance browsing.
 ---
 
 The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md)
-in the source repo. This page mirrors the most recent two minor versions for
+in the source repo. This page mirrors the three most recent releases for
 at-a-glance browsing.
 
 ## v0.3.9 — 2026-06-22
@@ -20,8 +20,8 @@ upgrade for anyone on 0.3.8.** The MCP surface is unchanged (still **8** tools).
 **Pulled forward, deliberately.** The exporter was planned for v0.4.0 (Phase 3).
 It ships now in the 0.3.x line as an **opt-in, additive** interop format —
 nothing about the native model, the MCP tools, or SQLite storage changes.
-Postgres and the HTTP layer remain the v0.4.0 markers; only the exporter moved
-up.
+Postgres and the tool-rename/consolidation remain the v0.4.0 markers (HTTP +
+auth is v0.4.1); only the exporter moved up.
 
 ### `selvedge export --format agent-trace`
 
@@ -61,7 +61,7 @@ in the source repo.
   preservation, line-range extraction, collapse-by-session, reasoning-quality
   passthrough, schema validation, and CLI integration.
 
-## v0.3.8 — 2026-06-17
+## v0.3.8 — 2026-06-16
 
 **Active memory v1 (date-based).** Selvedge's append-only log learns to know
 when its own data is stale. A decision can now carry a revisit date, and the

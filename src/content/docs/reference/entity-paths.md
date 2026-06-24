@@ -81,8 +81,8 @@ A rename of `users.tier` to `users.subscription_tier` emits:
 - A `create` event on `users.subscription_tier`
 
 So `selvedge blame` works under both names — the new one points at the create, the old
-one points at the rename. Same pattern for `RENAME COLUMN` and Alembic
-`op.rename_column`. This is what makes `selvedge import` against a long Alembic history
+one points at the rename. Same pattern for SQL `RENAME COLUMN` and Alembic
+`op.rename_table`. This is what makes `selvedge import` against a long Alembic history
 actually produce a useful trail.
 
 ## Why this is at the entity level, not the line level

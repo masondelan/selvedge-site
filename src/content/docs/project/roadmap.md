@@ -17,7 +17,7 @@ abstraction, tool-name prefixing). Phase 4 opens the hosted business.
 ## v0.3.5 — recovery basics ✅ shipped 2026-05-11
 
 The "find out what's wrong, take a safe snapshot" release. See the
-[changelog](/project/changelog/#v035--2026-05-11) for the full notes.
+[CHANGELOG](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md) for the full notes.
 
 - **`selvedge verify`** — DB-correctness gate with two exit tiers
   (`must_fail` vs `should_warn`). `--strict` escalates warnings.
@@ -31,7 +31,7 @@ The "find out what's wrong, take a safe snapshot" release. See the
 Shipped 2026-05-24 as a combined release with stay-current (PyPI
 version check) — a one-time exception to single-theme cadence.
 Single-theme discipline resumes at v0.3.7. See the
-[changelog](/project/changelog/#v036--2026-05-24) for the full notes.
+[CHANGELOG](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md) for the full notes.
 
 - **`selvedge prune` — `tool_calls` only**, hardcoded 90-day default,
   `--days N` override. **No `--include-events` flag in v0.3.6.** Every
@@ -72,7 +72,7 @@ notes.
   it directly. Schema-versioned so it can lift to MCP later if
   telemetry warrants.
 
-## v0.3.8 — active memory v1, date-based (Phase 2.14) ✅ shipped 2026-06-17
+## v0.3.8 — active memory v1, date-based (Phase 2.14) ✅ shipped 2026-06-16
 
 Selvedge's append-only log learned when its own data is stale. The
 date-based half shipped here; the pattern-based half waits for v0.3.11.
@@ -81,7 +81,7 @@ the second column's evaluator doesn't land until v0.3.11 — one
 migration is cheaper than two. Also bundled CLI parity for the v0.3.7
 wedge (`selvedge prior-attempts`) and a CLI-awareness section in the
 agent-instructions block. See the
-[changelog](/project/changelog/#v038--2026-06-17) for the full notes.
+[changelog](/project/changelog/#v038--2026-06-16) for the full notes.
 
 - **Schema migration v3** — adds `revisit_after` and `expires_when`
   (nullable) to `events`. Perf gated at 10k / 100k / 1M events. The
@@ -109,8 +109,8 @@ agent-instructions block. See the
 `selvedge export --format agent-trace` ships — Selvedge becomes a
 compatible **producer** for the [Agent Trace](https://github.com/cursor/agent-trace)
 open standard (Cursor + Cognition AI). **Pulled forward from Phase 3**
-(v0.4.0): only the exporter moved up; Postgres and the HTTP layer remain
-the v0.4.0 markers. Opt-in and additive — the MCP surface stays at
+(v0.4.0): only the exporter moved up; Postgres and the tool-rename/consolidation
+remain the v0.4.0 markers (HTTP + auth is v0.4.1). Opt-in and additive — the MCP surface stays at
 **8** tools. See the
 [changelog](/project/changelog/#v039--2026-06-22) for the full notes.
 

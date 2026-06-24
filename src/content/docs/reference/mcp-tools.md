@@ -78,8 +78,8 @@ History for an entity or entity prefix.
 
 | Name | Type | Description |
 |---|---|---|
-| `entity` | `string` (required) | Exact match (`users.email`) or prefix (`users` returns all `users.*`). |
-| `limit` | `int` | Default 50. |
+| `entity_path` | `string` (required) | Exact match (`users.email`) or prefix (`users` returns all `users.*`). |
+| `limit` | `int` | Default 20. |
 
 ### Returns
 
@@ -92,7 +92,8 @@ History for an entity or entity prefix.
 ]
 ```
 
-Newest-first. `LIKE` queries properly escape `_`, `%`, and `\`.
+Newest-first (abbreviated — each event also carries `entity_type`, `session_id`).
+`LIKE` queries properly escape `_`, `%`, and `\`.
 
 ---
 
@@ -104,7 +105,7 @@ Most recent change + context for an exact entity. The query everyone runs first.
 
 | Name | Type | Description |
 |---|---|---|
-| `entity` | `string` (required) | Exact match only — no prefix expansion (use `diff` for that). |
+| `entity_path` | `string` (required) | Exact match only — no prefix expansion (use `diff` for that). |
 
 ### Returns (`BlameResult`)
 
@@ -122,6 +123,9 @@ Most recent change + context for an exact entity. The query everyone runs first.
   "git_commit": "...",
   "project": "...",
   "changeset_id": "...",
+  "metadata": {},
+  "revisit_after": "",
+  "expires_when": "",
   "error": ""
 }
 ```
@@ -141,15 +145,15 @@ Filtered history across all entities.
 | Name | Type | Description |
 |---|---|---|
 | `since` | `string` | `15m` / `24h` / `7d` / `5mo` / `1y` / ISO 8601. Unparseable → error. |
-| `entity` | `string` | Exact or prefix. |
+| `entity_path` | `string` | Exact or prefix. |
 | `project` | `string` | Exact match. |
 | `changeset_id` | `string` | Exact match. |
-| `agent` | `string` | Exact match. |
-| `limit` | `int` | Default 100. |
+| `limit` | `int` | Default 50. |
 
 ### Returns
 
-Array of event objects, newest-first. Same shape as `diff`.
+Array of event objects, newest-first. Same shape as `diff` (abbreviated above —
+each event also carries `entity_type`, `session_id`).
 
 ---
 
@@ -179,7 +183,7 @@ Full-text search across reasoning + diff + entity_path.
 | Name | Type | Description |
 |---|---|---|
 | `query` | `string` (required) | Free-text query. Wildcards `_` and `%` are escaped — they match literally, not as SQL `LIKE` metacharacters. |
-| `limit` | `int` | Default 50. |
+| `limit` | `int` | Default 20. |
 
 ### Returns
 

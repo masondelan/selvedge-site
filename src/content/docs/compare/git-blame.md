@@ -66,8 +66,9 @@ Three problems with that:
    three functions, and an API route. The commit message can carry one paragraph of
    prose; Selvedge captures the reasoning *per entity* so each one is queryable.
 3. **Commit messages are immutable, but reasoning often improves.** `selvedge log`
-   lets you append annotations to existing entities post-hoc — useful when you discover
-   a context six months later that explains an old change.
+   appends a new event to an entity's history — it never edits or annotates a prior
+   record — so when you discover six months later the context that explains an old
+   change, you record it as the latest entry in that entity's timeline.
 
 `git blame` and `selvedge blame` are complementary. If your tooling only knows about
 the line, you're missing half the picture on AI-coded codebases. If it only knows about

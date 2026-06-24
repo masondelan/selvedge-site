@@ -107,8 +107,10 @@ producers and consumers can be anywhere.
 ## Roadmap
 
 - **v0.3.x** — Selvedge native MCP + CLI interface
-- **v0.3.9** — `selvedge export --format agent-trace` **and** `selvedge import --format agent-trace` shipped (Agent Trace v0.1.0, opt-in and additive). Selvedge is a bidirectional Agent Trace node today.
-- **v0.4.0** — PostgreSQL backend + HTTP layer (the Phase 3 markers)
+- **v0.3.9** — `selvedge export --format agent-trace` **and** `selvedge import --format agent-trace` shipped (Agent Trace v0.1.0, opt-in and additive). Selvedge both emits and ingests Agent Trace v0.1.0 — export is full-fidelity, import is best-effort for foreign producers.
+- **v0.3.12** — `selvedge import --format git-notes` — read-only one-way reader for Git-Notes-style attribution (interop, not substitute).
+- **v0.4.0** — PostgreSQL backend + the MCP tool-rename/consolidation
+- **v0.4.1** — HTTP transport + auth (Phase 3.1)
 - **v1.0.0** — webhook events on schema changes, optional Agent-Trace-native push to a remote sink
 
 ## Where to read more

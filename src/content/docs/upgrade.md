@@ -15,7 +15,7 @@ structuredData:
 If you landed here from a one-line stderr notice like
 
 ```
-selvedge: v0.3.7 available (you're on 0.3.6) — https://selvedge.sh/upgrade
+selvedge: vX.Y.Z available (you're on A.B.C) — https://selvedge.sh/upgrade
 ```
 
 …that's the background version check that ships with Selvedge v0.3.6+. It runs at
@@ -111,7 +111,9 @@ anything regressed in the upgrade, `doctor` is the fastest way to find it.
 
 Selvedge follows [semver](https://semver.org/) and the v0.3.x line is committed to
 **drop-in upgrades** — a `pip install -U selvedge` on a 0.3.x should never require
-config changes or a DB migration you have to think about. If something does break:
+config changes or a DB migration you have to think about. The 0.3.8 and 0.3.9 releases
+were both drop-in/additive — no breaking changes, no manual migration steps. If something
+does break:
 
 1. Capture `selvedge doctor --json` output.
 2. Check [the changelog](/project/changelog/) for the version you upgraded to —
