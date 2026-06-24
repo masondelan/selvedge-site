@@ -18,6 +18,10 @@
       loading="lazy"
       style="height: 640px;"></iframe>
   </div>
+  <figcaption class="terminal-demo__caption">
+    <code>selvedge blame payments.amount</code> surfaces the reasoning the agent
+    recorded for a change — the <em>why</em>, captured live, right in the terminal.
+  </figcaption>
 </figure>
 
 <style>
@@ -35,6 +39,16 @@
     width: 100%;
     border: 0;
   }
+  .terminal-demo__caption {
+    margin-top: 0.7rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--sl-color-gray-3);
+    text-align: center;
+  }
+  .terminal-demo__caption code {
+    font-size: 0.85em;
+  }
 </style>
 
 <script>
@@ -43,6 +57,7 @@
   // viewport width. 640px is just the pre-load fallback; the demo needs JS to
   // render anyway, so this always runs.
   const frame = document.getElementById("selvedge-terminal-demo") as HTMLIFrameElement | null;
+  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   if (frame) {
     const fit = () => {
       try {
@@ -85,7 +100,9 @@
     // Replay the animation each time the demo scrolls into view. It plays once
     // on first load (the demo's own mount), then replays on every re-entry.
     // The first appearance is skipped so it doesn't double up with that play.
-    if ("IntersectionObserver" in window) {
+    // Skipped under prefers-reduced-motion so the animation never re-triggers
+    // for users who asked for less movement.
+    if (!reduceMotion && "IntersectionObserver" in window) {
       let visible = false, seen = false;
       new IntersectionObserver((entries) => {
         entries.forEach((e) => {
