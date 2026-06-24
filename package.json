@@ -8,6 +8,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
+    "gen:og": "node scripts/gen-og.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
