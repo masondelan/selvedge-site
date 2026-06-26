@@ -10,12 +10,18 @@
     "build": "astro build",
     "gen:og": "node scripts/gen-og.mjs",
     "gen:icons": "node scripts/gen-favicons.mjs",
-    "preview": "astro preview",
-    "astro": "astro"
+    "preview": "npm run build && wrangler dev",
+    "astro": "astro",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "12",
     "@astrojs/starlight": "^0.35.2",
     "astro": "^5.18.1",
     "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "wrangler": "^4.105.0"
   }
 }

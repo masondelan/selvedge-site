@@ -3,9 +3,12 @@ import starlight from "@astrojs/starlight";
 // Generated from src/data/seo.mjs by scripts/gen-seo-pages.mjs.
 import { mcpItems, compareItems } from "./src/data/seo-nav.mjs";
 
+import cloudflare from "@astrojs/cloudflare";
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://selvedge.sh",
+
   integrations: [
     starlight({
       title: "selvedge",
@@ -107,4 +110,6 @@ export default defineConfig({
       tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
     }),
   ],
+
+  adapter: cloudflare()
 });
