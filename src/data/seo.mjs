@@ -25,14 +25,10 @@ export const clients = [
     name: "Cursor",
     // Short, page-specific meta description (<= ~155 chars ideal).
     description:
-      "Add Selvedge to Cursor as an MCP server so your agent logs why it changed code and checks prior reverted attempts before editing. One-click or one config file.",
+      "Add Selvedge to Cursor as an MCP server so your agent logs why it changed code and checks prior reverted attempts before editing. One config file, or let selvedge setup write it.",
     blurb:
-      "Cursor speaks MCP natively, so wiring in Selvedge takes one config file (or one click). Once it's connected, the agent can call `log_change` as it works and `prior_attempts` before it edits.",
-    oneClick: {
-      label: "Add to Cursor",
-      href: "cursor://anysphere.cursor-deeplink/mcp/install?name=selvedge&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJzZWx2ZWRnZSIsInNlbHZlZGdlLXNlcnZlciJdfQ==",
-      img: "https://cursor.com/deeplink/mcp-install-dark.svg",
-    },
+      "Cursor speaks MCP natively, so wiring in Selvedge takes one config file. Once it's connected, the agent can call `log_change` as it works and `prior_attempts` before it edits.",
+    oneClick: null,
     configPath: "`~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` (this project only)",
     configLang: "json",
     configSnippet: `{
@@ -54,14 +50,10 @@ export const clients = [
     slug: "vscode",
     name: "VS Code",
     description:
-      "Add Selvedge to VS Code as an MCP server so Copilot's agent logs why it changed code and checks prior reverted attempts before editing. One-click or one config file.",
+      "Add Selvedge to VS Code as an MCP server so Copilot's agent logs why it changed code and checks prior reverted attempts before editing. Just one config file.",
     blurb:
-      "VS Code supports MCP servers natively, so wiring in Selvedge takes one config file (or one click). Once it's connected, Copilot's agent mode can call `log_change` as it works and `prior_attempts` before it edits.",
-    oneClick: {
-      label: "Install in VS Code",
-      href: "https://insiders.vscode.dev/redirect/mcp/install?name=selvedge&config=%7B%22name%22%3A%22selvedge%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22selvedge%22%2C%22selvedge-server%22%5D%7D",
-      img: "https://img.shields.io/badge/Install_in_VS_Code-0098FF?style=for-the-badge&logo=visualstudiocode&logoColor=white",
-    },
+      "VS Code supports MCP servers natively, so wiring in Selvedge takes one config file. Once it's connected, Copilot's agent mode can call `log_change` as it works and `prior_attempts` before it edits.",
+    oneClick: null,
     configPath:
       "`.vscode/mcp.json` (this workspace) — or your user `mcp.json` via the Command Palette's **MCP: Open User Configuration**",
     configLang: "json",
