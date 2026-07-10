@@ -50,7 +50,10 @@ const pageDescription =
 
 // Per-page JSON-LD hint (see src/content.config.ts). Pages default to
 // TechArticle; setup/tutorial pages declare structuredData.type: howto.
+// Pages with a visible FAQ section declare structuredData.faq — the answers
+// must match the visible page text or the page loses rich-result eligibility.
 const structuredData = data.structuredData ?? { type: 'techarticle' };
+const faqItems: { question: string; answer: string }[] = structuredData.faq ?? [];
 const lastUpdated: Date | undefined = route?.lastUpdated;
 const pageUrl = `${SITE}${url}`;
 
@@ -136,12 +139,28 @@ if (!isHome && !isFaq) {
   }
 }
 
+// Frontmatter-declared FAQ (structuredData.faq) → FAQPage node. The dedicated
+// /project/faq page keeps its hand-synced block below; this is for content
+// pages that carry a visible FAQ section (e.g. /prior-attempts).
+const faqNode =
+  !isFaq && faqItems.length
+    ? {
+        '@type': 'FAQPage',
+        '@id': `${pageUrl}#faq`,
+        mainEntity: faqItems.map((f) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: { '@type': 'Answer', text: f.answer },
+        })),
+      }
+    : null;
+
 // Build a graph so all entities share IDs and Google can connect them.
 const graph: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@graph': isHome
     ? [organization, website, softwareApplication]
-    : [organization, website, ...(pageNode ? [pageNode] : [])],
+    : [organization, website, ...(pageNode ? [pageNode] : []), ...(faqNode ? [faqNode] : [])],
 };
 ---
 
@@ -216,6 +235,10 @@ const graph: Record<string, unknown> = {
             text: "Selvedge works with anything that speaks MCP. Claude Code, Cursor, Copilot are detected automatically by selvedge setup. For others, follow the manual install: add the selvedge server to the tool's MCP config and drop the agent-instructions block (selvedge prompt) into the tool's system prompt. If your AI tool doesn't support MCP, Selvedge can't capture live — but you can still use the CLI for manual logging via selvedge log and import historical migrations via selvedge import.",
           },
         },
+        // The visible "How do I stop my agent repeating a mistake..." entry on
+        // the FAQ page is deliberately NOT marked up here: the same question is
+        // marked up on /prior-attempts (its canonical page), and Google says a
+        // FAQ repeated across pages should carry markup on only one of them.
         {
           '@type': 'Question',
           name: 'Why MCP instead of a plain CLI hook?',
