@@ -72,6 +72,39 @@ Rules:
 The same operations are on your shell: `selvedge prior-attempts <entity>`, `selvedge blame <entity>`, `selvedge log <entity> <change_type> --reasoning "<why>"`, `selvedge search "<query>"`, `selvedge history --since 7d`, `selvedge stale`. Add `--json` to any read command.
 ```
 
+## Stopping repeated reverted mistakes (prior_attempts)
+
+The failure mode: an agent re-tries a change a previous session already made and reverted, because the reason for the revert lived in a chat session that's gone. The code went back; the why didn't go anywhere the next agent can read. The fix: before editing an entity, the agent calls `prior_attempts` on it — one tool call, before anything is written.
+
+Worked example (full case study: https://selvedge.sh/prior-attempts — transcript: https://github.com/masondelan/selvedge/blob/main/docs/demos/prior-attempts.md). An agent asked to keep mobile users signed in across restarts is about to re-add a `users.auth_token` column that an earlier session added and reverted:
+
+```jsonc
+// tool call
+prior_attempts({ "entity_path": "users.auth_token" })
+
+// tool result  (default min_confidence = "proximity_high")
+[
+  {
+    "entity_path": "users.auth_token",
+    "change_type": "add",
+    "timestamp": "2026-03-12T17:40:11Z",
+    "reasoning": "Store a per-user auth token so the mobile app can stay signed in across restarts.",
+    "outcome": "reverted",
+    "confidence": "proximity_high",
+    "outcome_reasoning": "Reverted: tokens in the DB meant we couldn't revoke without a write; moved to short-lived JWTs verified statelessly. Column unused."
+  }
+]
+```
+
+The agent reads why the change was rejected (DB-stored tokens couldn't be revoked without a write; the team standardized on short-lived stateless JWTs), keeps the JWT approach, and solves the problem compatibly — a refresh token in the OS keychain plus a stateless `/auth/refresh` endpoint — then logs its own reasoning with `log_change` so the next session inherits the decision.
+
+Facts:
+
+- `prior_attempts` is a deterministic SQLite query with templated output. No LLM, no API key, no network — which is why an empty result is a trustworthy "nothing to worry about" rather than noise.
+- Default `min_confidence="proximity_high"` returns only the clear tried-then-reverted signal; pass `min_confidence="proximity_low"` to widen recall to the speculative tail.
+- Each hit is the full change event (`entity_path`, `change_type`, `timestamp`, `reasoning` — why the change was made — plus the rest of the event record) with three always-present outcome fields on top: `outcome`, `confidence`, and `outcome_reasoning` (why it was reverted). Every field always populated, never null.
+- History from before Selvedge was installed isn't there — backfill with `selvedge import` (reads SQL DDL, Alembic migrations, and Agent Trace records); coverage grows from the day it's installed.
+
 ## How Selvedge compares
 
 | | Reasoning source | Granularity | Mechanism | Grouping | Storage |

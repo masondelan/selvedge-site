@@ -8,6 +8,7 @@ The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by t
 - [Home](https://selvedge.sh): what Selvedge is, who it's for, the quickstart.
 - [Quickstart](https://selvedge.sh/start/quickstart/): `pip install selvedge`, the `selvedge setup` wizard, wiring into Claude Code / Cursor / Copilot.
 - [Agent prompt block](https://selvedge.sh/prompt-block/): the copy-paste `CLAUDE.md` / `.cursorrules` block that tells an agent when and how to call Selvedge. Also emitted by `selvedge prompt`.
+- [Stop your agent repeating reverted mistakes](https://selvedge.sh/prior-attempts): case study of the prior_attempts tool — the agent checks an entity's history before editing and changes plan when the change was tried and reverted.
 - [How Selvedge compares](https://selvedge.sh/compare/agent-tools/): Selvedge vs. AgentDiff / Origin / Git AI / BlamePrompt — captured-live + entity-level + changesets.
 
 ## MCP tools (8, over stdio)

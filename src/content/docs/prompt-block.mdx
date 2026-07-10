@@ -73,7 +73,7 @@ selvedge prompt --install CLAUDE.md   # idempotent; writes a .bak first
 
 ## What your agent does with it
 
-- **Before editing** `users.card_token`, the agent calls `prior_attempts` and learns it was added and reverted 28 days ago ("storing card tokens pulled us into PCI-DSS scope — moved to Stripe-managed methods"). It changes its plan instead of repeating the mistake.
+- **Before editing** `users.card_token`, the agent calls `prior_attempts` and learns it was added and reverted 28 days ago ("storing card tokens pulled us into PCI-DSS scope — moved to Stripe-managed methods"). It changes its plan instead of repeating the mistake. The same flow, end to end with a real transcript: [stop your agent repeating reverted mistakes](/prior-attempts/).
 - **After changing** anything structural, it logs the *why* in its own words — so six months later, `selvedge blame` answers the question `git blame` can't.
 
 Full docs: [selvedge.sh](https://selvedge.sh) · `pip install selvedge` · [GitHub](https://github.com/masondelan/selvedge)
