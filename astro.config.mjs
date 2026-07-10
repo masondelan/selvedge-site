@@ -71,6 +71,7 @@ export default defineConfig({
             { label: "Quickstart", link: "/start/quickstart/" },
             { label: "How it works", link: "/start/how-it-works/" },
             { label: "Agent prompt block", link: "/prompt-block/" },
+            { label: "Stop repeated mistakes", link: "/prior-attempts/" },
           ],
         },
         {
