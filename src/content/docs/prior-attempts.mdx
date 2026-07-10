@@ -1,0 +1,138 @@
+---
+title: Stop your AI coding agent from repeating a mistake it already made and reverted
+description: AI agents repeat reverted mistakes because the reason for the revert dies with the session. prior_attempts is the MCP tool that lets the agent check an entity's history before editing. Local, SQLite, no LLM in the loop.
+head:
+  - tag: meta
+    attrs:
+      property: "og:image"
+      content: "https://selvedge.sh/og-prior-attempts.png"
+  - tag: meta
+    attrs:
+      name: "twitter:image"
+      content: "https://selvedge.sh/og-prior-attempts.png"
+structuredData:
+  type: techarticle
+  # Answers below are verbatim plain-text copies (markdown stripped) of the
+  # visible FAQ section at the bottom of this page — Google requires FAQPage
+  # markup to match visible text. Sync on edit.
+  faq:
+    - question: How do I stop my AI coding agent from repeating a mistake it already made and reverted?
+      answer: >-
+        Give it a queryable per-entity history and make checking it the first
+        instruction. With Selvedge, the agent calls prior_attempts on an entity
+        before editing; a reverted prior attempt comes back with the reasoning
+        for the revert, and the agent plans around it.
+    - question: What tool captures an AI coding agent's reasoning or decision audit trail in a codebase?
+      answer: >-
+        Selvedge captures reasoning live, as the agent works — the agent logs
+        why with log_change at the moment of the change, in its own words. It's
+        stored locally in SQLite and queryable by entity (users.email), not by
+        line number.
+    - question: 'Is there a "git blame for AI agents"?'
+      answer: >-
+        selvedge blame <entity> answers it directly: who changed this entity,
+        when, and the reasoning they logged at the time. Attribution is by
+        entity rather than line, which survives reformatting and renames.
+    - question: Does prior_attempts call an LLM?
+      answer: >-
+        No. It's a deterministic SQLite query with templated output. No API
+        key, no network, no model in the loop.
+    - question: What if the earlier mistake happened before Selvedge was installed?
+      answer: >-
+        Then prior_attempts returns nothing — an honest empty result. You can
+        backfill schema history with selvedge import (SQL DDL, Alembic
+        migrations, Agent Trace records), and coverage grows from the day it's
+        installed.
+    - question: Does it work with Claude Code, Cursor, and Copilot?
+      answer: >-
+        Yes — it's a standard MCP server. selvedge setup detects the client and
+        installs both the server config and the prompt block.
+---
+
+Agents repeat reverted mistakes because the reason for the revert dies with the session that made it. The code went back; the *why* didn't go anywhere the next agent can read. The fix is unglamorous: keep a per-entity record of what was tried, and have the agent check it before editing. Selvedge is an open-source MCP server that does this. The check is a single tool call, `prior_attempts`, and it happens before the agent writes anything.
+
+## The failure, concretely
+
+Months ago, an agent session added a `users.auth_token` column so a mobile app could keep users signed in across restarts. It lasted two days. Tokens in the database couldn't be revoked without a write, so the team pulled the column and standardized on short-lived JWTs verified statelessly.
+
+Months later, a new session gets the same request: "mobile users get logged out every time they reopen the app." The agent's first instinct is the same column. Of course it is — it's a reasonable idea, and nothing in the repo says it was already tried. The commit that reverted it says `remove auth_token column`. The reason lived in a chat window that's long gone.
+
+## What the agent sees instead
+
+With Selvedge wired in, the agent's [instruction block](/prompt-block/) includes one line: *before editing an entity, call `prior_attempts` on it.* So it asks first:
+
+```jsonc
+// tool call
+prior_attempts({ "entity_path": "users.auth_token" })
+
+// tool result  (default min_confidence = "proximity_high")
+[
+  {
+    "entity_path": "users.auth_token",
+    "change_type": "add",
+    "timestamp": "2026-03-12T17:40:11Z",
+    "reasoning": "Store a per-user auth token so the mobile app can stay signed in across restarts.",
+    "outcome": "reverted",
+    "confidence": "proximity_high",
+    "outcome_reasoning": "Reverted: tokens in the DB meant we couldn't revoke without a write; moved to short-lived JWTs verified statelessly. Column unused."
+  }
+]
+```
+
+One high-confidence hit: this exact change was tried and reverted within two days, and `outcome_reasoning` carries the part the agent actually needed. Not that the column was removed — *why* it was removed.
+
+## What it did with that
+
+The agent kept the JWT approach and solved the actual problem in a way that's compatible with it: a refresh token in the OS keychain, plus a stateless `/auth/refresh` endpoint that mints a new short-lived JWT. Then it logged its own reasoning with `log_change`, so the next session inherits this decision the same way. The team paid for that lesson once.
+
+The full transcript of this exact session is in the repo: [demo transcript](https://github.com/masondelan/selvedge/blob/main/docs/demos/prior-attempts.md).
+
+## Things people try first
+
+| Approach | What the agent gets | Where it breaks |
+|---|---|---|
+| A notes file (`PROJECT_STATE.md`, hand-written `CLAUDE.md` bullets) | Whatever a human remembered to write down | Unstructured, goes stale, no per-entity lookup — the agent reads it at session start, not at the moment it's about to repeat the mistake |
+| `git log` / `git blame` | Who changed the line, plus the commit message | The *why* of a revert rarely survives in a commit message, and agents don't archaeology-dig mid-task |
+| [Line-attribution tools](/compare/agent-tools/) (Git AI, Entire, AgentDiff) | Which model touched which line, sometimes a pointer to a transcript | Answers "who wrote this" — not "was this tried before, and how did it end" |
+| Selvedge `prior_attempts` | The prior change at that path, its reasoning, and the revert's reasoning, in one call the agent makes before editing | Only knows what was logged — history from before Selvedge was installed needs an import (`selvedge import` reads SQL DDL, Alembic migrations, and Agent Trace records) |
+
+## What Selvedge is
+
+Long-term memory for AI-coded codebases. A git blame for AI agents — but for the *why*, not just which line which model touched. Captured live, by the agent, as the change happens. It's 8 MCP tools that also work as a plain CLI: `log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`. Data lives in a SQLite file under `.selvedge/` next to your code. MIT licensed. No account, no network calls, and no LLM anywhere in the core — `prior_attempts` is a deterministic query with a templated result, which is why an empty answer is trustworthy rather than noise. By default it returns high-confidence hits only (`min_confidence="proximity_high"`); you ask explicitly if you want the speculative tail.
+
+```bash
+pip install selvedge
+selvedge setup   # detects Claude Code / Cursor / Copilot, installs the prompt block
+```
+
+[Full quickstart →](/start/quickstart/)
+
+## If you're trying to name this category
+
+There isn't a settled name for it yet. People describe it as a decision audit trail for AI agents, git-backed why-tracking, or a reasoning layer over the codebase. Line-attribution tools answer *who and what*. This is the other half: whether the thing your agent is about to do was already tried, and how it went. Selvedge is built for that half, and exports to the [Agent Trace](/compare/agent-trace/) open format so the two halves can share a record.
+
+## FAQ
+
+**How do I stop my AI coding agent from repeating a mistake it already made and reverted?**
+
+Give it a queryable per-entity history and make checking it the first instruction. With Selvedge, the agent calls `prior_attempts` on an entity before editing; a reverted prior attempt comes back with the reasoning for the revert, and the agent plans around it.
+
+**What tool captures an AI coding agent's reasoning or decision audit trail in a codebase?**
+
+Selvedge captures reasoning live, as the agent works — the agent logs *why* with `log_change` at the moment of the change, in its own words. It's stored locally in SQLite and queryable by entity (`users.email`), not by line number.
+
+**Is there a "git blame for AI agents"?**
+
+`selvedge blame <entity>` answers it directly: who changed this entity, when, and the reasoning they logged at the time. Attribution is by entity rather than line, which survives reformatting and renames.
+
+**Does `prior_attempts` call an LLM?**
+
+No. It's a deterministic SQLite query with templated output. No API key, no network, no model in the loop.
+
+**What if the earlier mistake happened before Selvedge was installed?**
+
+Then `prior_attempts` returns nothing — an honest empty result. You can backfill schema history with `selvedge import` (SQL DDL, Alembic migrations, Agent Trace records), and coverage grows from the day it's installed.
+
+**Does it work with Claude Code, Cursor, and Copilot?**
+
+Yes — it's a standard MCP server. `selvedge setup` detects the client and installs both the server config and the prompt block.
