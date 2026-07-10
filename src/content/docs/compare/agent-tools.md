@@ -79,6 +79,10 @@ reverted" signal, so an empty result is a trustworthy "nothing to worry about" r
 than noise. No second LLM is involved — it's a templated query over the reasoning agents
 wrote live. None of the line-attribution tools surface rejected paths at all.
 
+For the worked example — an agent about to re-add a reverted auth-token column, the
+exact tool call, and the plan it chose instead — see
+[stop your agent repeating reverted mistakes](/prior-attempts/).
+
 ## What Selvedge isn't trying to be
 
 Selvedge **is not**:
@@ -122,3 +126,4 @@ agent-trace` is at the [Agent Trace interop page](/compare/agent-trace/).
 
 [**Agent Trace interop →**](/compare/agent-trace/)
 [**git blame vs. selvedge blame →**](/compare/git-blame/)
+[**Stop your agent repeating reverted mistakes →**](/prior-attempts/)

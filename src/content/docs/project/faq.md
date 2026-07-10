@@ -43,6 +43,13 @@ If your AI tool doesn't support MCP, Selvedge can't capture *live* — but you c
 use the CLI for manual logging via `selvedge log` and import historical migrations via
 `selvedge import`.
 
+## How do I stop my agent repeating a mistake it already made and reverted?
+
+Give it a queryable per-entity history and make checking it the first instruction. The
+agent calls `prior_attempts` on an entity before editing; a reverted prior attempt comes
+back with the reasoning for the revert, and the agent plans around it. Full worked
+example: [stop your agent repeating reverted mistakes](/prior-attempts/).
+
 ## Why MCP instead of a plain CLI hook?
 
 Because MCP gives the agent **access to its own history**. Your agent can call
