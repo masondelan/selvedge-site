@@ -22,14 +22,17 @@ selvedge blame ENTITY                   Most recent change + context
 selvedge history [...filters]           Browse all history
 selvedge changeset [ID|--list]          Events grouped by changeset
 selvedge search QUERY [--limit N]       Full-text search
-selvedge prior-attempts [ENTITY]        Prior attempts on an entity + outcome
-selvedge stale [...filters]             Dated decisions due for a revisit
+selvedge prior-attempts [ENTITY]        Prior attempts on an entity + outcome ([--fuzzy TEXT] since 0.3.9.1)
+selvedge supersede ENTITY --reasoning   Re-open a reverted decision, append-only (since 0.3.9.1)
+selvedge index [--model NAME]           Build the optional semantic embeddings index (since 0.3.9.1)
+selvedge stale [...filters]             Decisions due for a revisit (date, or stale_when matched since 0.3.9.1)
 selvedge stats [--since SINCE]          Tool-call coverage report
 selvedge install-hook [--path PATH]     Install git post-commit hook
 selvedge backfill-commit --hash HASH    Backfill git_commit on recent events
 selvedge import PATH                    Import migrations (SQL / Alembic) or an Agent Trace file
+selvedge import --from-git [--since]    Seed pre-Selvedge reverts from git history (since 0.3.9.1)
 selvedge export [--format json|csv|agent-trace]  Export history (Agent Trace v0.1.0 since 0.3.9)
-selvedge log ENTITY CHANGE_TYPE         Manually log a change
+selvedge log ENTITY CHANGE_TYPE         Manually log a change ([--constraint] [--stale-when] since 0.3.9.1)
 selvedge migrate-paths [--apply]        Re-canonicalize stored entity paths
 selvedge backup [--output FILE]         Snapshot the store via VACUUM INTO
 selvedge prune [--days N]               Trim old tool_calls telemetry (90-day default)
@@ -179,7 +182,7 @@ Full-text search across reasoning + diff + entity_path. Properly escapes SQL `LI
 wildcards (`_`, `%`, `\`) so `selvedge search "stripe_customer_id"` won't accidentally
 match `stripeXcustomerXid`.
 
-### `selvedge prior-attempts [ENTITY] [--description TEXT] [--all] [--window WHEN] [--limit N]`
+### `selvedge prior-attempts [ENTITY] [--description TEXT] [--fuzzy TEXT] [--all] [--window WHEN] [--limit N]`
 
 Prior change attempts on an entity, each with an inferred outcome — the CLI parity
 (new in v0.3.8) for the `prior_attempts` MCP tool, which shipped in v0.3.7. A thin
@@ -189,7 +192,9 @@ the MCP tool returns and the two surfaces can't diverge.
 Pass an `ENTITY` positional **xor** `--description TEXT` (free-text, when you don't have
 an exact path) — not both. By default only the clear "tried then reverted"
 (`proximity_high`) cases come back; `--all` widens recall to `proximity_low`. `--window`
-(e.g. `7d`, `60m`) maps onto the add→remove proximity window.
+(e.g. `7d`, `60m`) maps onto the add→remove proximity window. Since v0.3.9.1 every row
+carries `outcome` (now including `reopened`), `current_status`, and the supersede-trail
+fields, so the output reads tried → reverted → re-opened.
 
 ```bash
 selvedge prior-attempts users.auth_token       # exact entity
@@ -197,26 +202,61 @@ selvedge prior-attempts --description "persistent login token"
 selvedge prior-attempts users.auth_token --all --json
 ```
 
+**`--fuzzy TEXT` (since v0.3.9.1)** adds semantically similar records on top — it matches
+on the *reasoning*, not the entity string, so a rename from `card_token` to
+`payment_token` still trips the warning. Fuzzy rows are labeled `match_type="fuzzy"` with
+a similarity score. It needs the optional `selvedge[semantic]` extra and a `selvedge
+index` run; without them it falls back to substring matching and prints a one-line
+pointer. The core stays zero-LLM either way.
+
+```bash
+selvedge prior-attempts users.card_token --fuzzy "tokenized payment credentials"
+```
+
 An empty result is the normal, good answer — exit 0, nothing clearly tried-and-rejected.
 Records on the same coverage counter as the MCP tool, so `selvedge stats` reflects both
 surfaces.
 
-### `selvedge stale [--entity ENTITY] [--project PROJECT] [--agent AGENT] [--limit N]`
+### `selvedge supersede ENTITY --reasoning TEXT [--constraint TEXT] [--stale-when TEXT] [--supersedes ID] [--json]`
 
-Dated decisions that are due for a revisit — the CLI mirror of the `stale_decisions`
-MCP tool (new in v0.3.8). Surfaces events whose `revisit_after` has passed **and** whose
-entity is still in active use; pure age never surfaces. Most-overdue-first. `--json` for
-cron / Slack / digest jobs.
+Re-open a reverted decision — **append-only, never rewrites history** (v0.3.9.1). When the
+constraint that killed a decision no longer holds, this logs a new
+`change_type="supersede"` event that links the prior revert (auto-resolving the entity's
+most recent remove/delete when `--supersedes` is omitted). `prior_attempts` / `blame` /
+`diff` then read the full trail: tried → reverted → re-opened. There is deliberately no
+automatic un-retiring — this command **is** the explicit re-open step.
 
 ```bash
-selvedge stale                       # everything past its revisit date and still live
+selvedge supersede payments.card_token -r "Provider now vaults card data — PCI constraint gone."
+```
+
+### `selvedge index [--model NAME] [--json]`
+
+Build or update the optional semantic embeddings index over reasoning text (v0.3.9.1) —
+the backing store for `prior-attempts --fuzzy`. Requires `pip install "selvedge[semantic]"`.
+Incremental (only new or changed reasoning is re-embedded); the first run downloads the
+model (~30 MB, cached), and indexing + querying are fully local after that. The core store
+is untouched — embeddings live in their own table and nothing in Selvedge's read/write
+paths depends on it.
+
+### `selvedge stale [--entity ENTITY] [--project PROJECT] [--agent AGENT] [--limit N]`
+
+Decisions that are due for a revisit — the CLI mirror of the `stale_decisions` MCP tool
+(new in v0.3.8). Two surfacing rules since v0.3.9.1: **`revisit_due`** — `revisit_after`
+has passed **and** the entity is still in active use (pure age never surfaces); and
+**`review_suggested`** — a later change event keyword-matched the decision's `stale_when`
+condition (follow up with `selvedge supersede`). Most-overdue-first. `--json` for cron /
+Slack / digest jobs.
+
+```bash
+selvedge stale                       # everything due: past revisit date, or stale_when matched
 selvedge stale --entity deps/stripe  # scope to one entity
 selvedge stale --json                # for cron / morning reports
 ```
 
-Each row carries the revisit due date, days overdue, the active-use signals that fired,
-and a templated reason. Composes with reporting jobs the same way `selvedge digest`
-(planned for v0.3.16) will.
+Each row carries the `flag`, the revisit due date, days overdue, the active-use signals
+that fired, any matched terms, and a templated reason. Composes with reporting jobs the
+same way `selvedge digest` (planned for v0.3.16) will.
 
 ### `selvedge stats [--since SINCE]`
 
@@ -241,13 +281,16 @@ Manually log a change. Useful for backfilling, post-hoc annotation, or scripts.
 
 ```text
 add | remove | modify | rename | retype | create | delete |
-index_add | index_remove | migrate
+index_add | index_remove | migrate | revert | supersede
 ```
 
-Invalid types are caught at argument parsing with the full list of valid choices.
+Invalid types are caught at argument parsing with the full list of valid choices. `revert`
+("we tried this and rolled it back") and `supersede` (re-open a reverted decision) were
+added in v0.3.9.1 — for the guided re-open flow prefer `selvedge supersede` above.
 
 Other flags: `--agent`, `--commit`, `--project`, `--changeset`, `--rename-from`,
-`--revisit-after`.
+`--revisit-after`, and (v0.3.9.1) `--constraint` (the testable principle behind the
+decision) / `--stale-when` (what would invalidate it, matched by `selvedge stale`).
 
 `--revisit-after WHEN` (new in v0.3.8) sets a revisit date on the change — an ISO-8601
 date or a relative offset (`90d`, `6mo`), normalized like `--since`. The decision then
@@ -311,6 +354,24 @@ atomically.
 A `CREATE TABLE users (id INT, email TEXT)` emits a `table.create` event for `users`
 **and** a `column.add` event for each column, so `selvedge blame users.email` works
 even when the column was defined only in the initial schema.
+
+**`--from-git [--since REF|DATE]` (since v0.3.9.1)** — instead of migration files, PATH is
+a git repository root (default `.`) and the import walks history for reverts that predate
+Selvedge: commits whose message mentions "revert" plus commits that deleted files. Each
+becomes a `change_type="revert"` event (`agent="git-import"`, reasoning = the commit
+subject + body) so `prior_attempts` and the enforcement hook see them. Idempotent on the
+`(commit, entity)` pair, so re-runs don't duplicate. `--since` takes a git ref (exclusive
+`REF..HEAD`) or a date git understands.
+
+```bash
+selvedge import --from-git --dry-run       # preview what would be seeded
+selvedge import --from-git --since v0.3.0   # only reverts after a tag
+```
+
+Honest limits: a revert folded into an unrelated commit (no "revert" marker, nothing
+deleted) is invisible even to the grep, and only SQL `DROP TABLE` / `DROP COLUMN` seed
+entity-level records today — every other diff shape is seeded at the file level. Widening
+that (and provenance-based trust tiers) is on the roadmap.
 
 ### `selvedge export [--format json|csv|agent-trace] [--since] [--entity] [--output FILE]`
 

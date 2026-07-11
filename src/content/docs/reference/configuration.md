@@ -3,9 +3,11 @@ title: Configuration
 description: How Selvedge resolves the DB path, environment variables, project vs. global precedence, and the destructive-action opt-in flag.
 ---
 
-Selvedge has very few knobs by design. As of v0.3.9 every setting lives in either an
-environment variable or a flag — a first-class `.selvedge/config.toml` file lands in
-v0.3.10 (see [below](#coming-in-v0310-selvedgeconfigtoml)).
+Selvedge has very few knobs by design. Most settings live in an environment variable or a
+flag; the one config-file surface today is the enforcement hook's optional
+`.selvedge/config.toml` `[hook]` block (v0.3.9.1, below). The *first-class*, everything-
+reads-it `.selvedge/config.toml` still lands in v0.3.10
+(see [below](#coming-in-v0310-selvedgeconfigtoml)).
 
 ## DB path resolution
 
@@ -31,7 +33,31 @@ DB are we using?" answer is unambiguous.
 | `SELVEDGE_DB` | unset | Path to a specific SQLite file. Overrides walk-up + global. |
 | `SELVEDGE_LOG_LEVEL` | `WARNING` | `DEBUG` / `INFO` / `WARNING` / `ERROR`. Controls the `selvedge.*` logger namespace. |
 | `SELVEDGE_QUIET` | unset | If set, suppresses the one-time stderr warning when the global fallback DB is used. |
-| `SELVEDGE_DESTRUCTIVE` | unset | **Lands in v0.3.10.** Will be **required** for any command that can permanently delete events (e.g. `selvedge prune --include-events`) — it will need to be set in the environment AND the command confirmed at the prompt. No event-deleting command ships as of v0.3.9. |
+| `SELVEDGE_HOOK_DISABLE` | unset | **v0.3.9.1.** If `1`, the PreToolUse enforcement hook (`selvedge-hook pretooluse`) bypasses and allows every tool call for that shell. |
+| `SELVEDGE_DESTRUCTIVE` | unset | **Lands in v0.3.10.** Will be **required** for any command that can permanently delete events (e.g. `selvedge prune --include-events`) — it will need to be set in the environment AND the command confirmed at the prompt. No event-deleting command ships as of v0.3.9.1. |
+
+### Enforcement-hook config — `.selvedge/config.toml` `[hook]` (v0.3.9.1)
+
+The PreToolUse enforcement hook installed by `selvedge setup` reads one optional block. If
+the file or block is absent, sensible defaults apply; a malformed file falls back to the
+defaults rather than failing.
+
+```toml
+[hook]
+# Which paths the hook treats as schema/migration territory. Replaces the
+# defaults: **/migrations/**, **/alembic/**, **/schema*, **/*model*, **/*.sql
+watch_globs = ["**/migrations/**", "db/**/*.sql"]
+```
+
+This is a narrow, hook-only precursor to the first-class `.selvedge/config.toml` in v0.3.10
+— it does not yet house DB path, retention, or size settings.
+
+### Optional extras
+
+`pip install "selvedge[semantic]"` (v0.3.9.1) adds the local embedding backend (model2vec)
+used by `selvedge index` and `prior-attempts --fuzzy`. It is strictly optional — the core
+never imports it, and Selvedge works identically without it (fuzzy queries fall back to
+substring matching).
 
 The destructive-action opt-in (v0.3.10) is a deliberate footgun defense — the most common
 way event-deleting commands get triggered by accident is through `--yes` flags in cron

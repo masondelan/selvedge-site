@@ -7,6 +7,69 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the three most recent releases for
 at-a-glance browsing.
 
+## v0.3.9.1 — 2026-07-10
+
+**The dev.to feedback release.** Every item here was publicly promised as "a
+following version" in the comment threads on
+[the launch post](https://dev.to/masondelan/my-ai-agent-tried-to-ship-a-mistake-wed-already-reverted-4737).
+Five improvements from five threads: an explicit supersede flow, a PreToolUse
+enforcement hook, structured constraint / stale-condition fields, git-history
+backfill, and optional semantic recall. The store stays append-only and the
+core stays zero-LLM / zero-network throughout. **Drop-in upgrade for anyone on
+0.3.9** — migration v4 is three nullable `ADD COLUMN`s, the same metadata-only
+class as v0.3.8's v3, instant at any DB size. Still **8** MCP tools.
+
+### Reverted is no longer a permanent ban
+
+New `change_type="supersede"` re-opens a reverted decision by linking the prior
+event — records stay append-only, a re-open is a new fact, never an edit. The
+trail reads **tried → reverted → re-opened**, and `prior_attempts` / `blame` /
+`diff` show a clear current status. New CLI `selvedge supersede ENTITY
+--reasoning ...`. Explicit only — **no automatic un-retiring**, by design.
+
+### Constraint + stale-condition fields
+
+`constraint` (the testable principle behind a decision) and `stale_when` (the
+evidence that would invalidate it) are their own queryable fields now, not one
+free-text blob. `stale_decisions` gained a second rule: when a *later* change
+event keyword-matches a decision's `stale_when`, it's flagged
+`review_suggested` — surfacing only; the follow-up is an explicit `supersede`.
+
+### PreToolUse enforcement hook
+
+The CLAUDE.md "check prior_attempts first" instruction was probabilistic. Now
+`selvedge setup` installs a Claude Code PreToolUse hook that blocks
+schema/migration edits until `prior_attempts` has been queried this session —
+with the prior reasoning **in the block message**, so the agent gets the
+skipped context for free. Fail-open by contract; `--dry-run` and
+`SELVEDGE_HOOK_DISABLE=1` included. The gate moved out of the prompt and into
+the tool boundary.
+
+### Git-history import
+
+`selvedge import --from-git` walks revert-message commits and file deletions
+and seeds them as `change_type="revert"` records (idempotent on the commit
+sha), so reverts that predate Selvedge gate `prior_attempts` and the hook like
+live-captured ones. Honest limit: reverts folded into unrelated commits are
+missed, and only SQL DDL drops seed entity-level records today.
+
+### Optional semantic recall
+
+`pip install "selvedge[semantic]"` + `selvedge index` builds a local
+embeddings index; `prior_attempts --fuzzy "description"` matches on the
+*reasoning*, so a `card_token → payment_token` rename still trips the warning.
+Local static embeddings (model2vec, ~30 MB, no torch); fuzzy matches are
+clearly labeled; without the extra it falls back to substring with a pointer.
+**The core never imports the backend.**
+
+### Migration + tests
+
+**Schema migration v4** adds `supersedes`, `constraint`, and `stale_when` to
+`events` (all nullable) — a metadata-only `ADD COLUMN`, instant at any size.
+114 new tests (suite 684): the supersede flow, the enforcement hook, git
+import, and the semantic layer, each with migration-upgrade, error-path, and
+both-surfaces (MCP + CLI) coverage.
+
 ## v0.3.9 — 2026-06-22
 
 **Agent Trace export — Selvedge is a compatible producer.** New
@@ -120,66 +183,11 @@ column is a metadata-only edit — the table isn't rewritten — so even a
 multi-million-event database migrates in well under a second on the next
 connection. `test_migrations_perf.py` gates this at 10k / 100k / 1M events.
 
-## v0.3.7 — 2026-06-08
-
-The brand-defining release: the **`prior_attempts`** MCP tool — an agent
-about to change an entity asks *"was this tried before, and how did it turn
-out?"* before it starts — plus the **entity-canonicalization foundation** it
-sits on. One new MCP tool (→ **7** total). **Drop-in upgrade for anyone on
-0.3.6.**
-
-### The wedge
-
-**`prior_attempts` MCP tool.** Given an `entity_path` or a free-text
-`description`, returns prior change attempts on the entity, each annotated
-with an inferred `outcome` (`reverted` / `active`), a `confidence` tier
-(`proximity_high` / `proximity_low`), and `outcome_reasoning` (why a reverted
-attempt was rejected). Outcome is inferred from add→remove proximity within a
-configurable window — explicit `reject` / `revert` change types arrive in
-v0.3.11. **Conservative-recall**: `min_confidence` defaults to
-`proximity_high`, so an empty list is the preferred answer over a false
-positive. Templated, no LLM, pull-only.
-
-### Entity foundation (lands first)
-
-**Canonicalization on write.** `src/auth.py::login` and
-`./src/auth.py::login` used to resolve to *different* entities. Now every
-write routes through one chokepoint
-(`selvedge.storage.canonicalize_entity_path`) that strips `./`, collapses
-`//`, normalizes separators, and trims — **preserving case on purpose**
-(filesystems differ; lowercasing would collapse genuinely distinct entities
-on case-sensitive Linux). `selvedge doctor` warns on sibling paths that differ
-only by case instead of merging them.
-
-**`selvedge migrate-paths`** backfills existing rows. **Dry-run is the
-default** and prints a collisions report (paths that would converge, i.e.
-histories that would merge) so you inspect before `--apply` writes.
-Idempotent, with a `path_migrations` audit row per run.
-
-**Rename folded into `log_change`.** Pass `rename_from` with
-`change_type="rename"` and Selvedge records the dual-event pattern — a rename
-on the old path, a create on the new path with `metadata.renamed_from` — so
-blame / diff / `prior_attempts` on the new path keep the history. No new tool.
-
-**Soft entity-path shape warnings** — a `function` path without `::`, a
-`column` without `.`, a `file` without a separator or extension get a nudge,
-never a rejection.
-
-**`selvedge.aggregates.summary()`** ships as a schema-versioned **library**
-helper (not a tool, not a CLI command) — the seed that v0.3.9's `selvedge
-audit` / `digest` will consume.
-
-### Tests
-
-- 47 new tests (suite ≈450, coverage 86.6%) — over the standard ≤30 per-phase
-  budget because the entity foundation and the wedge ship together, plus a
-  review pass that hardened the acceptance-criteria edges. Called out in the
-  source CHANGELOG.
-
 ---
 
 [**Full CHANGELOG.md →**](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md)
-in the source repo. Includes 0.3.6 (stay-current + retention basics —
+in the source repo. Includes 0.3.7 (the `prior_attempts` wedge + entity
+canonicalization foundation), 0.3.6 (stay-current + retention basics —
 background PyPI version check, `selvedge prune` for `tool_calls`),
 0.3.5 (recovery basics — `selvedge verify`,
 `selvedge backup`), 0.3.4 (first-run wizard, prompt, watch),

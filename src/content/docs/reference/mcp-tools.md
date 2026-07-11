@@ -35,7 +35,7 @@ Record a change event. The only writer.
 |---|---|---|
 | `entity_path` | `string` (required) | The thing that changed: `users.email`, `src/auth.py::login`, `env/STRIPE_SECRET_KEY`, `deps/stripe`. See [entity paths](/reference/entity-paths/). |
 | `entity_type` | `string` | `column` / `table` / `file` / `function` / `class` / `endpoint` / `dependency` / `env_var` / `index` / `schema` / `config` / `other`. Coerced to `"other"` if unrecognized. |
-| `change_type` | `string` (required) | `add` / `remove` / `modify` / `rename` / `retype` / `create` / `delete` / `index_add` / `index_remove` / `migrate`. Validated against the enum — typos are rejected. |
+| `change_type` | `string` (required) | `add` / `remove` / `modify` / `rename` / `retype` / `create` / `delete` / `index_add` / `index_remove` / `migrate` / `revert` / `supersede`. Validated against the enum — typos are rejected. `revert` ("tried and rolled back") and `supersede` (re-open a reverted decision) were added in v0.3.9.1. |
 | `diff` | `string` | The diff text. Optional but recommended. |
 | `reasoning` | `string` | **The why.** Captured from the agent's own context. Run through the quality validator — empty / too-short / generic-placeholder values produce `warnings` (advisory). |
 | `agent` | `string` | The calling agent name (`claude-code`, `cursor`, `copilot`, etc.). |
@@ -45,6 +45,9 @@ Record a change event. The only writer.
 | `changeset_id` | `string` | A slug grouping related changes under one feature/task. Indexed. |
 | `rename_from` | `string` | The entity's previous path, for renames. Set it with `change_type="rename"` and put the **new** path in `entity_path`. Selvedge then writes the dual-event pattern — a `rename` on the old path and a `create` on the new path with `metadata.renamed_from` set — so `blame` / `diff` / `prior_attempts` on the new path keep the history. A `rename_from` without `change_type="rename"` is rejected. Rename is a parameter, **not** a separate tool. |
 | `revisit_after` | `string` | A revisit date for the decision — an ISO-8601 date (`2026-12-01`) **or** a relative offset from the event's timestamp (`90d`, `6mo`), normalized with the same grammar as `--since`. Consumed by `stale_decisions` / `selvedge stale`. New in v0.3.8. |
+| `constraint` | `string` | **v0.3.9.1.** The testable principle behind the decision (`card data in our own DB = PCI scope`), kept as its own queryable field instead of buried in `reasoning`. |
+| `stale_when` | `string` | **v0.3.9.1.** The evidence that would invalidate the decision (`payment provider changed`). `stale_decisions` keyword-matches it against later change events and flags `review_suggested` — surfacing only. |
+| `supersedes` | `string` | **v0.3.9.1.** The id of the prior event this change overrides. Only valid with `change_type="supersede"`; leave empty to auto-link the entity's most recent remove/delete. The store stays append-only — the old verdict is never edited, just derived as superseded. |
 
 `entity_path` is **canonicalized on write** (strip leading `./`, collapse `//`,
 normalize separators to `/`, trim — case preserved on purpose) at a single storage
@@ -205,27 +208,33 @@ repeating it. New in v0.3.7; this is Selvedge's wedge.
 |---|---|---|
 | `entity_path` | `string` | The entity you're about to change. Exact + prefix match (`users` also covers `users.email`). Provide this **or** `description`. |
 | `description` | `string` | Free-text description, when you don't have an exact path. Matched as a substring against prior reasoning / diffs / paths. `entity_path` wins if both are given. |
+| `fuzzy` | `string` | **v0.3.9.1.** Semantic query — also returns attempts on entities whose prior reasoning is *similar* to this text, catching renames (`card_token` → `payment_token`) that exact/substring lookups miss. Rows are labeled `match_type="fuzzy"` with a similarity score. Needs the `selvedge[semantic]` extra and a `selvedge index` run; otherwise falls back to substring with a leading note row. |
 | `min_confidence` | `string` | `proximity_high` (default) returns only the clear "tried then reverted" cases; `proximity_low` widens to the noisy tail (still-active changes, far-apart reverts). |
 | `window_minutes` | `int` | Proximity window for the add→remove revert heuristic. Within it ⇒ `proximity_high`, beyond ⇒ `proximity_low`. Default `10080` (7 days). |
 | `limit` | `int` | Default 20. |
 
 ### Returns
 
-Array of event objects (newest-first), each with three extra fields:
+Array of event objects (newest-first), each with the trail fields:
 
 ```json
 [
   { "...event fields...": "...",
-    "outcome": "reverted" | "active",
+    "outcome": "reverted" | "reopened" | "active",
     "confidence": "proximity_high" | "proximity_low",
-    "outcome_reasoning": "why it was reverted, or \"\" while still active" }
+    "outcome_reasoning": "why it was reverted, or \"\" while still active",
+    "superseded_by": "id of the supersede that re-opened it, or \"\"",
+    "supersede_reasoning": "why it was re-opened, or \"\"",
+    "current_status": "active" | "reverted" | "reopened",
+    "match_type": "exact" | "substring" | "fuzzy",
+    "similarity": 0.0 }
 ]
 ```
 
-Outcome is inferred from **add→remove proximity** — v0.3.7 has no explicit
-`reject` / `revert` change types yet (those arrive in v0.3.11). The output is templated
-and deterministic — **no LLM call** — and the tool is **pull-only**: it never writes and
-never pushes; you decide when to ask.
+Outcome is inferred from **add→remove proximity**, upgraded by explicit `revert` events
+and `supersede` links (v0.3.9.1) — the trail reads tried → reverted → re-opened. The
+output is templated and deterministic — **no LLM call in core** — and the tool is
+**pull-only**: it never writes and never pushes; you decide when to ask.
 
 **Conservative by design.** `min_confidence` defaults to `proximity_high`, so an empty
 list — nothing clearly tried-and-rejected — is the normal, preferred answer over a

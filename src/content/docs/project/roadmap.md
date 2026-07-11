@@ -133,6 +133,37 @@ remain the v0.4.0 markers (HTTP + auth is v0.4.1). Opt-in and additive — the M
 > re-homed to **v0.3.16 (Phase 2.22)** — the last 0.3.x feature release,
 > just before the v0.4.0 tool-consolidation review.
 
+## v0.3.9.1 — the dev.to feedback release ✅ shipped 2026-07-10
+
+Five improvements, each publicly promised as "a following version" in the
+[launch-post](https://dev.to/masondelan/my-ai-agent-tried-to-ship-a-mistake-wed-already-reverted-4737)
+comment threads. Append-only store and zero-LLM / zero-network core throughout;
+still **8** MCP tools. See the [changelog](/project/changelog/#v0391--2026-07-10)
+for the full notes.
+
+- **Supersede flow + decision states** — `change_type="supersede"` re-opens a
+  reverted decision by linking the prior revert; the trail reads tried →
+  reverted → re-opened. New `selvedge supersede` CLI. Explicit only, no auto
+  un-retiring.
+- **Constraint + stale-condition fields** — `constraint` and `stale_when` are
+  their own queryable fields; `stale_decisions` flags a decision
+  `review_suggested` when a later change matches its `stale_when`.
+- **PreToolUse enforcement hook** — `selvedge setup` installs a Claude Code
+  hook that blocks schema/migration edits until `prior_attempts` has run,
+  returning the prior reasoning as the block message. The gate moved from
+  CLAUDE.md to the tool boundary.
+- **Git-history import** — `selvedge import --from-git` seeds pre-Selvedge
+  reverts from revert commits + file deletions, idempotent on the commit sha.
+  New `change_type="revert"`.
+- **Optional semantic recall** — `prior_attempts --fuzzy` matches on the
+  reasoning so a rename still trips the warning. Ships as the
+  `selvedge[semantic]` extra (model2vec); the core never imports it.
+
+> **Plan note.** `revert` and `supersede` shipped here, pulled forward from the
+> v0.3.11 change-type work below — the git importer needed `revert`, and the
+> supersede flow answered the un-retire thread. `reject` and the `expires_when`
+> evaluator remain in v0.3.11.
+
 ## v0.3.10 — config + advanced retention (Phase 2.16)
 
 `.selvedge/config.toml` lands here, paired with the dependent
@@ -166,10 +197,11 @@ migration.
   `library:NAME>=VERSION`, `entity:PATH:changes`, `date:ISO`,
   `manual:LABEL`. Non-matching values rejected at write time.
   Evaluable from local state only — no network, no LLM.
-- **New `change_type` values: `reject` and `revert`** — first-class
-  "we considered this and decided against it" / "we tried this and
-  rolled it back" events. Adoption defended on three surfaces
-  (`log_change` docstring, `PROMPT_BLOCK`, reasoning validator).
+- **New `change_type` value: `reject`** — first-class "we considered
+  this and decided against it" event. (`revert` shipped early in
+  v0.3.9.1 for the git importer; `reject` remains here.) Adoption
+  defended on three surfaces (`log_change` docstring, `PROMPT_BLOCK`,
+  reasoning validator).
 - **`prior_attempts` outcome-classifier upgrade** — explicit
   `reject`/`revert` events become the high-confidence tier directly;
   the proximity heuristic from v0.3.7 becomes the tiebreaker.
@@ -193,6 +225,15 @@ verifiable, and interoperable.
   exits 0 by default; `--enforce` flag opts in to gating. Default
   enforcement deferred until telemetry shows what natural quality
   distributions look like (Goodhart-trap defense).
+- **Git-import provenance + trust tiers** — matures the v0.3.9.1
+  `import --from-git` slice into an audit-grade one. A git-seeded record
+  is re-derivable (re-run the importer, diff against the store); a
+  live-captured one is testimony — so the gate can hard-block the
+  re-derivable slice and treat testimony as advisory. Adds a queryable
+  provenance field, an `import --from-git --verify` re-derivation diff,
+  cross-file entity extraction (so a reverted column matches across
+  migration / model / serializer), and a measured miss-rate for the
+  capture layer. From the launch-post design feedback; can pull forward.
 
 ## v0.3.13 — cross-repo CLI (Phase 2.19)
 
