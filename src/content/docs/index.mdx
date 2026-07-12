@@ -5,16 +5,16 @@ template: splash
 hero:
   tagline: Long-term memory for AI-coded codebases.
   actions:
-    - text: Quickstart
+    - text: Quickstart — 3 commands
       link: /start/quickstart/
       icon: right-arrow
       variant: primary
+    - text: Why Selvedge?
+      link: /start/what-is-selvedge/
+      variant: secondary
     - text: GitHub
       link: https://github.com/masondelan/selvedge
       icon: external
-      variant: secondary
-    - text: Why Selvedge?
-      link: /start/what-is-selvedge/
       variant: secondary
 ---
 
@@ -51,13 +51,14 @@ that format.
   </Card>
 
   <Card title="Tracks entities, not lines" icon="seti:db">
-    Attribution is at the *thing you actually search for*: `users.email`, `env/STRIPE_SECRET_KEY`,
-    `api/v1/checkout`, `deps/stripe`. Prefix queries work everywhere.
+    Every change is tagged to the *thing you actually search for* — `users.email`,
+    `env/STRIPE_SECRET_KEY`, `api/v1/checkout`, `deps/stripe` — not a line number.
+    Search `users` and you get everything under it.
   </Card>
 
   <Card title="Stays local, stays simple" icon="seti:lock">
-    Zero deps beyond MCP + Click + Rich. SQLite under `.selvedge/` next to your code.
-    No accounts, no servers, no telemetry.
+    Almost nothing to install, nothing to run. A SQLite file under `.selvedge/`
+    next to your code. No accounts, no servers, no telemetry.
   </Card>
 </CardGrid>
 
@@ -126,20 +127,20 @@ builds, the small internal tool you keep poking at. You don't need enterprise go
 last week, last sprint.
 
 If you've ever come back to your own AI-built project and thought "what was this *for*
-again?", Selvedge is the missing piece.
+again?" — that's the question Selvedge already has the answer to.
 
 ---
 
 ## Where Selvedge fits
 
-AI agents call Selvedge as they work. Selvedge captures the *why* into a durable,
-queryable store and emits it back out as Agent Trace records, observability metadata,
-and compliance artifacts.
+AI agents call Selvedge as they work. It captures the *why* into a durable, queryable
+store — and exports it in the open [Agent Trace](/compare/agent-trace/) format, so the
+reasoning travels into whatever observability or audit tooling you already run.
 
 Selvedge does **not** replace `git` (line-level what/when), PR review tools (review-time
 quality), agent observability (LLM call traces), or general-purpose code-host AI
-features. It sits between them — the provenance-as-first-class-citizen layer that
-everything else references.
+features. It sits between them — the layer that records *why*, so git, review, and
+observability tools finally have something to point at.
 
 [See the comparison table →](/compare/agent-tools/)
 

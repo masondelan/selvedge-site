@@ -19,15 +19,21 @@ const data = entry.data.hero;
   {data?.tagline && <p class="selvedge-hero__tag">{data.tagline}</p>}
 
   <p class="selvedge-hero__sub">
-    A local MCP server. AI coding agents (Claude Code, Cursor, Copilot) call it
-    as they work to log the <em>why</em> behind every change — captured live,
-    in the same context that produced it. Stays in a SQLite file under
-    <code>.selvedge/</code> next to your code.
+    AI writes the code; the reason it chose <em>that</em> approach lives in a chat
+    window that's gone by morning. Selvedge is a
+    <strong>git blame for the <em>why</em></strong> — a local MCP server your agent
+    (Claude Code, Cursor, Copilot) calls as it works, recording the intent behind
+    each change in the moment it makes it, not reconstructing it from the diff
+    afterward.
   </p>
 
   <code class="selvedge-hero__install" aria-label="Install command">
     pip install selvedge
   </code>
+
+  <p class="selvedge-hero__meta">
+    Open source (MIT) · v0.3.9.1 · runs locally, no account
+  </p>
 
   {data?.actions && data.actions.length > 0 && (
     <div class="selvedge-hero__cta">
