@@ -97,8 +97,8 @@ Selvedge **is not**:
 - **A code-host AI assistant.** GitHub Copilot's PR summaries answer a different
   question than `selvedge blame`.
 
-Selvedge is the **provenance-as-first-class-citizen layer** that those tools can
-reference.
+Selvedge is the **layer that records _why_** — the thing those tools can point at but
+don't capture themselves.
 
 ## What Selvedge is uniquely better at
 

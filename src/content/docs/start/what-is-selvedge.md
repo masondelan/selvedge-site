@@ -62,7 +62,8 @@ Selvedge is **not**:
   LangSmith and Helicone.
 - A code-host AI assistant — GitHub Copilot's PR summaries answer a different question.
 
-It's the provenance-as-first-class-citizen layer that those tools can reference.
+It's the layer that records *why* — the thing those tools can point at but don't
+capture themselves.
 
 ## How that's different from "ask an LLM about the diff"
 
