@@ -53,7 +53,13 @@ export default defineConfig({
           href: "https://github.com/masondelan/selvedge",
         },
       ],
-      customCss: ["./src/styles/selvedge.css"],
+      customCss: [
+        // Self-hosted, same-origin fonts (no third-party request). Variable
+        // weights cover the 400/500/600/700 the wordmark + body use.
+        "@fontsource-variable/inter/index.css",
+        "@fontsource-variable/jetbrains-mono/index.css",
+        "./src/styles/selvedge.css",
+      ],
       components: {
         // Override the default Starlight hero with our own that includes
         // the wordmark + selvedge stripe + install command.
