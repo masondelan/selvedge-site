@@ -208,7 +208,10 @@
   font-size: 0.95rem;
   text-decoration: none;
   background: transparent;
-  color: var(--selvedge-indigo);
+  /* Label in body ink, not indigo — indigo read greyer than the surrounding
+   * text and made the primary path the faintest thing on screen. Border stays
+   * indigo; the group is still deliberately flat (no filled primary). */
+  color: var(--sl-color-text);
   border: 1px solid var(--selvedge-indigo);
   transition: transform 0.08s ease, background 0.2s ease, color 0.2s ease;
 }
@@ -216,6 +219,13 @@
   transform: translateY(-1px);
   background: var(--selvedge-indigo);
   color: var(--selvedge-paper);
+}
+.selvedge-hero__cta a:focus-visible {
+  outline: 2px solid var(--selvedge-red);
+  outline-offset: 2px;
+}
+:root[data-theme="dark"] .selvedge-hero__cta a:focus-visible {
+  outline-color: var(--selvedge-red-bright);
 }
 :root[data-theme="dark"] .selvedge-hero__cta a {
   color: var(--selvedge-ecru);
@@ -246,44 +256,25 @@
   font-weight: 600;
 }
 
-/* Value props grid (used on landing) */
-.selvedge-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.2rem;
-  margin-top: 2rem;
-}
-.selvedge-card {
-  padding: 1.2rem 1.3rem;
-  background: var(--sl-color-bg-nav);
-  border: 1px solid var(--sl-color-hairline);
-  border-radius: 0.5rem;
-  border-left: 3px solid var(--selvedge-red);
-}
-.selvedge-card h3 {
-  margin: 0 0 0.4rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--sl-color-text);
-}
-.selvedge-card p {
+/* Provenance line under the install chip — open/maintained/local, in one
+ * muted breath. Facts, not endorsement; keep the version synced on release. */
+.selvedge-hero__meta {
   margin: 0;
-  font-size: 0.92rem;
-  color: var(--sl-color-gray-2);
-  line-height: 1.5;
+  font-size: 0.82rem;
+  color: var(--sl-color-gray-3);
+  letter-spacing: 0.01em;
 }
 
-/* Footer */
-.selvedge-footer {
-  border-top: 1px solid var(--sl-color-hairline);
-  margin-top: 4rem;
-  padding-block: 2rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 2rem;
-  justify-content: space-between;
-  font-size: 0.88rem;
-  color: var(--sl-color-gray-3);
+/* Value cards — run the selvedge thread down the left edge of the real
+ * Starlight <Card> components on the splash. (The old bespoke .selvedge-card /
+ * .selvedge-grid / .selvedge-footer rules that lived here were never wired to
+ * any markup, so they're gone — this is the treatment they were reaching for,
+ * applied to the cards that actually render.) */
+.card {
+  border-inline-start: 3px solid var(--selvedge-red);
+}
+:root[data-theme="dark"] .card {
+  border-inline-start-color: var(--selvedge-red-bright);
 }
 
 /* Reduce sidebar font weight contrast — Starlight default is loud */
