@@ -34,6 +34,13 @@
     overflow: hidden;
     background: var(--selvedge-ecru);
   }
+  /* In dark mode the light terminal is a bright slab against the darkest part
+   * of the page. Wrap it in a dark bezel so it reads as a screen, not a hole. */
+  :global(:root[data-theme="dark"]) .terminal-demo__frame {
+    background: var(--selvedge-indigo-deep);
+    border-color: var(--sl-color-hairline);
+    padding: 10px;
+  }
   .terminal-demo__frame iframe {
     display: block;
     width: 100%;

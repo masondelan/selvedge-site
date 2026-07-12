@@ -136,6 +136,20 @@
   font-weight: 600;
 }
 
+/* Section dividers as a short red "cut thread" rather than a full-width rule —
+ * the one place the selvedge-thread metaphor used to drop out of the page. */
+.sl-markdown-content hr {
+  border: 0;
+  width: 40px;
+  height: 2px;
+  margin: 3rem auto;
+  background: var(--selvedge-red);
+  border-radius: 1px;
+}
+:root[data-theme="dark"] .sl-markdown-content hr {
+  background: var(--selvedge-red-bright);
+}
+
 /* Hero overrides (used by SelvedgeHero.astro) */
 .selvedge-hero {
   --hero-pad-y: clamp(2rem, 5vw, 4rem);
@@ -154,7 +168,10 @@
 
 .selvedge-hero__stripe {
   width: 4px;
-  height: 3.5rem;
+  /* Track the wordmark's height instead of a fixed rem — at the mobile clamp
+   * floor the old 3.5rem stood ~half a line taller than the letters. */
+  align-self: stretch;
+  min-height: 2.2rem;
   background: var(--selvedge-red);
   border-radius: 1px;
 }
