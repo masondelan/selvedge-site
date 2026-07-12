@@ -276,17 +276,6 @@
   font-weight: 600;
 }
 
-/* Provenance line under the install chip — open/maintained/local, in one
- * muted breath. Facts, not endorsement; keep the version synced on release. */
-.selvedge-hero__meta {
-  /* Sits just under the CTA row as a quiet footer line — pulled up from the
-   * full hero grid gap so it reads as attached to the buttons, not orphaned. */
-  margin: -0.7rem 0 0;
-  font-size: 0.82rem;
-  color: var(--sl-color-gray-3);
-  letter-spacing: 0.01em;
-}
-
 /* Value cards — run the selvedge thread down the left edge of the real
  * Starlight <Card> components on the splash. (The old bespoke .selvedge-card /
  * .selvedge-grid / .selvedge-footer rules that lived here were never wired to
