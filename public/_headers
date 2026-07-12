@@ -1,18 +1,19 @@
 # Cloudflare Pages headers — long-cache assets, no-cache HTML, and a site CSP.
-# CSP notes: 'unsafe-inline' = Starlight's inline theme script; 'unsafe-eval' +
-# blob: = the embedded /terminal-demo.html bundle (it string-evals its runtime and
-# materializes its own inlined React/asset bytes via blob: — no CDN) — and
-# 'unsafe-eval' also covers Pagefind's wasm search. Fonts are self-hosted
-# (@fontsource, same-origin), so there is NO third-party origin in this policy at
-# all; it blocks every other origin, clickjacking, and base-uri/object/form-action
-# injection.
+# CSP notes: 'unsafe-inline' = Starlight's inline theme script. The embedded
+# /terminal-demo.html bundle string-evals its runtime and materializes resources
+# via blob: ('unsafe-eval' + blob:), loads React from unpkg.com at runtime, and
+# pulls its own web fonts from fonts.googleapis/gstatic — those origins exist for
+# the DEMO iframe, NOT the main site (whose fonts are self-hosted via @fontsource).
+# 'unsafe-eval' also covers Pagefind's wasm search. Vendoring the demo to drop the
+# unpkg + Google origins is a tracked follow-up; even so this CSP blocks every other
+# origin, clickjacking, and base-uri/object/form-action injection.
 
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), camera=(), microphone=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; font-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; worker-src 'self' blob:; connect-src 'self' blob:
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; font-src 'self' data: blob: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://unpkg.com; worker-src 'self' blob:; connect-src 'self' blob: https://unpkg.com
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
