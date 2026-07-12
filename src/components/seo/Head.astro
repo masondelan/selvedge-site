@@ -91,7 +91,25 @@ const softwareApplication = {
   description: ONE_LINER,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   softwareRequirements: 'Python 3.10+',
+  softwareVersion: '0.3.9.1', // keep in sync on release
+  license: 'https://opensource.org/licenses/MIT',
   downloadUrl: 'https://pypi.org/project/selvedge/',
+  sameAs: [
+    'https://github.com/masondelan/selvedge',
+    'https://pypi.org/project/selvedge/',
+    'https://smithery.ai/server/masondelan/selvedge',
+    'https://glama.ai/mcp/servers/masondelan/selvedge',
+    'https://mcpservers.org/servers/masondelan/selvedge',
+  ],
+  featureList: [
+    'Captures the reasoning behind each change, live, as the agent works',
+    'Entity-level attribution (DB columns, tables, env vars, deps, API routes, functions)',
+    'prior_attempts surfaces paths already tried and reverted, with the reason',
+    'Changesets group related changes across many files',
+    'Full-text search over change history',
+    'Exports to the Agent Trace format',
+    'Local SQLite storage — no account, no telemetry by default',
+  ],
   publisher: { '@id': `${SITE}/#org` },
 };
 
@@ -155,12 +173,32 @@ const faqNode =
       }
     : null;
 
+// Breadcrumb trail (Home > this page). The sidebar groups (start, compare, …)
+// are not real pages, so the trail stays two levels — both indexable URLs —
+// rather than linking crumbs to URLs that 404.
+const breadcrumbNode = isHome
+  ? null
+  : {
+      '@type': 'BreadcrumbList',
+      '@id': `${pageUrl}#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+        { '@type': 'ListItem', position: 2, name: pageTitle, item: pageUrl },
+      ],
+    };
+
 // Build a graph so all entities share IDs and Google can connect them.
 const graph: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@graph': isHome
     ? [organization, website, softwareApplication]
-    : [organization, website, ...(pageNode ? [pageNode] : []), ...(faqNode ? [faqNode] : [])],
+    : [
+        organization,
+        website,
+        ...(pageNode ? [pageNode] : []),
+        ...(breadcrumbNode ? [breadcrumbNode] : []),
+        ...(faqNode ? [faqNode] : []),
+      ],
 };
 ---
 
