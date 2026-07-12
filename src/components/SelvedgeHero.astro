@@ -31,10 +31,6 @@ const data = entry.data.hero;
     pip install selvedge
   </code>
 
-  <p class="selvedge-hero__meta">
-    Open source (MIT) · v0.3.9.1 · runs locally, no account
-  </p>
-
   {data?.actions && data.actions.length > 0 && (
     <div class="selvedge-hero__cta">
       {data.actions.map((a: any) => (
@@ -47,4 +43,8 @@ const data = entry.data.hero;
       ))}
     </div>
   )}
+
+  <p class="selvedge-hero__meta">
+    Open source (MIT) · v0.3.9.1 · runs locally, no account
+  </p>
 </section>
