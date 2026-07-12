@@ -9,7 +9,9 @@
  * for code blocks. Everything else is Starlight defaults overridden minimally.
  */
 
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap");
+/* Fonts are self-hosted via @fontsource-variable (registered in
+ * astro.config.mjs customCss) — no Google Fonts request. The "Variable"
+ * families come first; the plain names stay as a fallback. */
 
 :root {
   /* brand */
@@ -23,10 +25,11 @@
   --selvedge-paper: #faf6ec;
 
   /* fonts */
-  --__sl-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
-  --__sl-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
-    Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --__sl-font: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --__sl-font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace,
+    SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
 }
 
 /* Light mode = warm paper + indigo ink */
