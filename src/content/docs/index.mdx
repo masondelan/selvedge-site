@@ -62,10 +62,20 @@ that format.
   </Card>
 </CardGrid>
 
-And it reads back: before editing an entity, your agent calls [`prior_attempts`](/prior-attempts/)
-to see what was already tried and reverted — active memory, so it doesn't repeat a mistake the
-team already undid. Full case study, with the exact tool call and what the agent did instead:
-[stop your agent repeating reverted mistakes](/prior-attempts/).
+And it reads back. Before editing an entity, your agent calls
+[`prior_attempts`](/prior-attempts/) — and gets back what was already tried there, and
+how it ended:
+
+```jsonc
+prior_attempts({ "entity_path": "users.auth_token" })
+// → one hit, outcome: "reverted" (2026-03-12)
+//   "Tokens in the DB meant we couldn't revoke without a write; moved to
+//    short-lived JWTs verified statelessly. Column unused."
+```
+
+So the agent doesn't re-add a column the team already pulled — it plans around the
+reason instead. No line-attribution tool surfaces a rejected path at all.
+[Full case study, with the plan it chose instead →](/prior-attempts/)
 
 ---
 
