@@ -63,7 +63,7 @@ You have access to Selvedge (MCP server: `selvedge`) for change tracking.
 Rules:
 - Call `selvedge.log_change` immediately after adding, modifying, or removing any DB column, table, function, API endpoint, dependency, or env variable.
 - Set `reasoning` to the user's original request or the problem being solved. Write at least one full sentence.
-- Set `agent` to "claude-code" (or whichever agent you are).
+- Set `agent` to the tool you're using, e.g. "claude-code", "cursor", or "codex".
 - Set `git_commit` to the commit hash once you know it.
 - For multi-entity changes, set a shared `changeset_id` on all related calls (a short slug like `add-stripe-billing`).
 - Before editing an entity, call `selvedge.prior_attempts` on it — if the same change was tried before and reverted, you'll see the prior reasoning and why it was rejected, and can change your plan instead of repeating a rejected approach.

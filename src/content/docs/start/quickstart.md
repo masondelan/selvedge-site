@@ -75,9 +75,15 @@ cd your-project
 selvedge init
 ```
 
-### 2. Add to your AI tool's config
+### 2. Register the MCP server
 
-For Claude Code (`~/.claude/config.json`):
+Selvedge is a standard stdio MCP server, so it works with any MCP client. For Claude Code:
+
+```bash
+claude mcp add selvedge -- selvedge-server
+```
+
+Or commit a project-level `.mcp.json` so your whole team gets it:
 
 ```json
 {
@@ -89,14 +95,15 @@ For Claude Code (`~/.claude/config.json`):
 }
 ```
 
-For Cursor: `~/.cursor/mcp.json` (same shape). For Copilot:
-`.github/copilot-instructions.md` (different format — see `selvedge prompt --help`).
+Using something else? Every editor has a step-by-step page — [Cursor](/mcp/cursor/), [VS Code](/mcp/vscode/), [Windsurf](/mcp/windsurf/), [Cline](/mcp/cline/), [Continue](/mcp/continue/) — or paste the same `mcpServers` block into your client's config.
 
 ### 3. Tell your agent to use it
 
 ```bash
 selvedge prompt --install CLAUDE.md
 ```
+
+Point `--install` at whichever prompt file your client reads — the block is identical across clients: `CLAUDE.md` (Claude Code), `AGENTS.md` (Codex and other `AGENTS.md`-aware tools), `.cursor/rules/selvedge.md` or `.cursorrules` (Cursor), `GEMINI.md` (Gemini CLI).
 
 This installs the canonical agent-instructions block, sentinel-bracketed
 (`<!-- selvedge:start -->` / `<!-- selvedge:end -->`) so future `--install` calls update
