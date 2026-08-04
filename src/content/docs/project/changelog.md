@@ -7,6 +7,32 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the three most recent releases for
 at-a-glance browsing.
 
+## v0.3.9.2 — 2026-07-23
+
+**The Claude Code plugin, from scaffolding to first-class.** `/plugin install
+selvedge@selvedge` is now a complete, zero-prior-install setup: a bootstrapping
+launcher (existing install → `uvx` → `pipx`), the agent-instructions as a
+bundled skill, the PreToolUse enforcement hook, and four slash commands
+(`/selvedge:status`, `blame`, `history`, `prior-attempts`). **No store, schema,
+or tool-surface change** — the MCP server is byte-identical to 0.3.9.1. Drop-in
+for anyone on 0.3.9.x.
+
+### What the plugin ships
+
+The launcher tries an existing install first, then `uvx`, then `pipx`, so a
+fresh machine needs nothing preinstalled and anyone who already has Selvedge on
+their `PATH` keeps their exact version. The bundled skill is generated from the
+same block `selvedge prompt` installs, so the plugin and the hand-written prompt
+can't drift. The enforcement hook uses the same matcher as `selvedge setup`, and
+double-registration is harmless — the gate is read-only and its verdict is
+deterministic.
+
+### npm shim
+
+`npx selvedge-mcp` now pins the server through a dedicated `pypiVersion` field,
+decoupled from the shim's own npm version (npm's semver can't hold a
+four-segment PEP 440 version like 0.3.9.2).
+
 ## v0.3.9.1 — 2026-07-10
 
 **The dev.to feedback release.** Every item here was publicly promised as "a
@@ -124,69 +150,10 @@ in the source repo.
   preservation, line-range extraction, collapse-by-session, reasoning-quality
   passthrough, schema validation, and CLI integration.
 
-## v0.3.8 — 2026-06-16
-
-**Active memory v1 (date-based).** Selvedge's append-only log learns to know
-when its own data is stale. A decision can now carry a revisit date, and the
-new **`stale_decisions`** tool surfaces decisions that have aged out — but only
-the ones whose entity is *still in active use*, so an old-but-correct decision
-nobody touches never nags. One new MCP tool (→ **8** total). **Drop-in upgrade
-for anyone on 0.3.7.**
-
-### `revisit_after` + `stale_decisions` — decisions with an expiry date
-
-**`revisit_after` on `log_change` (MCP) and `selvedge log` (CLI).** Set a
-revisit date on an architectural change — an ISO-8601 date *or* a relative
-offset from the event's timestamp (e.g. `90d`, `6mo`), normalized with the same
-grammar as `--since`. Stored on the event and consumed by `stale_decisions` /
-`selvedge stale`.
-
-**`stale_decisions` MCP tool — the 8th tool.** Returns events whose
-`revisit_after` has passed **AND** whose entity is still in active use. The
-required active-use signal is one of: the entity was queried
-(`blame` / `diff` / `prior_attempts`) at or after the decision was logged, or
-the decision's `changeset_id` saw later sibling activity. **Pure age alone
-never surfaces** — that's the noise defense against old-but-correct decisions.
-Each result carries `revisit_due`, `days_overdue`, `active_use_signals`, and a
-templated `stale_reason`. Filterable by `entity_path`, `project`, `agent`.
-Templated, no LLM.
-
-The pattern-based half of active memory (the `expires_when` grammar and
-explicit `reject` / `revert` change types) lands in v0.3.11; the v0.3.8 schema
-migration adds the `expires_when` column now so v0.3.11 is a no-migration
-release.
-
-### CLI parity for the wedge + CLI-awareness
-
-**`selvedge prior-attempts <entity>`** lands — CLI parity for the v0.3.7
-`prior_attempts` wedge, previously the only MCP tool without a CLI command. A
-thin presenter over the same `get_prior_attempts` store, so `--json` emits the
-identical list the MCP tool returns and the two surfaces can't diverge. ENTITY
-(positional) xor `--description`; `--all` widens recall to `proximity_low`;
-`--window` (e.g. `7d`, `60m`) maps onto the proximity window. An empty result is
-the normal, good answer (exit 0).
-
-**`selvedge stale`** mirrors `stale_decisions` — the same data surface,
-Rich-formatted, with `--json` for cron / Slack / digest jobs. Filters by
-`--entity`, `--project`, `--agent`.
-
-And the canonical agent-instructions block now names the CLI equivalents
-alongside the MCP tools, so a shell-having agent is never blocked when the MCP
-server isn't loaded. Selvedge stays **MCP-first**; the CLI is the additive
-second path.
-
-### Migration
-
-**Schema migration v3** adds `revisit_after` and `expires_when` to `events`
-(both nullable). In SQLite an `ALTER TABLE ADD COLUMN` of a nullable, default-less
-column is a metadata-only edit — the table isn't rewritten — so even a
-multi-million-event database migrates in well under a second on the next
-connection. `test_migrations_perf.py` gates this at 10k / 100k / 1M events.
-
 ---
 
 [**Full CHANGELOG.md →**](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md)
-in the source repo. Includes 0.3.7 (the `prior_attempts` wedge + entity
+in the source repo. Includes 0.3.8 (active memory v1 — revisit dates + `stale_decisions`), 0.3.7 (the `prior_attempts` wedge + entity
 canonicalization foundation), 0.3.6 (stay-current + retention basics —
 background PyPI version check, `selvedge prune` for `tool_calls`),
 0.3.5 (recovery basics — `selvedge verify`,
