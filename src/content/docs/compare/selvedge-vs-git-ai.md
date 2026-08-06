@@ -10,7 +10,7 @@ Git AI stores attribution metadata in git notes and plugs into the Agent Trace a
 |---|---|---|
 | **Reasoning source** | **Captured live**, by the agent in the same context that produced the change | Attribution metadata |
 | **Granularity** | **Entity** — DB column, table, env var, dep, API route, function | Line |
-| **Mechanism** | **MCP server** — the agent calls it as work happens | Git hook + Agent Trace alliance |
+| **Mechanism** | **MCP server** — the agent calls it as work happens | Agent-invoked checkpoint → Git notes at commit |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None |
 | **Storage** | SQLite, zero deps | Git notes |
@@ -19,6 +19,7 @@ Git AI stores attribution metadata in git notes and plugs into the Agent Trace a
 
 - **Reasoning, not just attribution.** Git AI records *who/what* touched a line. Selvedge records *why*, in the agent's own words, captured live.
 - **A query layer.** `selvedge blame`, `diff`, `history`, `changeset`, and `search` are first-class. Git-notes attribution has no equivalent CLI you can pipe.
+- **Continuous vs. cooperative.** Git AI's own README states it does *not* rely on git hooks: the agent calls `git-ai checkpoint`, and attribution lands in git notes at commit time. That is cooperative snapshotting — it records what the agent chose to check point, when it chose to. Selvedge captures at the moment of each change.
 - **Agent Trace interop, not rivalry.** Selvedge emits [Agent Trace](https://github.com/cursor/agent-trace) records too — see the [Agent Trace interop page](/compare/agent-trace/). The two layers compose: Git AI / Selvedge produce, downstream tools consume.
 - **Entity-level + changesets** for querying the history of a column or a whole feature, not a line.
 

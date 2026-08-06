@@ -29,6 +29,10 @@ export const mcpItems = [
 
 export const compareItems = [
   {
+    "label": "Selvedge vs. OpenLore",
+    "link": "/compare/selvedge-vs-openlore/"
+  },
+  {
     "label": "Selvedge vs. AgentDiff",
     "link": "/compare/selvedge-vs-agentdiff/"
   },
