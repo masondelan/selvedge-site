@@ -77,9 +77,9 @@ export const clients = [
     slug: "claude-code",
     name: "Claude Code",
     description:
-      "Add Selvedge to Claude Code in one command (claude mcp add) or via the plugin marketplace, so the agent logs why each change happened and checks prior attempts first.",
+      "Add Selvedge to Claude Code via the plugin (two commands, no prior pip install — it bootstraps the server) or a single claude mcp add, so the agent logs why each change happened and checks prior attempts first.",
     blurb:
-      "Claude Code has a first-class MCP CLI, so the fastest path is a single `claude mcp add`. There's also a plugin-marketplace install and the auto-detecting `selvedge setup` wizard.",
+      "Two ways in: the **plugin** (`/plugin install`, no prior `pip install` — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.",
     oneClick: null,
     command: {
       intro: "The fastest path — register the stdio server with one command:",
@@ -88,11 +88,11 @@ export const clients = [
       note: "Add `--scope user` to make it available across all your projects, or `--scope project` to write a shared `.mcp.json` you can commit so the whole team gets it. Local scope (the default) keeps it to you in the current project.",
     },
     altInstall: {
-      title: "Plugin marketplace (Claude-Code-only alternative)",
+      title: "Install as a Claude Code plugin (no prior pip install)",
       lang: "text",
       snippet: `/plugin marketplace add masondelan/selvedge
 /plugin install selvedge@selvedge`,
-      note: "Run `pip install selvedge` first either way — the plugin wires the MCP server but does not install the Python package that provides `selvedge-server`.",
+      note: "Two commands — the plugin bootstraps the server via `uvx`/`pipx`, so no prior `pip install` is needed. One install brings the MCP server, a skill that tells the agent when to use it, the PreToolUse enforcement hook, and the `/selvedge:status`, `blame`, `history`, and `prior-attempts` slash commands. Prefer a pinned install? `pip install selvedge` and the launcher uses it instead of uvx.",
     },
     configPath: "`~/.claude.json` (local/user scope) or `.mcp.json` at the project root (project scope)",
     configLang: "json",
