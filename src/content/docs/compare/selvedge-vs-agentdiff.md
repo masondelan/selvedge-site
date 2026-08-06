@@ -10,7 +10,7 @@ Both answer "why did the agent write this?" — but they capture the answer at o
 |---|---|---|
 | **Reasoning source** | **Captured live**, by the agent in the same context that produced the change | Inferred post-hoc by Claude Haiku from the diff at session end ([sunilmallya/agentdiff](https://github.com/sunilmallya/agentdiff); not to be confused with [codeprakhar25/agentdiff](https://github.com/codeprakhar25/agentdiff), which does signed cross-agent provenance) |
 | **Granularity** | **Entity** — DB column, table, env var, dep, API route, function | Line |
-| **Mechanism** | **MCP server** — the agent calls it as work happens | Git pre/post-commit hook |
+| **Mechanism** | **MCP server** — the agent calls it as work happens | Claude Code lifecycle hooks → local daemon |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None |
 | **Storage** | SQLite, zero deps | JSONL on disk |

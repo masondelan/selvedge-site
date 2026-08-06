@@ -10,7 +10,7 @@ BlamePrompt records the prompt behind a line. Selvedge records the full structur
 |---|---|---|
 | **Reasoning source** | **Captured live**, by the agent in the same context that produced the change | Prompt-only |
 | **Granularity** | **Entity** — DB column, table, env var, dep, API route, function | Line |
-| **Mechanism** | **MCP server** — the agent calls it as work happens | Git hook |
+| **Mechanism** | **MCP server** — the agent calls it as work happens | Agent-lifecycle hooks + post-commit hook |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None |
 | **Storage** | SQLite, zero deps | Local |

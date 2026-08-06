@@ -227,7 +227,7 @@ export const comparisons = [
     them: {
       reasoning: "Inferred post-hoc by Claude Haiku from the diff at session end ([sunilmallya/agentdiff](https://github.com/sunilmallya/agentdiff); not to be confused with [codeprakhar25/agentdiff](https://github.com/codeprakhar25/agentdiff), which does signed cross-agent provenance)",
       granularity: "Line",
-      mechanism: "Git pre/post-commit hook",
+      mechanism: "Claude Code lifecycle hooks → local daemon",
       grouping: "None",
       priorAttempts: "None",
       storage: "JSONL on disk",
@@ -245,25 +245,27 @@ export const comparisons = [
     slug: "origin",
     tool: "Origin",
     description:
-      "Selvedge vs. Origin: MCP-server capture in the agent's context vs. commit-time git-hook capture. Entity-level history and changesets vs. line-level local storage.",
+      "Selvedge vs. Origin: stated reasoning captured through MCP vs. automatic prompt receipts from agent lifecycle hooks. Entity-level rejected paths vs. line-level git-notes attribution.",
     summary:
-      "Origin captures at commit time through a git hook. Selvedge captures *during* the work through MCP — so the why is tied to the agent's reasoning, not reconstructed at commit boundaries.",
+      "Origin ([opsworks-co/origin-cli](https://github.com/opsworks-co/origin-cli)) captures automatically — agent lifecycle hooks record prompt receipts live, per turn, anchored to commits in git notes. Selvedge captures the agent's *stated reasoning* through MCP. The trade is coverage vs. content: receipts everywhere, or testimony where it matters.",
     them: {
-      reasoning: "Captured at commit time",
+      reasoning:
+        "Prompt receipts, captured live per turn — prompt, diff, tokens; no stated rationale",
       granularity: "Line",
-      mechanism: "Git hook",
-      grouping: "None",
-      priorAttempts: "None",
-      storage: "Local",
+      mechanism: "Agent lifecycle hooks + global git post-commit hook",
+      grouping: "Branch-level `trail` view; no entity-spanning changesets",
+      priorAttempts:
+        "None — `rework` flags reverted AI code post-hoc, without rationale",
+      storage: "Git notes (`refs/notes/origin`) + a sessions branch; optional cloud sync",
     },
     differences: [
-      "**Capture point.** Origin fires at commit time; a single agent session that makes five decisions and one commit collapses to one capture moment. Selvedge logs each structural change as the agent makes it, decision by decision.",
+      "**Receipts vs. testimony.** Origin records what the prompt and the diff were — automatically, across a dozen-plus agents. Selvedge records what the agent *said it was doing and why*, from the context that had the reasoning. A receipt can tell you a change followed a prompt; it can't tell you which alternatives were weighed and killed.",
+      "**Rejected paths.** Origin's `rework` command detects AI code that was later reverted or heavily modified — a post-hoc diff heuristic yielding a rework-rate report, with no rationale attached and no queryable record of *why* the approach died. Selvedge's `prior_attempts` returns the tried → reverted → re-opened trail with the stated reason at each step.",
       "**Entity-level granularity.** Selvedge's unit is the column / env var / route / dependency / function, with prefix queries — not lines that drift as the file evolves.",
-      "**Read path for the agent.** `prior_attempts`, `blame`, `diff`, and `stale_decisions` are callable by the agent mid-task. Origin is write-oriented.",
-      "**Changesets** tie a whole feature's events together across many files and PRs.",
+      "**Read path for the agent.** `prior_attempts`, `blame`, `diff`, and `stale_decisions` are callable by the agent mid-task, and the SessionStart digest pushes standing verdicts into new sessions. Origin's queries (`origin why`, `origin blame`, session search) are developer-facing; nothing pushes a prior verdict back into the agent's context.",
     ],
     whenThem:
-      "If your workflow is commit-centric and you want attribution that lives entirely in the git hook with no MCP server in the loop, Origin's commit-time model is a lighter touch.",
+      "If you want automatic, zero-cooperation capture across a dozen-plus agents — prompts, diffs, and token costs riding along in git notes with optional cloud sync — Origin's coverage and near-zero adoption friction beat an MCP-cooperation model. Reach for Selvedge when what you need back is the reasoning and the rejected paths, not the receipts.",
   },
   {
     slug: "git-ai",
@@ -300,7 +302,7 @@ export const comparisons = [
     them: {
       reasoning: "Prompt-only",
       granularity: "Line",
-      mechanism: "Git hook",
+      mechanism: "Agent-lifecycle hooks + post-commit hook",
       grouping: "None",
       priorAttempts: "None",
       storage: "Local",
