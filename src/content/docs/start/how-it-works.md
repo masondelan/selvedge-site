@@ -26,9 +26,11 @@ prose.
    reading the same SQLite file. The MCP server queries the same file too, so agents
    can ask their own history when they need context.
 
-There is no network hop, no account, no telemetry, no cloud anything. The only thing
-crossing a process boundary is the JSON-RPC stdio between your AI tool and
-`selvedge-server`.
+There is no network hop on the data path, no account, no cloud anything. The only
+thing crossing a process boundary is the JSON-RPC stdio between your AI tool and
+`selvedge-server`. (Selvedge can make two requests unrelated to your data: an opt-in
+usage heartbeat, off unless you enable it, and a PyPI version check. Neither sends
+code, paths, diffs, or reasoning.)
 
 ## What lives in the SQLite file
 

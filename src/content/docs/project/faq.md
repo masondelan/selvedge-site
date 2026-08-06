@@ -17,10 +17,15 @@ Yes. MIT-licensed. Source: [github.com/masondelan/selvedge](https://github.com/m
 In a SQLite file under `.selvedge/selvedge.db` next to your code (or
 `~/.selvedge/selvedge.db` if no project DB is found and you didn't `selvedge init`).
 
-It does not leave your machine. There's no telemetry, no remote endpoint, no opt-in or
-opt-out — the data simply doesn't go anywhere by default. The roadmap includes an
-optional HTTP layer (v0.4.1) for self-hosted team servers; it's never sending data to
-us.
+Your code, file paths, diffs, and reasoning never leave your machine. Nothing in the
+store is ever transmitted.
+
+To be precise rather than absolute: Selvedge can make two outbound requests, and
+neither one carries any of that. A usage heartbeat is **strictly opt-in** — nothing is
+sent unless you turn it on, and `SELVEDGE_TELEMETRY=0` disables it unconditionally. A
+version check queries PyPI's public JSON API to tell you when a newer release exists.
+Both are off the data path entirely. The roadmap includes an optional HTTP layer
+(v0.4.1) for self-hosted team servers; it's never sending data to us.
 
 ## Can I commit `.selvedge/` to git?
 

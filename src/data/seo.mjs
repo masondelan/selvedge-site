@@ -188,14 +188,44 @@ export const clients = [
 
 export const comparisons = [
   {
+    slug: "openlore",
+    tool: "OpenLore",
+    description:
+      "Selvedge vs. OpenLore: two deterministic, local-first memory layers for coding agents. The split is testimony vs. derivation \u2014 and what each one does with a rejected decision.",
+    summary:
+      "OpenLore is the closest thing to Selvedge in the category, and the most useful comparison because of it: both are local-first, both are deterministic, and neither puts an LLM in the retrieval path. The difference is where the memory comes from, and what survives in it.",
+    them: {
+      reasoning:
+        "**Derived** \u2014 tree-sitter static analysis of code state, plus commit-gated decision notes",
+      granularity: "AST node (18 languages + 12 IaC)",
+      mechanism: "MCP server \u2014 one-time index + commit-time certificates",
+      grouping: "Call-graph edges",
+      priorAttempts:
+        "Purged \u2014 `rejected` is an inactive status, dropped from the queryable store after each decision sync",
+      storage: "SQLite graph in `.openlore/`",
+    },
+    differences: [
+      "**Determinism is shared ground here, not a differentiator.** Against most of this category Selvedge leads on having no model in the storage or retrieval path. OpenLore is deterministic-native too \u2014 its own description is \"no LLM in the hot path\" \u2014 so that argument doesn't separate the two, and we won't pretend it does.",
+      "**Testimony vs. derivation.** OpenLore derives what it knows from the code as it stands: a static analysis can always be recomputed, so it can only ever describe the state that survived. Selvedge stores what the agent *said* at the time. Testimony is not re-derivable from the repository, which is exactly why it's worth keeping.",
+      "**What happens to a rejected decision.** This is the sharp one. In OpenLore, `rejected` is one of the inactive statuses, and `purgeInactiveDecisions` drops those from the store after every decision sync \u2014 the annotation survives in the synced spec markdown, but the *queryable record* does not. In Selvedge the store is append-only: a rejection is a first-class, permanent, queryable fact, and `prior_attempts` is built to return it. Nothing in a purged store can answer \"has this been tried, and how did it turn out?\"",
+      "**Entity granularity vs. AST node.** OpenLore's node coverage is broader across languages. Selvedge's entities are the things you search for six months later that have no AST node at all \u2014 `users.email`, `env/STRIPE_SECRET_KEY`, `deps/stripe`.",
+    ],
+    whenThem:
+      "If what you want is a deterministic map of the code as it exists now \u2014 call graphs, AST-level structure, broad language coverage, decisions kept in step with the current spec \u2014 OpenLore is a strong and genuinely well-built fit, and its language coverage is wider than ours. Reach for Selvedge when the question you need answered is about the path *not* taken.",
+  },
+  {
     slug: "agentdiff",
     tool: "AgentDiff",
+    // Two unrelated projects ship under this name. The row below describes
+    // sunilmallya/agentdiff; codeprakhar25/agentdiff is ed25519-signed
+    // cross-agent provenance. An unfalsifiable comparison row is worse
+    // than no row.
     description:
       "Selvedge vs. AgentDiff: captured-live reasoning from the agent's own context vs. reasoning inferred post-hoc by a second LLM from the diff. Entity-level vs. line-level.",
     summary:
       "Both answer \"why did the agent write this?\" — but they capture the answer at opposite ends of the change. AgentDiff infers it *afterward* from the diff; Selvedge records it *as it happens*, from the agent itself.",
     them: {
-      reasoning: "Inferred post-hoc by Claude Haiku from the diff at session end",
+      reasoning: "Inferred post-hoc by Claude Haiku from the diff at session end ([sunilmallya/agentdiff](https://github.com/sunilmallya/agentdiff); not to be confused with [codeprakhar25/agentdiff](https://github.com/codeprakhar25/agentdiff), which does signed cross-agent provenance)",
       granularity: "Line",
       mechanism: "Git pre/post-commit hook",
       grouping: "None",
@@ -203,7 +233,7 @@ export const comparisons = [
       storage: "JSONL on disk",
     },
     differences: [
-      "**Captured live, not inferred.** AgentDiff feeds the finished diff back to a second LLM to *guess* the intent. Selvedge's reasoning is the agent's own words, written from the same context window that produced the change — no second model, no hallucinated rationale, and an empty `reasoning` is itself an honest signal.",
+      "**Testimony, not reconstruction.** AgentDiff feeds the finished diff to a second LLM that never saw the original prompt. What it returns may well be right — the problem is that it is *unverifiable and nonreproducible*: nothing distinguishes an accurate reconstruction from a merely plausible one, and re-running it can categorise the same change differently. Selvedge's reasoning is the agent's own words from the context that produced the change, and an empty `reasoning` is itself an honest signal.",
       "**Entity-level, not line-level.** Selvedge attributes the things you actually search for — `users.email`, `env/STRIPE_SECRET_KEY`, `deps/stripe` — so six months later you query the column, not a line range that has since moved.",
       "**Changesets.** Selvedge groups every event in a multi-file feature under one slug (`add-stripe-billing`); AgentDiff has no grouping.",
       "**It reads, too.** `prior_attempts` lets the agent ask \"was this tried and reverted?\" *before* it edits. A post-hoc capture tool only ever writes.",
@@ -245,7 +275,7 @@ export const comparisons = [
     them: {
       reasoning: "Attribution metadata",
       granularity: "Line",
-      mechanism: "Git hook + Agent Trace alliance",
+      mechanism: "Agent-invoked checkpoint \u2192 Git notes at commit",
       grouping: "None",
       priorAttempts: "None",
       storage: "Git notes",
@@ -253,6 +283,7 @@ export const comparisons = [
     differences: [
       "**Reasoning, not just attribution.** Git AI records *who/what* touched a line. Selvedge records *why*, in the agent's own words, captured live.",
       "**A query layer.** `selvedge blame`, `diff`, `history`, `changeset`, and `search` are first-class. Git-notes attribution has no equivalent CLI you can pipe.",
+      "**Continuous vs. cooperative.** Git AI's own README states it does *not* rely on git hooks: the agent calls `git-ai checkpoint`, and attribution lands in git notes at commit time. That is cooperative snapshotting \u2014 it records what the agent chose to check point, when it chose to. Selvedge captures at the moment of each change.",
       "**Agent Trace interop, not rivalry.** Selvedge emits [Agent Trace](https://github.com/cursor/agent-trace) records too — see the [Agent Trace interop page](/compare/agent-trace/). The two layers compose: Git AI / Selvedge produce, downstream tools consume.",
       "**Entity-level + changesets** for querying the history of a column or a whole feature, not a line.",
     ],

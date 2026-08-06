@@ -91,7 +91,7 @@ const softwareApplication = {
   description: ONE_LINER,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   softwareRequirements: 'Python 3.10+',
-  softwareVersion: '0.3.9.1', // keep in sync on release
+  softwareVersion: '0.3.10', // keep in sync on release
   license: 'https://opensource.org/licenses/MIT',
   downloadUrl: 'https://pypi.org/project/selvedge/',
   sameAs: [
@@ -108,7 +108,7 @@ const softwareApplication = {
     'Changesets group related changes across many files',
     'Full-text search over change history',
     'Exports to the Agent Trace format',
-    'Local SQLite storage — no account, no telemetry by default',
+    'Local SQLite storage — no account, and your code never leaves the machine',
   ],
   publisher: { '@id': `${SITE}/#org` },
 };
@@ -254,7 +254,7 @@ const graph: Record<string, unknown> = {
           name: 'Where does my data live?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "In a SQLite file under .selvedge/selvedge.db next to your code (or ~/.selvedge/selvedge.db if no project DB is found and you didn't selvedge init). It does not leave your machine. There's no telemetry, no remote endpoint, no opt-in or opt-out — the data simply doesn't go anywhere by default. The roadmap includes an optional HTTP layer (v0.4.1) for self-hosted team servers; it's never sending data to us.",
+            text: "In a SQLite file under .selvedge/selvedge.db next to your code (or ~/.selvedge/selvedge.db if no project DB is found and you didn't selvedge init). Your code, paths, diffs, and reasoning never leave your machine. Selvedge can make two outbound requests and neither carries any of it: a strictly opt-in usage heartbeat (off unless you enable it) and a PyPI version check. The roadmap includes an optional HTTP layer (v0.4.1) for self-hosted team servers; it's never sending data to us.",
           },
         },
         {

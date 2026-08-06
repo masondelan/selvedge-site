@@ -148,10 +148,12 @@ for the full notes.
 - **Constraint + stale-condition fields** — `constraint` and `stale_when` are
   their own queryable fields; `stale_decisions` flags a decision
   `review_suggested` when a later change matches its `stale_when`.
-- **PreToolUse enforcement hook** — `selvedge setup` installs a Claude Code
-  hook that blocks schema/migration edits until `prior_attempts` has run,
-  returning the prior reasoning as the block message. The gate moved from
-  CLAUDE.md to the tool boundary.
+- **PreToolUse gate** — `selvedge setup` installs a Claude Code hook that
+  blocks schema/migration edits until `prior_attempts` has run, returning the
+  prior reasoning as the block message. The nudge moved from CLAUDE.md to the
+  tool boundary. It is deliberately **not** a security control: every error,
+  miss, or unrecognized shape resolves to *allow*, because a gate that
+  false-blocks a correct edit costs more than one that misses.
 - **Git-history import** — `selvedge import --from-git` seeds pre-Selvedge
   reverts from revert commits + file deletions, idempotent on the commit sha.
   New `change_type="revert"`.

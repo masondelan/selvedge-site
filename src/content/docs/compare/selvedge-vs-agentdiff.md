@@ -8,7 +8,7 @@ Both answer "why did the agent write this?" — but they capture the answer at o
 
 | | Selvedge | AgentDiff |
 |---|---|---|
-| **Reasoning source** | **Captured live**, by the agent in the same context that produced the change | Inferred post-hoc by Claude Haiku from the diff at session end |
+| **Reasoning source** | **Captured live**, by the agent in the same context that produced the change | Inferred post-hoc by Claude Haiku from the diff at session end ([sunilmallya/agentdiff](https://github.com/sunilmallya/agentdiff); not to be confused with [codeprakhar25/agentdiff](https://github.com/codeprakhar25/agentdiff), which does signed cross-agent provenance) |
 | **Granularity** | **Entity** — DB column, table, env var, dep, API route, function | Line |
 | **Mechanism** | **MCP server** — the agent calls it as work happens | Git pre/post-commit hook |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
@@ -17,7 +17,7 @@ Both answer "why did the agent write this?" — but they capture the answer at o
 
 ## Where Selvedge is different
 
-- **Captured live, not inferred.** AgentDiff feeds the finished diff back to a second LLM to *guess* the intent. Selvedge's reasoning is the agent's own words, written from the same context window that produced the change — no second model, no hallucinated rationale, and an empty `reasoning` is itself an honest signal.
+- **Testimony, not reconstruction.** AgentDiff feeds the finished diff to a second LLM that never saw the original prompt. What it returns may well be right — the problem is that it is *unverifiable and nonreproducible*: nothing distinguishes an accurate reconstruction from a merely plausible one, and re-running it can categorise the same change differently. Selvedge's reasoning is the agent's own words from the context that produced the change, and an empty `reasoning` is itself an honest signal.
 - **Entity-level, not line-level.** Selvedge attributes the things you actually search for — `users.email`, `env/STRIPE_SECRET_KEY`, `deps/stripe` — so six months later you query the column, not a line range that has since moved.
 - **Changesets.** Selvedge groups every event in a multi-file feature under one slug (`add-stripe-billing`); AgentDiff has no grouping.
 - **It reads, too.** `prior_attempts` lets the agent ask "was this tried and reverted?" *before* it edits. A post-hoc capture tool only ever writes.

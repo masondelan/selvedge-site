@@ -7,6 +7,81 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the three most recent releases for
 at-a-glance browsing.
 
+## v0.3.10 — 2026-08-05
+
+**Config + delivery.** Two themes: the memory comes to the agent, and the store
+gets its dials.
+
+### The memory comes to the agent
+
+Selvedge already blocked re-edits of reverted entities. What was missing was
+delivery when there is nothing to veto — so two new hooks:
+
+- **SessionStart** injects a compact digest as a session begins: decisions due
+  for a revisit, entities that were tried and reverted, recent changesets.
+- **PreCompact** fires just before context compaction destroys the session's
+  reasoning and names the watched entities you edited but never logged.
+
+Both are quiet when they have nothing to say, size-capped, read-only, and
+templated. Neither can block anything — PreCompact deliberately declines the
+veto the hook API offers it, because blocking compaction doesn't inconvenience
+a tool call, it wedges the session.
+
+This answers a measured failure mode rather than a hunch: two 2026 papers
+recorded pull-model memory tools going unused entirely — zero voluntary memory
+operations across 114 turns against a pre-seeded store — while deterministic
+injection landed every time.
+
+### Captured intent, reviewable in a pull request
+
+`selvedge export --format markdown` renders the store as a human-readable
+digest to commit next to it, grouped by entity with reverted decisions first.
+Deterministic: regenerating with no new events produces a zero-line diff, so it
+stays reviewable instead of becoming noise.
+
+### The store gets its dials
+
+`.selvedge/config.toml` is now first-class, with a canonical precedence chain
+(**CLI flag → env var → project config → global config → default**) that
+`selvedge doctor` prints per setting. `SELVEDGE_DB` remains the one exception
+and always wins for database resolution.
+
+- **`selvedge prune --include-events`** — the first path that can delete
+  captured reasoning, so it needs *both* a confirmation and
+  `SELVEDGE_DESTRUCTIVE=1`. Neither alone is enough: `--yes` in a cron entry
+  defeats a prompt, and a shell profile defeats an env var. Events retention
+  defaults to never.
+- **Event-size bounds** (`diff_bytes`, `reasoning_bytes`) truncate loudly — a
+  marker in the text, a warning at write time, a count in `selvedge stats`.
+- **Secret-shape warnings** at `log_change`, extendable via
+  `redaction_patterns`, plus a `doctor` row that scans what is already stored.
+  Warn, never reject.
+
+### Fixes
+
+Five review issues closed. The PreToolUse hook's allow path is **40% faster**
+(33.6 ms → 20.1 ms per gated call) and `SELVEDGE_HOOK_DISABLE=1` finally
+short-circuits before the imports it was documented to skip. `log_change` no
+longer discards `revisit_after` / `constraint` / `stale_when` on renames and
+supersedes. The CLI's `--json` and the MCP tools now return identical
+structures. The Docker image no longer ships the maintainer's own database.
+
+Tests 826 → 989. Still **8** MCP tools.
+## v0.3.9.3 — 2026-08-01
+
+**Unbreaks `pip install selvedge`, plus a full code-quality pass.** `mcp` 2.0.0
+removed `mcp.server.fastmcp`, and Selvedge declared `mcp>=1.0.0` with no upper
+bound — so every fresh install after 2026-07-28 resolved 2.0.0 and
+`selvedge-server` died at import. That pin is the reason to take this release.
+
+It shipped alongside nine parallel reviews across correctness, concurrency,
+security, performance, API consistency, test quality, code health and
+packaging, with every finding put through an adversarial verification pass
+before it was acted on. Seventeen confirmed defects fixed — the enforcement
+gate no longer false-blocks ordinary reads, entity lookups went from 7.4 ms to
+0.35 ms at 100k events, and `selvedge setup` can no longer damage your
+`CLAUDE.md`. No schema or tool-surface change, so it's drop-in from 0.3.9.x.
+
 ## v0.3.9.2 — 2026-07-23
 
 **The Claude Code plugin, from scaffolding to first-class.** `/plugin install
