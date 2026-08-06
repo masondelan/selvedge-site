@@ -15,7 +15,7 @@
 // there (not here) whenever the tool surface changes.
 
 export const ONE_LINER =
-  "Long-term memory for AI-coded codebases. A git blame for AI agents — but for the why, not just which line which model touched. Captured live, by the agent, as the change happens.";
+  "Long-term memory for AI-coded codebases — including what was already tried and rejected. A git blame for AI agents, for the why rather than which model touched which line — captured live, by the agent, as the change happens.";
 
 /** @typedef {{name: string, text: string}} HowToStep */
 
