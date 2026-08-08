@@ -1,0 +1,117 @@
+---
+title: "Long-term memory for AI coding agents: decisions that survive the session"
+description: Give your AI coding agent memory of past decisions across sessions — entity-keyed, deterministic, in local SQLite. Not another vector store.
+structuredData:
+  type: techarticle
+  # Answers below are verbatim plain-text copies (markdown stripped) of the
+  # visible FAQ section at the bottom of this page — sync on edit.
+  faq:
+    - question: How do I give my AI coding agent long-term memory across sessions?
+      answer: >-
+        Persist decisions, not chat. Selvedge is a local MCP server the agent
+        writes to as it works (log_change, with reasoning) and reads from
+        before it acts (prior_attempts, blame). Everything lands in a SQLite
+        file next to your code, so the next session inherits every decision.
+    - question: Is this a vector database or RAG memory?
+      answer: >-
+        No. Selvedge memory is entity-keyed and deterministic — you ask about
+        users.email and get its actual change history with reasoning, not
+        semantically similar text. No API keys, no LLM in the loop, and no
+        embeddings in the core; one opt-in extra (prior-attempts --fuzzy)
+        ranks results with a small local embeddings model, and even that
+        never writes or rewrites history.
+    - question: Can decisions expire or go stale?
+      answer: >-
+        Yes — that's the point of stale_decisions. Decisions can carry
+        revisit_after dates or stale_when conditions, and the tool surfaces
+        dated decisions that are past due and still in active use.
+    - question: How is this different from session-context tools like Memory Keeper?
+      answer: >-
+        Session-context tools checkpoint what you were doing so a session can
+        resume. Selvedge records what the codebase decided and why, per
+        entity, forever. One restores context; the other answers questions
+        years later. They compose fine.
+    - question: Does the memory work across different agents?
+      answer: >-
+        Yes. Claude Code, Cursor, and Copilot can all write to and read from
+        the same .selvedge/ database — memory is shared per project, not per
+        tool, and selvedge stats shows per-agent logging coverage.
+---
+
+Every AI coding session starts from zero. The agent that added your billing tiers last month made a dozen small decisions — why the parallel column, why the pinned dependency, why *not* the obvious approach — and every one of them evaporated when the context window closed. "Long-term memory" for a coding agent isn't remembering conversations. It's remembering **decisions**, keyed to the things they were about, with the reasoning attached.
+
+Selvedge is an open-source MCP server that does exactly that, with a SQLite file under `.selvedge/` next to your code.
+
+## Memory that answers questions, not vibes
+
+Most "agent memory" is a vector store: embed the past, retrieve whatever's cosine-similar. That's useful for preferences and prose. It's the wrong shape for a codebase, where the questions are exact:
+
+- *What did we decide about `users.email` — and is it still true?*
+- *Was this tried before? How did it end?* → [`prior_attempts`](/prior-attempts/)
+- *What changed last here, and why?* → `blame`
+- *Which decisions are past their revisit date and still load-bearing?* → `stale_decisions`
+
+Selvedge answers these deterministically. Same query, same answer, no model in the loop — which is why an empty result is trustworthy rather than noise. The one semantic feature is opt-in and honest about itself: `prior-attempts --fuzzy` ranks candidates with a small local embeddings model (model2vec, ~30 MB, off by default), and it only *ranks* — nothing ever generates or rewrites the record.
+
+## Memory with a lifecycle
+
+Real decisions have shelf lives. Say an agent pinned Stripe below 12.x after a webhook signature change broke replay verification, and logged the pin with `--revisit-after 2026-07-01`. Once that date passes — and the entity is still in active use — the decision surfaces:
+
+```
+$ selvedge stale
+
+                                  Decisions due for revisit
+
+  Entity        Change   Flag   Due                   Overdue   Why
+ ────────────────────────────────────────────────────────────────────────────────────────────
+  deps/stripe   modify   due    2026-07-01 00:00:00       39d   past its revisit date and
+                                                                still active — the entity
+                                                                was queried
+                                                                (blame/diff/prior_attempts)
+                                                                after the decision.
+```
+
+Note the *still active* part: a decision only surfaces once its date has passed **and** the entity is still in active use — recently queried, or its changeset kept moving. Pure age alone never surfaces, so the list stays short and worth reading. A notes file can't do this. A vector store *really* can't do this — nothing in cosine similarity knows the difference between a decision that's current and one that expired in March. And when a rejected path stops being rejected — the constraint that killed it no longer holds — a `supersede` event re-opens it without rewriting anything: the trail reads tried → reverted → re-opened.
+
+## Things people try first
+
+| Approach | What the next session inherits | Where it breaks |
+|---|---|---|
+| `CLAUDE.md` / notes files | Whatever a human remembered to write | Unstructured, goes stale silently, read once at session start — not at the moment of the edit |
+| Vector memory (mem0, embeddings + RAG) | Semantically similar snippets | Similar ≠ relevant; no entity keys, no expiry, retrieval is probabilistic |
+| Session-context tools ([Memory Keeper](/compare/codebase-memory-mcp-servers/) et al.) | A checkpoint of what you were doing | Restores a session; doesn't answer "why is the code like this" a year later |
+| Knowledge-graph note servers (official `server-memory`) | Entities and relations you manually curate | Nobody curates mid-task; nothing ties notes to actual code changes |
+| Selvedge | Per-entity change history with reasoning, outcomes, and expiry | Blank until the agent starts logging — `selvedge import` backfills from DDL, Alembic, or Agent Trace |
+
+## What Selvedge is
+
+Memory with the shape of a decision log: entity-keyed events carrying the agent's own reasoning, outcomes, and expiry, written live as the work happens. It's 8 MCP tools that also work as a plain CLI: `log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`. MIT licensed. No account, no LLM in the core, and the memory itself never leaves your machine.
+
+```bash
+pip install selvedge
+selvedge setup   # detects Claude Code / Cursor / Copilot, installs the prompt block
+```
+
+[Full quickstart →](/start/quickstart/)
+
+## FAQ
+
+**How do I give my AI coding agent long-term memory across sessions?**
+
+Persist decisions, not chat. Selvedge is a local MCP server the agent writes to as it works (`log_change`, with reasoning) and reads from before it acts (`prior_attempts`, `blame`). Everything lands in a SQLite file next to your code, so the next session inherits every decision.
+
+**Is this a vector database or RAG memory?**
+
+No. Selvedge memory is entity-keyed and deterministic — you ask about `users.email` and get its actual change history with reasoning, not semantically similar text. No API keys, no LLM in the loop, and no embeddings in the core; one opt-in extra (`prior-attempts --fuzzy`) ranks results with a small local embeddings model, and even that never writes or rewrites history.
+
+**Can decisions expire or go stale?**
+
+Yes — that's the point of `stale_decisions`. Decisions can carry `revisit_after` dates or `stale_when` conditions, and the tool surfaces dated decisions that are past due and still in active use.
+
+**How is this different from session-context tools like Memory Keeper?**
+
+Session-context tools checkpoint what you were doing so a session can resume. Selvedge records what the codebase decided and why, per entity, forever. One restores context; the other answers questions years later. They compose fine.
+
+**Does the memory work across different agents?**
+
+Yes. Claude Code, Cursor, and Copilot can all write to and read from the same `.selvedge/` database — memory is shared per project, not per tool, and `selvedge stats` shows per-agent logging coverage.

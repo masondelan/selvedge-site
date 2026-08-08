@@ -81,6 +81,16 @@ export default defineConfig({
           ],
         },
         {
+          // Direct-answer pages: one page per question, phrased the way
+          // people actually ask it. Same pattern as /prior-attempts/.
+          label: "Answers",
+          items: [
+            { label: "Track the why", link: "/track-why/" },
+            { label: "Agent memory", link: "/agent-memory/" },
+            { label: "Audit trail", link: "/audit-trail/" },
+          ],
+        },
+        {
           label: "Reference",
           items: [
             { label: "CLI", link: "/reference/cli/" },
@@ -98,6 +108,7 @@ export default defineConfig({
           items: [
             { label: "Selvedge vs. git blame", link: "/compare/git-blame/" },
             { label: "Selvedge vs. AgentDiff & friends", link: "/compare/agent-tools/" },
+            { label: "Codebase-memory servers", link: "/compare/codebase-memory-mcp-servers/" },
             { label: "Agent Trace interop", link: "/compare/agent-trace/" },
             ...compareItems,
           ],

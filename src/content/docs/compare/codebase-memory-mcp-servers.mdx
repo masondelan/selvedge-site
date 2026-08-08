@@ -1,0 +1,100 @@
+---
+title: Best MCP servers for codebase memory with Claude Code, compared
+description: Codebase-memory MCP servers do four different jobs — code intelligence, session context, general memory, decision provenance. An honest map of which to pick.
+structuredData:
+  type: techarticle
+  # Answers below are verbatim plain-text copies (markdown stripped) of the
+  # visible FAQ section at the bottom of this page — sync on edit.
+  faq:
+    - question: What is the best MCP server for codebase memory with Claude Code?
+      answer: >-
+        It depends which memory you're missing. For code structure and
+        navigation, codebase-memory-mcp or OpenLore. For resuming interrupted
+        sessions, Memory Keeper. For user preferences across apps, mem0 or
+        the official memory server. For decision history — why changes were
+        made and what was already tried and rejected — Selvedge.
+    - question: Do these memory servers replace each other?
+      answer: >-
+        Mostly no — they remember different things. A structure index, a
+        session checkpoint, and a decision log answer different questions,
+        and Claude Code can run several MCP servers side by side.
+    - question: Which codebase memory servers work fully offline?
+      answer: >-
+        codebase-memory-mcp, OpenLore, Memory Keeper, the official memory
+        server, and Selvedge all store locally (SQLite or JSON) with no
+        required cloud. mem0 can self-host; its hosted API is optional.
+    - question: What does Selvedge remember that the others don't?
+      answer: >-
+        Rejected paths, with the reasoning. Selvedge events carry the agent's
+        own reasoning per entity, plus outcomes — and a rejected decision
+        stays queryable instead of being dropped (OpenLore purges rejected
+        decisions from its queryable store after each sync). That's what lets
+        prior_attempts tell an agent the change it's about to make was
+        already tried and reverted, and why.
+---
+
+"Codebase memory" is four different jobs wearing one name. Before picking an MCP server for Claude Code, decide which memory you're actually missing — most disappointment with these tools is a category error, not a quality problem. Here's the honest map, including where Selvedge (that's us) is *not* the right pick.
+
+## The four jobs
+
+| Job | The question it answers | Representative servers |
+|---|---|---|
+| **Code intelligence** | "How is this codebase structured — who calls what?" | codebase-memory-mcp, OpenLore |
+| **Session context** | "What was I doing before this session died?" | Memory Keeper |
+| **General memory** | "What do we know about this user/project?" | mem0, official `server-memory`, claude-code-memory |
+| **Decision provenance** | "Why is the code like this — and what was already tried?" | Selvedge |
+
+## The servers, side by side
+
+| Server | What it remembers | Storage | Setup | License |
+|---|---|---|---|---|
+| [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | A knowledge graph of code structure — functions, classes, calls, imports — via 15 analysis tools (search, trace paths, dead code, architecture) | SQLite-backed graph in `~/.cache/` | Single static binary, one-line installer | MIT |
+| [OpenLore](https://github.com/clay-good/OpenLore) | A derived map of code state — tree-sitter call graph across 18 languages + 12 IaC ecosystems — plus commit-gated decision notes | SQLite graph in `.openlore/` | One-time repo index; 73 MCP tools across three presets (13 in the default) | MIT |
+| [Memory Keeper](https://github.com/mkreyman/mcp-memory-keeper) | Session context — categorized items (task/decision/progress/note), checkpoints, file caching, git-branch channels, ~38 tools | SQLite (WAL) in `~/mcp-data/` | Node: `claude mcp add memory-keeper npx mcp-memory-keeper` | MIT |
+| [mem0](https://github.com/mem0ai/mem0) | Facts and preferences as vector memory, retrieved by semantic similarity | Vector store; self-hosted or hosted API | Python/API; embeddings required | Apache-2.0 |
+| [Official `server-memory`](https://github.com/modelcontextprotocol/servers) | A manually-built knowledge graph of entities, relations, observations | Local JSON file | `npx` one-liner | MIT |
+| [claude-code-memory](https://github.com/ViralV00d00/claude-code-memory) | A Neo4j-backed knowledge graph of coding activity and relationships | Neo4j (runs separately) | Requires a Neo4j instance | — |
+| **Selvedge** | Per-entity change history with the agent's own reasoning, outcomes, expiry — written live as the agent works | SQLite under `.selvedge/` next to your code | `pip install selvedge && selvedge setup`, or the [Claude Code plugin](/mcp/claude-code/) | MIT |
+
+## Which one to pick
+
+**Pick codebase-memory-mcp** if agents keep misunderstanding your architecture — it's the strongest structure index here, and its dead-code and call-tracing tools are things Selvedge doesn't do at all.
+
+**Pick OpenLore** if you want a structure index *and* decision notes from one deterministic, local-first server — it's the closest thing to Selvedge in the category, and we keep a [full comparison](/compare/selvedge-vs-openlore/). The difference that decides it: OpenLore derives its memory from code state and purges rejected decisions from the queryable store after each sync (a decision that was synced before rejection leaves an annotation in the spec markdown — the queryable record is what disappears). Selvedge keeps rejected paths queryable.
+
+**Pick Memory Keeper** if your pain is losing your place — long sessions dying with un-checkpointed context. That's its lane.
+
+**Pick mem0 or the official memory server** if you want durable facts and preferences that follow a user across applications.
+
+**Pick Selvedge** if the pain is *"why is the code like this?"* and *"the agent just re-made a mistake we reverted in March."* It's the only server on this list where a rejected path stays queryable, reasoning attached — which is exactly the record [`prior_attempts`](/prior-attempts/) needs to stop the agent before the edit. That's the lane we built for: [decision provenance](/track-why/), with a [queryable audit trail](/audit-trail/) and [Agent Trace](/compare/agent-trace/) interop.
+
+**And they compose.** These aren't competitors for one slot — Claude Code runs multiple MCP servers happily. A structure index plus a decision log is a strictly better-informed agent than either alone. Besides OpenLore's decision notes (covered above), one overlap to watch: Memory Keeper's "decision" category items are freeform session notes, while Selvedge decisions are entity-keyed events with outcomes and expiry — if you want decisions the *next* session can act on automatically, that difference is the whole game.
+
+## What Selvedge is
+
+The decision-provenance row of that table, and nothing else on it: captured testimony — what the agent said at change time — rather than an index derived from code state. 8 MCP tools that also work as a plain CLI: `log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`. SQLite next to your code, MIT licensed, no LLM in the core.
+
+```bash
+pip install selvedge
+selvedge setup   # detects Claude Code / Cursor / Copilot, installs the prompt block
+```
+
+[Full quickstart →](/start/quickstart/)
+
+## FAQ
+
+**What is the best MCP server for codebase memory with Claude Code?**
+
+It depends which memory you're missing. For code structure and navigation, codebase-memory-mcp or OpenLore. For resuming interrupted sessions, Memory Keeper. For user preferences across apps, mem0 or the official memory server. For decision history — why changes were made and what was already tried and rejected — Selvedge.
+
+**Do these memory servers replace each other?**
+
+Mostly no — they remember different things. A structure index, a session checkpoint, and a decision log answer different questions, and Claude Code can run several MCP servers side by side.
+
+**Which codebase memory servers work fully offline?**
+
+codebase-memory-mcp, OpenLore, Memory Keeper, the official memory server, and Selvedge all store locally (SQLite or JSON) with no required cloud. mem0 can self-host; its hosted API is optional.
+
+**What does Selvedge remember that the others don't?**
+
+Rejected paths, with the reasoning. Selvedge events carry the agent's own reasoning per entity, plus outcomes — and a rejected decision stays queryable instead of being dropped (OpenLore purges rejected decisions from its queryable store after each sync). That's what lets `prior_attempts` tell an agent the change it's about to make was already tried and reverted, and why.

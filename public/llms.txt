@@ -9,7 +9,11 @@ The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by t
 - [Quickstart](https://selvedge.sh/start/quickstart/): `pip install selvedge`, the `selvedge setup` wizard, wiring into Claude Code / Cursor / Copilot.
 - [Agent prompt block](https://selvedge.sh/prompt-block/): the copy-paste `CLAUDE.md` / `.cursorrules` block that tells an agent when and how to call Selvedge. Also emitted by `selvedge prompt`.
 - [Stop your agent repeating reverted mistakes](https://selvedge.sh/prior-attempts): case study of the prior_attempts tool — the agent checks an entity's history before editing and changes plan when the change was tried and reverted.
+- [The MCP server that tracks why your AI agent changed code](https://selvedge.sh/track-why/): the write path (`log_change`, live, in the agent's own words) and the read path (`blame`, `history`) for decision provenance.
+- [Long-term memory for AI coding agents](https://selvedge.sh/agent-memory/): decisions that survive the session — entity-keyed and deterministic, with expiry via `stale_decisions`. Not a vector store.
+- [A local decision audit trail for AI-written code](https://selvedge.sh/audit-trail/): who/what/when/why per entity, searchable, exportable as Agent Trace records.
 - [How Selvedge compares](https://selvedge.sh/compare/agent-tools/): Selvedge vs. AgentDiff / Origin / Git AI / BlamePrompt — captured-live + entity-level + changesets.
+- [Best MCP servers for codebase memory, compared](https://selvedge.sh/compare/codebase-memory-mcp-servers/): the honest map — code intelligence vs. session context vs. general memory vs. decision provenance, and when Selvedge is not the right pick.
 
 ## MCP tools (8, over stdio)
 - `log_change`: record a change event with entity, diff, and reasoning (pass `rename_from` with `change_type="rename"` for renames).

@@ -1,0 +1,121 @@
+---
+title: A local decision audit trail for AI-written code
+description: Every AI change with who, what, when, and why — recorded live over MCP into SQLite next to your code, searchable, and exportable as Agent Trace records.
+structuredData:
+  type: techarticle
+  # Answers below are verbatim plain-text copies (markdown stripped) of the
+  # visible FAQ section at the bottom of this page — sync on edit.
+  faq:
+    - question: Is there a tool that keeps an audit trail of AI agent code decisions?
+      answer: >-
+        Selvedge. Each change event records the agent, the entity, the change
+        type, the diff, the reasoning, the timestamp, and the linked git
+        commit — written by the agent itself, live, into a local SQLite
+        database you can query and export.
+    - question: Where does the audit trail live?
+      answer: >-
+        In a SQLite file under .selvedge/ next to your code. No SaaS platform,
+        no account, and no network hop on the data path — the trail itself
+        never leaves your machine. Commit it to git and it travels with the
+        repo.
+    - question: Can I export the trail to other tools?
+      answer: >-
+        Yes — Selvedge exports and imports Agent Trace v0.1.0 records, the
+        open format for AI code attribution from Cursor and Cognition, so the
+        history round-trips with tools that speak it.
+    - question: How is this different from LLM observability platforms?
+      answer: >-
+        LangSmith, Braintrust, and Arize trace LLM application calls — spans,
+        tokens, evals. Selvedge audits codebase decisions: what changed in the
+        code, and why. Different layer; a team can want both.
+    - question: Is the reasoning trustworthy if the agent writes it?
+      answer: >-
+        log_change validates incoming reasoning (empty, too-short, and
+        placeholder reasoning gets flagged), and selvedge stats reports
+        per-agent coverage and missing-reasoning counts — so silent
+        low-quality logging is visible instead of assumed.
+---
+
+"Which changes touched payments in the last quarter, and why were they made?" In an AI-coded codebase, that question is either answerable in one command or it's a week of guessing across commit messages and dead chat logs. An audit trail for AI-written code has to capture the one thing git doesn't: the **decision** — and it has to be captured at the moment of the change, because that's the only time the reasoning exists.
+
+Selvedge is an open-source MCP server that records exactly that, locally.
+
+## What one event carries
+
+Every change the agent logs is a structured event: the **entity** it touched (`payments.amount`, `env/STRIPE_SECRET_KEY`, `api/v1/checkout`), the **change type**, the **diff**, the **reasoning** in the agent's own words, the **agent** that made it, the **timestamp**, and the **git commit** it landed in. Events group into named [changesets](/reference/mcp-tools/), can supersede earlier decisions, and can carry revisit dates.
+
+That's an audit trail with all four questions covered — who, what, when, *why* — per entity, not per line.
+
+## Asking it questions
+
+"What touched payments in the last quarter, and why" is one command:
+
+```
+$ selvedge history --entity payments --since 90d --summarize
+
+Changelog since 90d  (3 events, 2 group(s))
+
+  changeset: add-stripe-billing  claude-code  2026-08-09 19:14:26
+    · add payments.amount  Integer cents, not floats — Stripe's API is cents-native.
+    · create payments.webhooks  Keep raw payloads so signature replay can be re-verified.
+
+  ungrouped  cursor  2026-08-09 19:14:27
+    · add payments.currency  ISO 4217 code per row, defaulted at write time.
+```
+
+The same trail slices the other ways an audit needs:
+
+```bash
+selvedge search "webhook signature"       # full-text across paths, diffs, and reasoning
+selvedge changeset add-stripe-billing     # every event in one named change group
+selvedge blame payments.amount            # the last change on one entity, with its why
+```
+
+All four queries are also MCP tools (`history`, `search`, `changeset`, `blame`), so agents audit themselves before acting — the read path that powers [`prior_attempts`](/prior-attempts/).
+
+## Local-first, and it round-trips
+
+The trail is a SQLite file under `.selvedge/` next to your code. No platform, no account, no network hop on the data path — your code, diffs, and reasoning never leave the machine. (The CLI's only default outbound request is a daily PyPI version check; usage telemetry exists but is opt-in and off.) Commit the file and the audit trail travels with the repo — every clone has the full decision history. When other tooling needs the record, Selvedge [exports and imports Agent Trace v0.1.0](/compare/agent-trace/), the open attribution format from Cursor and Cognition, so the *why* flows into whatever already speaks it.
+
+## Things people reach for first
+
+| Approach | What it audits | Where it breaks |
+|---|---|---|
+| Commit history | What changed, when, generated message | The decision isn't in `Update schema`; intent is gone by review time |
+| LLM observability (LangSmith, Braintrust, Arize) | LLM app calls — spans, tokens, evals | Traces the application layer, not codebase decisions; and it's a platform |
+| [Line-attribution tools](/compare/agent-tools/) (Git AI, Entire) | Which model wrote which line | Who/what without why; line-keyed, so it churns with reformatting |
+| Governance suites | Access, approvals, compliance events | Nothing about code intent; heavyweight; not agent-writable mid-task |
+| Selvedge | Who, what, when, why — per entity, agent-written, locally | The trail starts at install — earlier history only gets in via `selvedge import` |
+
+## What Selvedge is
+
+An audit trail the agent writes as it works, and anyone can read forever after. It's 8 MCP tools that also work as a plain CLI: `log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`. MIT licensed, local-first, no LLM in the core — reasoning is validated by deterministic rules, and `selvedge stats` shows exactly how complete your coverage is.
+
+```bash
+pip install selvedge
+selvedge setup   # detects Claude Code / Cursor / Copilot, installs the prompt block
+```
+
+[Full quickstart →](/start/quickstart/)
+
+## FAQ
+
+**Is there a tool that keeps an audit trail of AI agent code decisions?**
+
+Selvedge. Each change event records the agent, the entity, the change type, the diff, the reasoning, the timestamp, and the linked git commit — written by the agent itself, live, into a local SQLite database you can query and export.
+
+**Where does the audit trail live?**
+
+In a SQLite file under `.selvedge/` next to your code. No SaaS platform, no account, and no network hop on the data path — the trail itself never leaves your machine. Commit it to git and it travels with the repo.
+
+**Can I export the trail to other tools?**
+
+Yes — Selvedge exports and imports Agent Trace v0.1.0 records, the open format for AI code attribution from Cursor and Cognition, so the history round-trips with tools that speak it.
+
+**How is this different from LLM observability platforms?**
+
+LangSmith, Braintrust, and Arize trace LLM application calls — spans, tokens, evals. Selvedge audits codebase decisions: what changed in the code, and why. Different layer; a team can want both.
+
+**Is the reasoning trustworthy if the agent writes it?**
+
+`log_change` validates incoming reasoning (empty, too-short, and placeholder reasoning gets flagged), and `selvedge stats` reports per-agent coverage and missing-reasoning counts — so silent low-quality logging is visible instead of assumed.

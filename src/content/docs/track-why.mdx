@@ -1,0 +1,123 @@
+---
+title: The MCP server that tracks why your AI agent changed code
+description: Selvedge records the reasoning behind every AI-written change — logged live by the agent over MCP into local SQLite, and answerable later with selvedge blame.
+structuredData:
+  type: techarticle
+  # Answers below are verbatim plain-text copies (markdown stripped) of the
+  # visible FAQ section at the bottom of this page — Google requires FAQPage
+  # markup to match visible text. Sync on edit.
+  faq:
+    - question: What MCP server tracks why an AI agent changed code?
+      answer: >-
+        Selvedge. It's a local MCP server the agent calls as it works —
+        log_change records what changed and why, in the agent's own words, at
+        the moment of the change. Later, selvedge blame <entity> returns the
+        most recent change and its reasoning.
+    - question: Is the reasoning inferred from the diff by a second model?
+      answer: >-
+        No. The agent writes the reasoning itself, live, from the same context
+        window that produced the change. Nothing is reconstructed after the
+        fact, and there is no LLM anywhere in Selvedge's core.
+    - question: How is this different from git blame or line-attribution tools?
+      answer: >-
+        git blame and line-attribution tools (Git AI, Entire, AgentDiff) answer
+        who or which model touched which line. Selvedge answers why the change
+        was made — reasoning is attached to entities like users.email, so it
+        survives reformatting and renames.
+    - question: What happens to changes made before Selvedge was installed?
+      answer: >-
+        They have no logged reasoning — Selvedge doesn't guess. You can
+        backfill schema history with selvedge import, which reads SQL DDL,
+        Alembic migrations, and Agent Trace records.
+    - question: Which AI coding tools does it work with?
+      answer: >-
+        Anything that speaks MCP. selvedge setup auto-detects Claude Code,
+        Cursor, and Copilot and wires in both the server and the agent prompt
+        block.
+---
+
+Six months from now, someone will look at a change your AI agent made today and ask the only question that matters: *why is it like this?* The diff is in git. The prompt, the constraint that forced the approach, the alternative that was rejected — those lived in a chat window that no longer exists. Selvedge is an open-source MCP server that closes that gap: the agent logs the *why* at the moment it makes the change, and anyone (human or agent) can query it later.
+
+## The `_v2` nobody can explain
+
+An agent session adds a column called `user_tier_v2`. The commit message says `Update schema`. `git blame` attributes it to `claude-code`. Six months later nobody knows why there's a `_v2`, whether `user_tier` is safe to drop, or what the migration plan was — and the next agent session, asked to "clean up the users table," has no way to find out. It will guess. Guessing is how AI-coded codebases rot.
+
+## What tracking the why looks like
+
+With Selvedge wired in, the agent's [instruction block](/prompt-block/) tells it to log each change as it makes it:
+
+```jsonc
+// tool call, made by the agent in the same context that produced the change
+log_change({
+  "entity_path": "users.user_tier_v2",
+  "change_type": "add",
+  "reasoning": "Parallel column for the new billing tiers so we can backfill while user_tier keeps serving reads. Cut over once backfill passes checksum; then drop user_tier."
+})
+```
+
+Later — next week or next year — the question answers itself:
+
+```
+$ selvedge blame users.user_tier_v2
+
+users.user_tier_v2
+  Changed    2026-02-19 09:31:02
+  Type       add
+  Entity     column
+  Agent      claude-code
+  Commit     4f21c0e
+
+  Reasoning:
+    Parallel column for the new billing tiers so we can backfill while user_tier keeps serving
+reads. Cut over once backfill passes checksum; then drop user_tier.
+
+  Status     active (last add on 2026-02-19)
+```
+
+The same answer is available to the agent over MCP as `blame`, and in bulk as `history` — so "what changed in `users` in the last 30 days, and why" is one call, not an archaeology dig.
+
+## Things people try first
+
+| Approach | What you get | Where it breaks |
+|---|---|---|
+| Commit messages | Whatever the agent generated — usually `Update schema` | The why rarely survives; and it's keyed to commits, not to the entity you're staring at |
+| `git blame` | Who touched the line, when | Attribution, not intent — and it dies on reformat/rename |
+| [Line-attribution tools](/compare/agent-tools/) (Git AI, Entire, AgentDiff) | Which model wrote which line, sometimes a session pointer | Still answers *who/what*. The reasoning, if kept at all, is inferred post-hoc or buried in a transcript |
+| Selvedge | The agent's own reasoning, captured live, queryable per entity | Only knows what was logged — pre-install history needs `selvedge import` |
+
+## What Selvedge is
+
+Decision provenance for AI-coded codebases: the why behind every change, and what was already tried and rejected. It's 8 MCP tools that also work as a plain CLI: `log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`. Data lives in a SQLite file under `.selvedge/` next to your code. MIT licensed. No account, no LLM anywhere in the core, and no network hop on the data path — your code, diffs, and reasoning never leave the machine.
+
+```bash
+pip install selvedge
+selvedge setup   # detects Claude Code / Cursor / Copilot, installs the prompt block
+```
+
+[Full quickstart →](/start/quickstart/)
+
+## The read path is the point
+
+Capture is half the loop. The other half: before editing an entity, the agent calls [`prior_attempts`](/prior-attempts/) and finds out whether the thing it's about to do was already tried and reverted — so the team pays for each lesson once. The full history is also a [decision audit trail](/audit-trail/) you can search and export as [Agent Trace](/compare/agent-trace/) records.
+
+## FAQ
+
+**What MCP server tracks why an AI agent changed code?**
+
+Selvedge. It's a local MCP server the agent calls as it works — `log_change` records what changed and why, in the agent's own words, at the moment of the change. Later, `selvedge blame <entity>` returns the most recent change and its reasoning.
+
+**Is the reasoning inferred from the diff by a second model?**
+
+No. The agent writes the reasoning itself, live, from the same context window that produced the change. Nothing is reconstructed after the fact, and there is no LLM anywhere in Selvedge's core.
+
+**How is this different from git blame or line-attribution tools?**
+
+`git blame` and line-attribution tools (Git AI, Entire, AgentDiff) answer who or which model touched which line. Selvedge answers *why* the change was made — reasoning is attached to entities like `users.email`, so it survives reformatting and renames.
+
+**What happens to changes made before Selvedge was installed?**
+
+They have no logged reasoning — Selvedge doesn't guess. You can backfill schema history with `selvedge import`, which reads SQL DDL, Alembic migrations, and Agent Trace records.
+
+**Which AI coding tools does it work with?**
+
+Anything that speaks MCP. `selvedge setup` auto-detects Claude Code, Cursor, and Copilot and wires in both the server and the agent prompt block.

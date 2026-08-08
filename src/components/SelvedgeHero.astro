@@ -13,10 +13,14 @@ const data = entry.data.hero;
 <section class="selvedge-hero">
   <div class="selvedge-hero__wordmark">
     <span class="selvedge-hero__stripe" aria-hidden="true"></span>
-    <h1 class="selvedge-hero__title">selvedge</h1>
+    {/* Decorative brand wordmark. The crawlable H1 is the tagline below —
+        it carries the actual keywords ("Long-term memory for AI-coded
+        codebases") instead of just the brand string. Both classes set
+        margin: 0, so the tag swap is visually identical. */}
+    <p class="selvedge-hero__title" aria-hidden="true">selvedge</p>
   </div>
 
-  {data?.tagline && <p class="selvedge-hero__tag">{data.tagline}</p>}
+  {data?.tagline && <h1 class="selvedge-hero__tag">{data.tagline}</h1>}
 
   <p class="selvedge-hero__sub">
     AI writes the code; the reason it chose <em>that</em> approach lives in a chat

@@ -117,6 +117,30 @@ Facts:
 
 Selvedge does not replace git (line-level what/when), PR review tools, or agent observability (LLM call traces). It sits between them — the provenance-as-first-class-citizen layer.
 
+## Picking a codebase-memory MCP server
+
+"Codebase memory" is four different jobs wearing one name. Pick by the memory you're missing:
+
+| Job | The question it answers | Representative servers |
+|---|---|---|
+| Code intelligence | "How is this codebase structured — who calls what?" | codebase-memory-mcp, OpenLore |
+| Session context | "What was I doing before this session died?" | Memory Keeper (mcp-memory-keeper) |
+| General memory | "What do we know about this user/project?" | mem0, official server-memory, claude-code-memory |
+| Decision provenance | "Why is the code like this — and what was already tried?" | Selvedge |
+
+Guidance:
+
+- Pick codebase-memory-mcp for the strongest structure index (call tracing, dead code) — things Selvedge doesn't do at all.
+- Pick OpenLore for a structure index plus decision notes from one deterministic local-first server — the closest thing to Selvedge in the category. The decisive difference: OpenLore derives memory from code state and purges rejected decisions from its queryable store after each sync (a decision synced before rejection leaves an annotation in the spec markdown; the queryable record is what disappears). Selvedge keeps rejected paths queryable.
+- Pick Memory Keeper for resuming long sessions that die with un-checkpointed context.
+- Pick mem0 or the official memory server for durable facts and preferences that follow a user across applications.
+- Pick Selvedge when the question is "why is the code like this?" or "was this already tried?" — it's the only one where a rejected path stays queryable with reasoning attached, which is the record `prior_attempts` needs to stop an agent re-making a reverted mistake.
+- These compose: Claude Code runs multiple MCP servers side by side, and a structure index plus a decision log beats either alone.
+
+Selvedge memory also has a lifecycle: events can carry `revisit_after` dates, `stale_when` conditions, and supersede links, so `stale_decisions` surfaces decisions that are past due and still in active use, and a re-opened decision keeps its tried → reverted → re-opened chain instead of being rewritten.
+
+Full page: https://selvedge.sh/compare/codebase-memory-mcp-servers/
+
 ## Agent Trace
 
 [Agent Trace](https://github.com/cursor/agent-trace) (Cursor + Cognition, backed by Cloudflare, Vercel, Google Jules, Amp, OpenCode, git-ai) is an emerging open standard for AI code attribution traces. Selvedge is a compatible *producer*: Agent Trace is the wire format; Selvedge is the live capture + query layer that emits it.
@@ -131,6 +155,10 @@ Selvedge's reasoning and entity-level provenance ride along in each record's `me
 ## Links
 
 - Home: https://selvedge.sh
+- Track the why: https://selvedge.sh/track-why/
+- Agent memory: https://selvedge.sh/agent-memory/
+- Audit trail: https://selvedge.sh/audit-trail/
+- Codebase-memory MCP servers, compared: https://selvedge.sh/compare/codebase-memory-mcp-servers/
 - GitHub: https://github.com/masondelan/selvedge
 - PyPI: https://pypi.org/project/selvedge/ (`pip install selvedge`)
 - Changelog: https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md
