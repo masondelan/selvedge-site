@@ -110,10 +110,11 @@ Facts:
 | | Reasoning source | Granularity | Mechanism | Grouping | Storage |
 |---|---|---|---|---|---|
 | Selvedge | Captured live, by the agent in the same context that produced the change | Entity (column, table, env var, dep, route, function) | MCP server — agent calls it as work happens | Changesets across many entities | SQLite, zero deps |
-| AgentDiff | Inferred post-hoc by an LLM from the diff at session end | Line | Git hook | None | JSONL |
-| Origin | Captured at commit time | Line | Git hook | None | Local |
-| Git AI | Attribution metadata | Line | Git hook + Agent Trace | None | Git notes |
-| BlamePrompt | Prompt-only | Line | Git hook | None | Local |
+| OpenLore | Derived — tree-sitter static analysis of code state, plus commit-gated decision notes | AST node (18 languages + 12 IaC) | MCP server — one-time index + commit-time certificates | Call-graph edges | SQLite graph in `.openlore/` |
+| AgentDiff (sunilmallya) | Inferred post-hoc by Claude Haiku from the diff at session end | Line | Claude Code lifecycle hooks → local daemon | Session/task | JSONL on disk |
+| Origin | Prompt receipts, captured live per turn | Line | Agent lifecycle hooks + git post-commit hook | None | Git notes + sessions branch |
+| Git AI | Attribution metadata | Line | Agent-invoked checkpoint → Git notes at commit | None | Git notes |
+| BlamePrompt | Prompt receipts — prompt, cost, tools; no stated rationale | Line | Agent-lifecycle hooks + post-commit hook | None | Git notes |
 
 Selvedge does not replace git (line-level what/when), PR review tools, or agent observability (LLM call traces). It sits between them — the provenance-as-first-class-citizen layer.
 
