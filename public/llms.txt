@@ -29,7 +29,7 @@ The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by t
 - [README](https://github.com/masondelan/selvedge/blob/main/README.md): full overview, MCP tool table, CLI reference, entity-path conventions.
 - [Changelog](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md): what shipped, per version.
 - [Architecture](https://github.com/masondelan/selvedge/blob/main/docs/architecture.md): data model, phase plan, non-goals.
-- [Agent Trace interop](https://selvedge.sh/compare/agent-trace/): Selvedge as a compatible producer of Cursor + Cognition's Agent Trace standard.
+- [Agent Trace interop](https://selvedge.sh/compare/agent-trace/): Selvedge exports and imports the Agent Trace v0.1.0 record format (published by Cursor; now frozen — the upstream repo is gone, spec survives at agent-trace.dev).
 - [prior_attempts demo](https://github.com/masondelan/selvedge/blob/main/docs/demos/prior-attempts.md): worked transcript of an agent checking history and changing its plan.
 
 ## Install

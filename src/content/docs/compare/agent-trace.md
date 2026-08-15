@@ -1,16 +1,22 @@
 ---
 title: Agent Trace interop
-description: Selvedge as a compatible producer for the Agent Trace open standard. Wire format + mapping for selvedge export --format agent-trace (shipped in v0.3.9).
+description: Selvedge exports and imports the Agent Trace v0.1.0 record format (shipped in v0.3.9). Wire format + mapping for selvedge export --format agent-trace.
 ---
 
-[Agent Trace](https://github.com/cursor/agent-trace) is an emerging open standard for
-AI code attribution traces. Cursor and Cognition AI published the RFC in January 2026,
-with backing from Cloudflare, Vercel, Google Jules, Amp, OpenCode, and git-ai.
+[Agent Trace](https://agent-trace.dev/) is an open wire format for AI code
+attribution traces, published by Cursor as an RFC in January 2026.
 
-Selvedge **is not a competitor to Agent Trace.** It's a compatible producer. Agent
-Trace is the wire format; Selvedge is the live capture + query layer that emits it. As
-of **v0.3.9**, `selvedge export --format agent-trace` and `selvedge import --format
-agent-trace` ship — Selvedge round-trips Agent Trace **v0.1.0** records today.
+> **Status (2026-08).** Agent Trace's original GitHub home went 404 and the
+> multi-vendor momentum behind it has faded. The spec and schema still resolve
+> at [agent-trace.dev](https://agent-trace.dev/), frozen at v0.1.0. Selvedge
+> vendors that schema and keeps the exporter — the records it emits stay valid
+> and portable regardless of the standard's fate — but we no longer describe it
+> as a live, growing ecosystem.
+
+Since **v0.3.9**, `selvedge export --format agent-trace` and `selvedge import
+--format agent-trace` ship — Selvedge round-trips Agent Trace **v0.1.0** records.
+Agent Trace is the wire format; Selvedge is the live capture + query layer that
+emits it, with no runtime dependency on the upstream project.
 
 ## Why both layers exist
 
@@ -83,8 +89,9 @@ changeset:add-stripe-billing" inline as you read code
 every AI-made change
 
 You don't have to wait for any of that to use Selvedge. The local SQLite file is the
-canonical store, and `selvedge export --format agent-trace` is opt-in. But if and when
-the cross-tool ecosystem solidifies, your data is already in a format that travels.
+canonical store, and `selvedge export --format agent-trace` is opt-in — a portable,
+documented shape your history can travel in, independent of whether any particular
+standard wins.
 
 ## Why not just use Agent Trace directly?
 
@@ -96,8 +103,8 @@ Selvedge wins when:
 1. **You want a reasoning-quality validator.** Agent Trace doesn't prescribe one.
 Selvedge runs every incoming `reasoning` through `selvedge.validation` and surfaces
 weak/empty cases via `selvedge stats`.
-2. **You want changesets.** Agent Trace doesn't have first-class changeset semantics
-yet (it's an open RFC issue). Selvedge does, and carries them in
+2. **You want changesets.** Agent Trace v0.1.0 doesn't define first-class changeset
+semantics. Selvedge does, and carries them in
 `metadata["dev.selvedge"].changeset_id`.
 3. **You want a CLI you can pipe.** `selvedge blame`, `selvedge diff`,
 `selvedge changeset` — none of these have an Agent-Trace-native equivalent.
@@ -115,6 +122,6 @@ producers and consumers can be anywhere.
 
 ## Where to read more
 
-- [**Agent Trace RFC**](https://github.com/cursor/agent-trace) — the open standard
+- [**Agent Trace spec**](https://agent-trace.dev/) — the surviving publication home (the original GitHub repo is gone)
 - [**Selvedge → Agent Trace mapping doc**](https://github.com/masondelan/selvedge/blob/main/docs/agent-trace-interop.md) — the shipped mapping + design notes
 - [**Comparison page →**](/compare/agent-tools/) — how Selvedge differs from AgentDiff, Origin, etc.

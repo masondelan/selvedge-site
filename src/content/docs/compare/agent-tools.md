@@ -116,11 +116,11 @@ don't capture themselves.
 
 ## Where the category is going
 
-[Agent Trace](https://github.com/cursor/agent-trace) (Cursor + Cognition AI, RFC Jan
-2026, backed by Cloudflare, Vercel, Google Jules, Amp, OpenCode, and git-ai) is an
-emerging open standard for AI code attribution traces. Selvedge **is not a competitor
-to it** — it's a compatible producer. The design for `selvedge export --format
-agent-trace` is at the [Agent Trace interop page](/compare/agent-trace/).
+[Agent Trace](https://agent-trace.dev/) (Cursor, RFC Jan 2026) is an open wire
+format for AI code attribution traces. Its original GitHub home went 404 in
+August 2026 and the multi-vendor momentum behind it faded, but the spec survives
+frozen at v0.1.0. Selvedge emits and reads it — a portable interchange format,
+not a live standard it tracks. See the [Agent Trace interop page](/compare/agent-trace/).
 
 ## Next
 

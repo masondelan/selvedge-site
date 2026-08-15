@@ -377,7 +377,7 @@ that (and provenance-based trust tiers) is on the roadmap.
 
 Dump change history to JSON or CSV with full filter support.
 
-**`--format agent-trace`** (since v0.3.9) emits [Agent Trace](https://github.com/cursor/agent-trace)
+**`--format agent-trace`** (since v0.3.9) emits [Agent Trace](https://agent-trace.dev/)
 **v0.1.0** records — one per change event by default, wrapped in a self-describing
 bundle (`{agent_trace_version, producer, note, records: [...]}`). Two agent-trace-only
 flags: `--ndjson` streams one record per line for large histories, and

@@ -175,8 +175,8 @@ both-surfaces (MCP + CLI) coverage.
 
 **Agent Trace export — Selvedge is a compatible producer.** New
 `selvedge export --format agent-trace` emits
-[Agent Trace](https://github.com/cursor/agent-trace) **v0.1.0** records — the
-open AI code-attribution wire format from Cursor + Cognition AI — so your
+[Agent Trace](https://agent-trace.dev/) **v0.1.0** records — the
+open AI code-attribution wire format published by Cursor — so your
 captured history travels to any tool that reads the standard. Agent Trace is the
 wire format; Selvedge is the live capture + query layer that emits it. **Drop-in
 upgrade for anyone on 0.3.8.** The MCP surface is unchanged (still **8** tools).

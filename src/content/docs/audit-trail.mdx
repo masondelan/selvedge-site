@@ -21,7 +21,7 @@ structuredData:
     - question: Can I export the trail to other tools?
       answer: >-
         Yes — Selvedge exports and imports Agent Trace v0.1.0 records, the
-        open format for AI code attribution from Cursor and Cognition, so the
+        open format for AI code attribution published by Cursor, so the
         history round-trips with tools that speak it.
     - question: How is this different from LLM observability platforms?
       answer: >-
@@ -75,7 +75,7 @@ All four queries are also MCP tools (`history`, `search`, `changeset`, `blame`),
 
 ## Local-first, and it round-trips
 
-The trail is a SQLite file under `.selvedge/` next to your code. No platform, no account, no network hop on the data path — your code, diffs, and reasoning never leave the machine. (The CLI's only default outbound request is a daily PyPI version check; usage telemetry exists but is opt-in and off.) Commit the file and the audit trail travels with the repo — every clone has the full decision history. When other tooling needs the record, Selvedge [exports and imports Agent Trace v0.1.0](/compare/agent-trace/), the open attribution format from Cursor and Cognition, so the *why* flows into whatever already speaks it.
+The trail is a SQLite file under `.selvedge/` next to your code. No platform, no account, no network hop on the data path — your code, diffs, and reasoning never leave the machine. (The CLI's only default outbound request is a daily PyPI version check; usage telemetry exists but is opt-in and off.) Commit the file and the audit trail travels with the repo — every clone has the full decision history. When other tooling needs the record, Selvedge [exports and imports Agent Trace v0.1.0](/compare/agent-trace/), the open attribution format published by Cursor, so the *why* flows into whatever already speaks it.
 
 ## Things people reach for first
 
@@ -110,7 +110,7 @@ In a SQLite file under `.selvedge/` next to your code. No SaaS platform, no acco
 
 **Can I export the trail to other tools?**
 
-Yes — Selvedge exports and imports Agent Trace v0.1.0 records, the open format for AI code attribution from Cursor and Cognition, so the history round-trips with tools that speak it.
+Yes — Selvedge exports and imports Agent Trace v0.1.0 records, the open format for AI code attribution published by Cursor, so the history round-trips with tools that speak it.
 
 **How is this different from LLM observability platforms?**
 

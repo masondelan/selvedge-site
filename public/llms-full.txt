@@ -144,7 +144,7 @@ Full page: https://selvedge.sh/compare/codebase-memory-mcp-servers/
 
 ## Agent Trace
 
-[Agent Trace](https://github.com/cursor/agent-trace) (Cursor + Cognition, backed by Cloudflare, Vercel, Google Jules, Amp, OpenCode, git-ai) is an emerging open standard for AI code attribution traces. Selvedge is a compatible *producer*: Agent Trace is the wire format; Selvedge is the live capture + query layer that emits it.
+[Agent Trace](https://agent-trace.dev/) is an open wire format for AI code attribution traces, published by Cursor (RFC, Jan 2026). Its original GitHub home went 404 in August 2026; the spec and schema survive, frozen at v0.1.0, at agent-trace.dev. Selvedge emits and reads that format — Agent Trace is the wire format; Selvedge is the live capture + query layer — with no runtime dependency on the upstream project.
 
 ```
 selvedge export --format agent-trace    # emit Agent Trace v0.1.0 records (--ndjson, --collapse-by-session)

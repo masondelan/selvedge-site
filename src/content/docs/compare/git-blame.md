@@ -78,5 +78,5 @@ the symbol, you're missing the textual diff. Use both.
 
 [**Selvedge vs. AgentDiff & friends →**](/compare/agent-tools/) — the LLM-inference
 category, where Selvedge differs sharply.
-[**Agent Trace interop →**](/compare/agent-trace/) — emitting Selvedge events as the
-emerging open standard.
+[**Agent Trace interop →**](/compare/agent-trace/) — emitting Selvedge events in the
+Agent Trace v0.1.0 record format.

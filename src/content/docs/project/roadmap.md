@@ -107,8 +107,8 @@ agent-instructions block. See the
 ## v0.3.9 — Agent Trace export interop ✅ shipped 2026-06-22
 
 `selvedge export --format agent-trace` ships — Selvedge becomes a
-compatible **producer** for the [Agent Trace](https://github.com/cursor/agent-trace)
-open standard (Cursor + Cognition AI). **Pulled forward from Phase 3**
+**producer** for the [Agent Trace](https://agent-trace.dev/)
+open format (Cursor, Jan 2026). **Pulled forward from Phase 3**
 (v0.4.0): only the exporter moved up; Postgres and the tool-rename/consolidation
 remain the v0.4.0 markers (HTTP + auth is v0.4.1). Opt-in and additive — the MCP surface stays at
 **8** tools. See the
@@ -348,8 +348,8 @@ design — local-only, agent and server on the same machine.
 
 ## v0.4.2 — Agent Trace interop (Phase 3.2) ✅ delivered early in v0.3.9
 
-Selvedge became a compatible producer of
-[Agent Trace](https://github.com/cursor/agent-trace), the open RFC
+Selvedge became a producer of
+[Agent Trace](https://agent-trace.dev/), the open RFC
 for AI code attribution traces — **shipped ahead of schedule in
 v0.3.9**, pulled forward from this slot once the standard gained
 backing. Purely additive and non-breaking. The delivered scope is in
