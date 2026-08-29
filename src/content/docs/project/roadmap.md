@@ -75,9 +75,9 @@ notes.
 ## v0.3.8 — active memory v1, date-based (Phase 2.14) ✅ shipped 2026-06-16
 
 Selvedge's append-only log learned when its own data is stale. The
-date-based half shipped here; the pattern-based half waits for v0.3.11.
+date-based half shipped here; the pattern-based half landed in v0.3.11.
 **The v3 schema migration added both nullable columns** even though
-the second column's evaluator doesn't land until v0.3.11 — one
+the second column's evaluator was still three releases out — one
 migration is cheaper than two. Also bundled CLI parity for the v0.3.7
 wedge (`selvedge prior-attempts`) and a CLI-awareness section in the
 agent-instructions block. See the
@@ -85,8 +85,8 @@ agent-instructions block. See the
 
 - **Schema migration v3** — adds `revisit_after` and `expires_when`
   (nullable) to `events`. Perf gated at 10k / 100k / 1M events. The
-  `expires_when` evaluator is deferred to v0.3.11; the column ships now
-  so that release needs no second migration.
+  `expires_when` evaluator was deferred to v0.3.11; the column shipped
+  early so that release would need no second migration — and it didn't.
 - **`stale_decisions` MCP tool** (→ **8** total) — events whose
   `revisit_after` has passed. **Active-use weighting**: pure age does
   not surface as stale; a recent `blame`/`diff`/`prior_attempts` query
@@ -164,49 +164,67 @@ for the full notes.
 > **Plan note.** `revert` and `supersede` shipped here, pulled forward from the
 > v0.3.11 change-type work below — the git importer needed `revert`, and the
 > supersede flow answered the un-retire thread. `reject` and the `expires_when`
-> evaluator remain in v0.3.11.
+> evaluator landed in v0.3.11 as planned.
 
-## v0.3.10 — config + advanced retention (Phase 2.16)
+## v0.3.10 — config + advanced retention (Phase 2.16) ✅ shipped 2026-08-05
 
-`.selvedge/config.toml` lands here, paired with the dependent
-features that needed somewhere to read settings from. Configuration
-as a foundation; deferring it from v0.3.5 let the grammar settle in
-one release.
+`.selvedge/config.toml` landed here, paired with the dependent
+features that needed somewhere to read settings from — plus the
+delivery hooks (SessionStart digest, PreCompact reminder) that
+answered the measured pull-model failure mode. See the
+[changelog](/project/changelog/#v0310--2026-08-05) for the full notes.
 
 - **`.selvedge/config.toml`** — first-class project config. Houses
-  `retention_days_events` (default ∞), `retention_days_tool_calls`,
+  `retention_days_events` (default: never), `retention_days_tool_calls`,
   `backup_keep_last`, `diff_bytes`, `reasoning_bytes`,
-  `db_size_warn_mb`, `stale_days`. Precedence:
+  `db_size_warn_mb`, `stale_days`, `digest_max_bytes`,
+  `redaction_patterns`. Precedence:
   CLI > env > project config > global config > defaults. `SELVEDGE_DB`
   is the only exception (env always wins for DB path).
 - **`selvedge prune --include-events`** — destructive events-table
   prune. Requires confirmation prompt **AND** `SELVEDGE_DESTRUCTIVE=1`
   **AND** audit-log append to `.selvedge/prune.log`. Default events
-  retention is *infinity* — users must opt in to ever deleting events.
+  retention is *never* — users must opt in to ever deleting events.
 - **Event-size bounds at log time** — `diff_bytes` / `reasoning_bytes`
   truncation with a `…[truncated 12KB]` marker; truncation surfaced
   as a validator warning at write time.
-- **Doctor — `oversized-tables` warning + per-setting precedence
-  surfacing.**
+- **Doctor — database-size warning, per-setting precedence
+  surfacing, and a stored-secret scan.**
 
-## v0.3.11 — active memory v2, semantic (Phase 2.17)
+## v0.3.11 — active memory v2, semantic (Phase 2.17) ✅ shipped 2026-08-29
 
 The pattern-based half of active memory. `expires_when` was added in
-v0.3.8's schema migration; v0.3.11 lights up the evaluator. No new
-migration.
+v0.3.8's schema migration; v0.3.11 lit up the evaluator. No new
+migration — plus the tamper-evidence chain, pulled forward from the
+v0.3.12 verifiable-claims theme. See the
+[changelog](/project/changelog/#v0311--2026-08-29) for the full notes.
 
 - **`expires_when` evaluator** — closed grammar in v1, *not* free-form:
   `library:NAME>=VERSION`, `entity:PATH:changes`, `date:ISO`,
   `manual:LABEL`. Non-matching values rejected at write time.
-  Evaluable from local state only — no network, no LLM.
+  Evaluated from local state only — no network, no LLM. `selvedge
+  stale` flags fired conditions `expired`, with `manual_review` for a
+  `library:` condition whose package isn't locally observable.
 - **New `change_type` value: `reject`** — first-class "we considered
   this and decided against it" event. (`revert` shipped early in
-  v0.3.9.1 for the git importer; `reject` remains here.) Adoption
-  defended on three surfaces (`log_change` docstring, `PROMPT_BLOCK`,
-  reasoning validator).
+  v0.3.9.1 for the git importer.) Adoption defended on three surfaces
+  (`log_change` docstring, `PROMPT_BLOCK`, reasoning validator).
 - **`prior_attempts` outcome-classifier upgrade** — explicit
-  `reject`/`revert` events become the high-confidence tier directly;
-  the proximity heuristic from v0.3.7 becomes the tiebreaker.
+  `reject`/`revert` events became the stated-outcome
+  `confidence: "exact"` tier; the proximity heuristic from v0.3.7
+  became the tiebreaker. Callers filtering on `proximity_high` should
+  accept `exact` too.
+- **Tamper-evident hash chain** — pulled forward from Phase 2.18's
+  verifiable-claims theme: a SHA-256 chain over every logged event in
+  a sidecar table, written in the same transaction, with two new
+  `selvedge verify` checks (`chain_intact`, must-fail;
+  `chain_coverage`, warn-only) and an attestation manifest in
+  `verify --json`. Honest scope, stated in the module: detects casual
+  and accidental modification; not proof against a motivated local
+  attacker.
+- **`selvedge supersede` parity** (#31) — the guided flow gained
+  `-d/--diff`, `--revisit-after`, and `--expires-when`, and both hook
+  surfaces had their determinism pinned as documented contracts.
 
 ## v0.3.12 — competitive interop + verifiable claims (Phase 2.18)
 
@@ -315,11 +333,11 @@ absorb both breaks in one cycle. HTTP+auth ships separately in v0.4.1
 so each release's surface stays tightly scoped.
 
 - **MCP tool-surface consolidation review (gate before any other
-  v0.4.0 changes ship).** By v0.3.11 the tool count is ~9.
-  `history` + `changeset_id` filter overlaps `changeset`; `summary`
-  overlaps `digest` / `audit`. Past ~10 tools agents hit decision
-  fatigue. Written decision in the architecture doc names the final
-  v0.4.0 tool list before the prefix migration begins.
+  v0.4.0 changes ship).** Through v0.3.11 the tool count has held
+  at 8. `history` + `changeset_id` filter overlaps `changeset`;
+  `summary` overlaps `digest` / `audit`. Past ~10 tools agents hit
+  decision fatigue. Written decision in the architecture doc names the
+  final v0.4.0 tool list before the prefix migration begins.
 - **`StorageBackend` protocol + PostgreSQL backend.** SQLite stays
   the default; `SELVEDGE_BACKEND=postgresql://...` swaps the layer.
   `LinkedReadStorage` (v0.3.13) gets rewritten against the new
