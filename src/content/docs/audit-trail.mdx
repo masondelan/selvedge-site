@@ -34,6 +34,15 @@ structuredData:
         placeholder reasoning gets flagged), and selvedge stats reports
         per-agent coverage and missing-reasoning counts — so silent
         low-quality logging is visible instead of assumed.
+    - question: Can the trail be quietly edited after the fact?
+      answer: >-
+        Since v0.3.11 the log is tamper-evident — each event gets a SHA-256
+        chain record in the same transaction, and selvedge verify recomputes
+        the chain end to end, failing by sequence number on any row edited,
+        deleted, or reordered out-of-band. Honest scope — it detects casual
+        and accidental modification; it is not proof against a motivated
+        local attacker, who controls the file and can recompute every
+        digest.
 ---
 
 "Which changes touched payments in the last quarter, and why were they made?" In an AI-coded codebase, that question is either answerable in one command or it's a week of guessing across commit messages and dead chat logs. An audit trail for AI-written code has to capture the one thing git doesn't: the **decision** — and it has to be captured at the moment of the change, because that's the only time the reasoning exists.
@@ -42,7 +51,7 @@ Selvedge is an open-source MCP server that records exactly that, locally.
 
 ## What one event carries
 
-Every change the agent logs is a structured event: the **entity** it touched (`payments.amount`, `env/STRIPE_SECRET_KEY`, `api/v1/checkout`), the **change type**, the **diff**, the **reasoning** in the agent's own words, the **agent** that made it, the **timestamp**, and the **git commit** it landed in. Events group into named [changesets](/reference/mcp-tools/), can supersede earlier decisions, and can carry revisit dates.
+Every change the agent logs is a structured event: the **entity** it touched (`payments.amount`, `env/STRIPE_SECRET_KEY`, `api/v1/checkout`), the **change type**, the **diff**, the **reasoning** in the agent's own words, the **agent** that made it, the **timestamp**, and the **git commit** it landed in. Events group into named [changesets](/reference/mcp-tools/), can supersede earlier decisions, and can carry revisit dates and machine-checkable expiry conditions. Paths *not* taken are events too — `change_type="reject"` records "considered and decided against" without writing the change, so the trail keeps the alternatives, not just the survivors.
 
 That's an audit trail with all four questions covered — who, what, when, *why* — per entity, not per line.
 
@@ -76,6 +85,8 @@ All four queries are also MCP tools (`history`, `search`, `changeset`, `blame`),
 ## Local-first, and it round-trips
 
 The trail is a SQLite file under `.selvedge/` next to your code. No platform, no account, no network hop on the data path — your code, diffs, and reasoning never leave the machine. (The CLI's only default outbound request is a daily PyPI version check; usage telemetry exists but is opt-in and off.) Commit the file and the audit trail travels with the repo — every clone has the full decision history. When other tooling needs the record, Selvedge [exports and imports Agent Trace v0.1.0](/compare/agent-trace/), the open attribution format published by Cursor, so the *why* flows into whatever already speaks it.
+
+Since v0.3.11 the trail is also **tamper-evident**: every logged event gets a SHA-256 chain record in the same transaction, and `selvedge verify` recomputes the chain end to end. A row edited, deleted, or reordered out-of-band — a stray `sqlite3` session, a hand-hacked file — fails the `chain_intact` check by sequence number, while legitimate maintenance (path migration, the double-gated prune) appends boundary records and verifies clean. Honest scope, because an audit page owes you one: this detects casual and accidental modification; it is not proof against a motivated local attacker, who controls the file and can recompute every digest.
 
 ## Things people reach for first
 
@@ -119,3 +130,7 @@ LangSmith, Braintrust, and Arize trace LLM application calls — spans, tokens, 
 **Is the reasoning trustworthy if the agent writes it?**
 
 `log_change` validates incoming reasoning (empty, too-short, and placeholder reasoning gets flagged), and `selvedge stats` reports per-agent coverage and missing-reasoning counts — so silent low-quality logging is visible instead of assumed.
+
+**Can the trail be quietly edited after the fact?**
+
+Since v0.3.11 the log is tamper-evident — each event gets a SHA-256 chain record in the same transaction, and `selvedge verify` recomputes the chain end to end, failing by sequence number on any row edited, deleted, or reordered out-of-band. Honest scope — it detects casual and accidental modification; it is not proof against a motivated local attacker, who controls the file and can recompute every digest.

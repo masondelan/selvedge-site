@@ -23,8 +23,10 @@ structuredData:
     - question: Can decisions expire or go stale?
       answer: >-
         Yes — that's the point of stale_decisions. Decisions can carry
-        revisit_after dates or stale_when conditions, and the tool surfaces
-        dated decisions that are past due and still in active use.
+        revisit_after dates, stale_when conditions, or machine-checkable
+        expires_when conditions (a dependency version, a named entity
+        changing, a date), and the tool surfaces what has expired or come
+        due while the entity is still in active use.
     - question: How is this different from session-context tools like Memory Keeper?
       answer: >-
         Session-context tools checkpoint what you were doing so a session can
@@ -71,7 +73,9 @@ $ selvedge stale
                                                                 after the decision.
 ```
 
-Note the *still active* part: a decision only surfaces once its date has passed **and** the entity is still in active use — recently queried, or its changeset kept moving. Pure age alone never surfaces, so the list stays short and worth reading. A notes file can't do this. A vector store *really* can't do this — nothing in cosine similarity knows the difference between a decision that's current and one that expired in March. And when a rejected path stops being rejected — the constraint that killed it no longer holds — a `supersede` event re-opens it without rewriting anything: the trail reads tried → reverted → re-opened.
+Note the *still active* part: a decision only surfaces once its date has passed **and** the entity is still in active use — recently queried, or its changeset kept moving. Pure age alone never surfaces, so the list stays short and worth reading. Since v0.3.11 a decision can also name its own expiry outright: `expires_when` takes a closed, machine-checkable grammar — `library:stripe>=13`, `entity:users.email:changes`, `date:2027-01-01`, plus `manual:` labels for the calls only a human can make — evaluated locally from installed packages, the event log, and the clock, and flagged `expired` the moment a condition fires. A notes file can't do this. A vector store *really* can't do this — nothing in cosine similarity knows the difference between a decision that's current and one that expired in March.
+
+Abandoned paths are first-class, too. `reject` (v0.3.11) records "we considered this and decided against it" without writing the change; `revert` records "we tried it and rolled it back"; and when a rejected path stops being rejected — the constraint that killed it no longer holds — a `supersede` event re-opens it without rewriting anything: the trail reads tried → reverted → re-opened.
 
 ## Things people try first
 
@@ -106,7 +110,7 @@ No. Selvedge memory is entity-keyed and deterministic — you ask about `users.e
 
 **Can decisions expire or go stale?**
 
-Yes — that's the point of `stale_decisions`. Decisions can carry `revisit_after` dates or `stale_when` conditions, and the tool surfaces dated decisions that are past due and still in active use.
+Yes — that's the point of `stale_decisions`. Decisions can carry `revisit_after` dates, `stale_when` conditions, or machine-checkable `expires_when` conditions (a dependency version, a named entity changing, a date), and the tool surfaces what has expired or come due while the entity is still in active use.
 
 **How is this different from session-context tools like Memory Keeper?**
 
