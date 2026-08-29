@@ -3,11 +3,10 @@ title: Configuration
 description: How Selvedge resolves the DB path, environment variables, project vs. global precedence, and the destructive-action opt-in flag.
 ---
 
-Selvedge has very few knobs by design. Most settings live in an environment variable or a
-flag; the one config-file surface today is the enforcement hook's optional
-`.selvedge/config.toml` `[hook]` block (v0.3.9.1, below). The *first-class*, everything-
-reads-it `.selvedge/config.toml` still lands in v0.3.10
-(see [below](#coming-in-v0310-selvedgeconfigtoml)).
+Selvedge has very few knobs by design. Since v0.3.10 the settings live in a first-class
+`.selvedge/config.toml` (see [below](#selvedgeconfigtoml)), with environment variables
+and CLI flags layered on top of it in a canonical precedence order. v0.3.11 adds no new
+keys — the surface below is current.
 
 ## DB path resolution
 
@@ -34,7 +33,7 @@ DB are we using?" answer is unambiguous.
 | `SELVEDGE_LOG_LEVEL` | `WARNING` | `DEBUG` / `INFO` / `WARNING` / `ERROR`. Controls the `selvedge.*` logger namespace. |
 | `SELVEDGE_QUIET` | unset | If set, suppresses the one-time stderr warning when the global fallback DB is used. |
 | `SELVEDGE_HOOK_DISABLE` | unset | **v0.3.9.1.** If `1`, the PreToolUse enforcement hook (`selvedge-hook pretooluse`) bypasses and allows every tool call for that shell. |
-| `SELVEDGE_DESTRUCTIVE` | unset | **Lands in v0.3.10.** Will be **required** for any command that can permanently delete events (e.g. `selvedge prune --include-events`) — it will need to be set in the environment AND the command confirmed at the prompt. No event-deleting command ships as of v0.3.9.1. |
+| `SELVEDGE_DESTRUCTIVE` | unset | **v0.3.10.** **Required** for the one command that can permanently delete events (`selvedge prune --include-events`) — it must be set in the environment AND the command confirmed at the prompt. Neither gate alone is enough. |
 
 ### Enforcement-hook config — `.selvedge/config.toml` `[hook]` (v0.3.9.1)
 
@@ -49,8 +48,9 @@ defaults rather than failing.
 watch_globs = ["**/migrations/**", "db/**/*.sql"]
 ```
 
-This is a narrow, hook-only precursor to the first-class `.selvedge/config.toml` in v0.3.10
-— it does not yet house DB path, retention, or size settings.
+The `[hook]` block is deliberately separate from the first-class settings
+[below](#selvedgeconfigtoml) — the hook cannot afford the config layer's import cost on
+its hot path, so it reads this one block directly.
 
 ### Optional extras
 
@@ -61,9 +61,10 @@ substring matching).
 
 The destructive-action opt-in (v0.3.10) is a deliberate footgun defense — the most common
 way event-deleting commands get triggered by accident is through `--yes` flags in cron
-jobs or non-interactive scripts. `SELVEDGE_DESTRUCTIVE=1` will be the second factor that
+jobs or non-interactive scripts. `SELVEDGE_DESTRUCTIVE=1` is the second factor that
 prevents that, gating `selvedge prune --include-events` behind both the env var and an
-interactive confirmation.
+interactive confirmation: `--yes` in a cron entry defeats a prompt, and a shell profile
+defeats an env var, so it takes both.
 
 ## Per-project initialization
 
@@ -118,7 +119,10 @@ escalation is the v0.4.0 PostgreSQL backend, not raising these knobs.
 ```text
 .selvedge/
 ├── selvedge.db          The SQLite DB (WAL mode → also -wal, -shm next to it)
+├── config.toml          Optional project config (v0.3.10; [hook] block since v0.3.9.1)
+├── backups/             Rotated snapshots from selvedge backup (kept out of git)
 ├── hook.log             Post-commit hook failure log (one line per failure)
+├── prune.log            One line per prune run, surfaced by doctor
 └── selvedge.db-journal  Transient — only present during a transaction
 ```
 
@@ -127,25 +131,31 @@ checkout — useful for monorepos where each microservice maintains its own hist
 For most projects, committing the DB is fine; SQLite + WAL handles concurrent CI
 checkouts well.
 
-## Coming in v0.3.10: `.selvedge/config.toml`
+## `.selvedge/config.toml`
 
-v0.3.9 has no config file — the settings above are the whole surface. A first-class
-project config arrives in **v0.3.10**: `.selvedge/config.toml`, read on every entry
-point, backwards compatible (a missing file means today's defaults). Expected keys:
+First-class project config, since **v0.3.10**: read on every entry point, backwards
+compatible (a missing file means the defaults below). Keys are flat and top-level; each
+also has an env-var override (`SELVEDGE_<KEY>` uppercased, e.g.
+`SELVEDGE_RETENTION_DAYS_EVENTS`):
 
 | Key | Default | Purpose |
 |---|---|---|
-| `retention_days_events` | ∞ | Event retention for `prune --include-events` (opt-in deletion) |
+| `retention_days_events` | 0 (never) | Event retention for `prune --include-events` (opt-in deletion — losing captured reasoning is the one thing this tool exists to prevent) |
 | `retention_days_tool_calls` | 90 | Telemetry retention for `selvedge prune` |
 | `backup_keep_last` | 7 | Snapshots kept by `selvedge backup` |
-| `diff_bytes` | 65536 | Per-event diff truncation limit |
+| `diff_bytes` | 65536 | Per-event diff truncation limit (truncates loudly, with a marker) |
 | `reasoning_bytes` | 32768 | Per-event reasoning truncation limit |
 | `db_size_warn_mb` | 500 | Doctor warns past this DB size |
-| `stale_days` | off | Fallback window for `stale_decisions` |
+| `stale_days` | 0 (off) | Fallback age for `stale_decisions` when a decision has no `revisit_after` |
+| `digest_max_bytes` | 4096 | Hard cap on the SessionStart digest injected into agent context (0 disables the digest) |
+| `redaction_patterns` | `[]` | Extra secret-shaped regexes to warn about at `log_change` time — extends the built-in set |
+
+(The v0.3.11 tamper-evidence chain and `expires_when` evaluator run with zero
+configuration — no keys govern them.)
 
 **Precedence (canonical):** `SELVEDGE_DB` always wins for DB-path resolution. For every
 other setting: CLI flags > env vars > project-local `.selvedge/config.toml` > global
-`~/.selvedge/config.toml` > hardcoded defaults. `selvedge doctor` will print which
+`~/.selvedge/config.toml` > hardcoded defaults. `selvedge doctor` prints which
 precedence step produced each effective setting.
 
 ## What's not configurable
