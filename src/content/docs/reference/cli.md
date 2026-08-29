@@ -31,11 +31,12 @@ selvedge install-hook [--path PATH]     Install git post-commit hook
 selvedge backfill-commit --hash HASH    Backfill git_commit on recent events
 selvedge import PATH                    Import migrations (SQL / Alembic) or an Agent Trace file
 selvedge import --from-git [--since]    Seed pre-Selvedge reverts from git history (since 0.3.9.1)
-selvedge export [--format json|csv|agent-trace]  Export history (Agent Trace v0.1.0 since 0.3.9)
+selvedge export [--format json|csv|agent-trace|markdown]  Export history (Agent Trace since 0.3.9, markdown since 0.3.10)
 selvedge log ENTITY CHANGE_TYPE         Manually log a change ([--constraint] [--stale-when] since 0.3.9.1)
 selvedge migrate-paths [--apply]        Re-canonicalize stored entity paths
 selvedge backup [--output FILE]         Snapshot the store via VACUUM INTO
 selvedge prune [--days N]               Trim old tool_calls telemetry (90-day default)
+selvedge prune --include-events         Destructive events prune, double-gated (since 0.3.10)
 ```
 
 ---
@@ -373,9 +374,14 @@ deleted) is invisible even to the grep, and only SQL `DROP TABLE` / `DROP COLUMN
 entity-level records today — every other diff shape is seeded at the file level. Widening
 that (and provenance-based trust tiers) is on the roadmap.
 
-### `selvedge export [--format json|csv|agent-trace] [--since] [--entity] [--output FILE]`
+### `selvedge export [--format json|csv|agent-trace|markdown] [--since] [--entity] [--output FILE]`
 
 Dump change history to JSON or CSV with full filter support.
+
+**`--format markdown`** (since v0.3.10) renders the store as a deterministic,
+human-readable digest — grouped by entity, reverted decisions first — designed to be
+committed next to `.selvedge/` so captured intent is reviewable in a pull request.
+Regenerating with no new events produces a zero-line diff.
 
 **`--format agent-trace`** (since v0.3.9) emits [Agent Trace](https://agent-trace.dev/)
 **v0.1.0** records — one per change event by default, wrapped in a self-describing
@@ -405,20 +411,26 @@ pruned). The backups directory is kept out of git — `selvedge init` (v0.3.5+) 
 to the project `.gitignore`, and the first `selvedge backup` run backfills that entry on
 older repos.
 
-### `selvedge prune [--days N] [--json]`
+### `selvedge prune [--days N] [--include-events] [--event-days N] [--json]`
 
-Trims old `tool_calls` **telemetry rows only** — it never deletes change events. Default
-retention is 90 days; pass `--days N` to override. Every run appends a one-liner to
-`.selvedge/prune.log` so the cadence shows up in `selvedge doctor`.
+Trims old `tool_calls` **telemetry rows only** by default — the plain command never
+deletes change events. Telemetry retention defaults to 90 days
+(`retention_days_tool_calls` in [config.toml](/reference/configuration/)); pass
+`--days N` to override. Every run appends a one-liner to `.selvedge/prune.log` so the
+cadence shows up in `selvedge doctor`.
 
-There is **no `--include-events` flag yet** — the destructive events-prune path lands in
-v0.3.10 alongside `.selvedge/config.toml`, and will require both `SELVEDGE_DESTRUCTIVE=1`
-and an interactive confirmation.
+**`--include-events`** (since v0.3.10) is the one path that can delete captured
+reasoning, so it is double-gated on purpose: it requires an interactive confirmation
+**and** `SELVEDGE_DESTRUCTIVE=1` in the environment. Neither alone is enough — `--yes`
+in a cron entry defeats a prompt, and a shell profile defeats an env var. Events
+retention comes from `retention_days_events` (default 0 = never delete anything) or
+`--event-days N`, and each run is recorded in `.selvedge/prune.log`.
 
 ```bash
 selvedge prune              # trim tool_calls older than 90 days
 selvedge prune --days 30
 selvedge prune --json
+SELVEDGE_DESTRUCTIVE=1 selvedge prune --include-events --event-days 730
 ```
 
 ---
@@ -452,6 +464,7 @@ Prometheus). If you're on v0.2.x, `5m` will read as five months — upgrade.
 | `SELVEDGE_DB` | Force a specific DB path (per-session override) |
 | `SELVEDGE_LOG_LEVEL` | `DEBUG` / `INFO` / `WARNING` / `ERROR` (default `WARNING`) |
 | `SELVEDGE_QUIET=1` | Suppress the global-fallback stderr warning |
+| `SELVEDGE_DESTRUCTIVE=1` | Second gate for `prune --include-events` — the only command that can delete events (v0.3.10) |
 
 [**Configuration page →**](/reference/configuration/) for full details on DB resolution
 and project / global precedence.
