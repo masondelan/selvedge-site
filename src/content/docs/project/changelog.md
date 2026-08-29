@@ -1,11 +1,73 @@
 ---
 title: What's new
-description: Recent Selvedge releases. Every shipped change is in CHANGELOG.md in the source repo — this page mirrors the three most recent releases for at-a-glance browsing.
+description: Recent Selvedge releases. Every shipped change is in CHANGELOG.md in the source repo — this page mirrors the most recent releases for at-a-glance browsing.
 ---
 
 The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md)
-in the source repo. This page mirrors the three most recent releases for
+in the source repo. This page mirrors the most recent releases for
 at-a-glance browsing.
+
+## v0.3.11 — 2026-08-29
+
+**Abandoned alternatives are first-class, and the log can prove itself.** The
+active-memory release: rejections become stated outcomes, expiry conditions
+get their evaluator, and a hash chain makes the event log tamper-evident.
+
+### Rejections are stated outcomes, not inferences
+
+New `change_type="reject"` records "we considered this and decided against
+it" *without writing the change* — the counterpart to `revert` for paths
+never taken. No new tool; it's logged through the existing `log_change`, and
+the prompt block now tells agents to log rejections and reverts with the
+condition that would invalidate them.
+
+`prior_attempts` reads both as a new **`confidence: "exact"`** tier — the
+outcome is stated in the log, not guessed from add→remove proximity. The old
+proximity heuristic drops to tiebreaker for attempts without a stated
+outcome. Results move accordingly: rows that used to come back
+`proximity_high` can now come back `exact`, so callers filtering on
+`proximity_high` should accept `exact` too.
+
+### Decisions that know when to die
+
+The `expires_when` column that shipped dormant in v0.3.8 gets its evaluator.
+A decision can carry a machine-checkable expiry condition in a closed
+four-shape grammar — `library:NAME>=VERSION`, `entity:PATH:changes`,
+`date:ISO`, `manual:LABEL` — validated at write time on every path; values
+outside the grammar are rejected, not stored. `selvedge stale` evaluates the
+conditions locally, from installed package metadata, the event log itself,
+and the clock — no network, no LLM — and flags fired ones `expired`. A
+`library:` condition whose package isn't locally observable surfaces as
+`manual_review` rather than a guess, and `manual:` never auto-fires.
+
+### The log can prove itself
+
+Every logged event now gets a SHA-256 chain record in a sidecar table, same
+transaction, covering every field except the late-bound `git_commit` (git
+already witnesses that one). Two new `selvedge verify` checks:
+**`chain_intact`** fails hard when a chained row was edited, deleted, or
+reordered out-of-band — naming the exact sequence number — and
+**`chain_coverage`** warns, never fails, about rows that predate the chain.
+Legitimate operations append boundary records instead of breaking the chain,
+so `migrate-paths --apply` and a destructive-gated prune verify clean while
+a silent `sqlite3` edit does not. `selvedge verify --json` publishes the
+attestation manifest. Honest scope, stated in the module itself: this
+detects casual and accidental modification; it is not proof against a
+motivated local attacker, who controls the file and can recompute every
+digest.
+
+### Fixes
+
+`selvedge supersede` gains `-d/--diff`, `--revisit-after`, and
+`--expires-when` (#31) — the storage layer accepted them all along, so the
+guided flow finally records everything the raw path could. An id-less
+supersede no longer re-opens every earlier revert on the path (#30). The
+PreCompact reminder now distinguishes "edited with no log" from "log exists
+but was truncated," both hook surfaces have their determinism pinned
+byte-for-byte in tests, and a capture-time nudge suggests recording the
+invalidating condition when a reject or revert lands without one.
+
+Tests 984 → 1114. No migration, no new config keys, still **8** MCP tools.
 
 ## v0.3.10 — 2026-08-05
 
@@ -66,7 +128,8 @@ longer discards `revisit_after` / `constraint` / `stale_when` on renames and
 supersedes. The CLI's `--json` and the MCP tools now return identical
 structures. The Docker image no longer ships the maintainer's own database.
 
-Tests 826 → 989. Still **8** MCP tools.
+Tests 826 → 984. Still **8** MCP tools.
+
 ## v0.3.9.3 — 2026-08-01
 
 **Unbreaks `pip install selvedge`, plus a full code-quality pass.** `mcp` 2.0.0
