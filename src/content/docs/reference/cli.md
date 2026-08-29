@@ -25,14 +25,14 @@ selvedge search QUERY [--limit N]       Full-text search
 selvedge prior-attempts [ENTITY]        Prior attempts on an entity + outcome ([--fuzzy TEXT] since 0.3.9.1)
 selvedge supersede ENTITY --reasoning   Re-open a reverted decision, append-only (since 0.3.9.1)
 selvedge index [--model NAME]           Build the optional semantic embeddings index (since 0.3.9.1)
-selvedge stale [...filters]             Decisions due for a revisit (date, or stale_when matched since 0.3.9.1)
+selvedge stale [...filters]             Decisions due for a revisit (date, stale_when, or expires_when since 0.3.11)
 selvedge stats [--since SINCE]          Tool-call coverage report
 selvedge install-hook [--path PATH]     Install git post-commit hook
 selvedge backfill-commit --hash HASH    Backfill git_commit on recent events
 selvedge import PATH                    Import migrations (SQL / Alembic) or an Agent Trace file
 selvedge import --from-git [--since]    Seed pre-Selvedge reverts from git history (since 0.3.9.1)
 selvedge export [--format json|csv|agent-trace|markdown]  Export history (Agent Trace since 0.3.9, markdown since 0.3.10)
-selvedge log ENTITY CHANGE_TYPE         Manually log a change ([--constraint] [--stale-when] since 0.3.9.1)
+selvedge log ENTITY CHANGE_TYPE         Manually log a change ([--constraint] [--stale-when] since 0.3.9.1, [--expires-when] since 0.3.11)
 selvedge migrate-paths [--apply]        Re-canonicalize stored entity paths
 selvedge backup [--output FILE]         Snapshot the store via VACUUM INTO
 selvedge prune [--days N]               Trim old tool_calls telemetry (90-day default)
@@ -128,13 +128,28 @@ Exits 1 if any `FAIL` row is present so doctor can be wired into CI.
 Correctness checks against the Selvedge store, in two tiers:
 
 - **`must_fail`** — SQLite corruption, schema mismatch, invariant violations (empty
-  `entity_path`, unknown `change_type`, bad timestamps)
+  `entity_path`, unknown `change_type`, bad timestamps), and — since v0.3.11 —
+  **`chain_intact`**: an end-to-end recomputation of the tamper-evidence hash chain
+  (hashes, `prev_hash` threading, sequence contiguity, tombstone accounting). A chained
+  row that was edited, deleted, or reordered out-of-band fails this check, which names
+  the exact sequence number. Nothing legitimate can trip it — `migrate-paths --apply`
+  and a destructive-gated prune append boundary records instead of breaking the chain.
 - **`should_warn`** — soft signals (singleton changesets, events past the backfill
-  window with no `git_commit`)
+  window with no `git_commit`), plus **`chain_coverage`** (v0.3.11): a count of events
+  rows with no chain record. Expected on every install upgraded from pre-0.3.11 —
+  pre-existing rows are *unchained, not invalid* — so it warns without breaking CI.
 
 Exit 0 when clean or only should-warn rows triggered; exit 1 on any must-fail row.
 `--strict` escalates should-warn rows to failures too, so you can wire `selvedge verify`
 into CI without `|| true` on day one and promote the soft tier once the team is ready.
+
+`--json` additionally carries **`chain_manifest`** (v0.3.11): the storage mechanism,
+chain algorithm, canonical-form version, verification-procedure reference, and a
+coverage declaration for the chain — the attestation fields SEP-3004 §2.7 describes,
+which Selvedge is assessed against (divergences documented; this is not a conformance
+claim). Honest scope, stated in the code itself: the chain detects casual and
+accidental modification of the log; it is not proof against a motivated local
+attacker, who controls the file and can recompute every digest.
 
 ### `selvedge watch [--interval N] [--since] [--entity] [--project] [--agent] [--json]`
 
@@ -191,11 +206,18 @@ presenter over the same `get_prior_attempts` store, so `--json` is byte-identica
 the MCP tool returns and the two surfaces can't diverge.
 
 Pass an `ENTITY` positional **xor** `--description TEXT` (free-text, when you don't have
-an exact path) — not both. By default only the clear "tried then reverted"
-(`proximity_high`) cases come back; `--all` widens recall to `proximity_low`. `--window`
-(e.g. `7d`, `60m`) maps onto the add→remove proximity window. Since v0.3.9.1 every row
-carries `outcome` (now including `reopened`), `current_status`, and the supersede-trail
-fields, so the output reads tried → reverted → re-opened.
+an exact path) — not both. By default only high-confidence rows come back: attempts
+closed by an explicit `revert` or `reject` event report `confidence: "exact"` (v0.3.11 —
+the outcome is stated in the log, not inferred) and always clear the default floor,
+alongside the clear tried-then-reverted proximity cases (`proximity_high`). `--all`
+widens recall to `proximity_low`. `--window` (e.g. `7d`, `60m`) maps onto the
+add→remove proximity window, which since v0.3.11 is the tiebreaker for *implicit*
+removals only. Since v0.3.9.1 every row carries `outcome` (including `reopened`, and —
+v0.3.11 — `rejected` for a standalone rejection), `current_status`, and the
+supersede-trail fields, so the output reads tried → reverted → re-opened.
+
+If you script against this output: rows that used to report `proximity_high` can now
+report `exact`, so a filter on `proximity_high` should accept `exact` too.
 
 ```bash
 selvedge prior-attempts users.auth_token       # exact entity
@@ -218,17 +240,30 @@ An empty result is the normal, good answer — exit 0, nothing clearly tried-and
 Records on the same coverage counter as the MCP tool, so `selvedge stats` reflects both
 surfaces.
 
-### `selvedge supersede ENTITY --reasoning TEXT [--constraint TEXT] [--stale-when TEXT] [--supersedes ID] [--json]`
+### `selvedge supersede ENTITY --reasoning TEXT [-d/--diff TEXT] [--constraint TEXT] [--stale-when TEXT] [--expires-when COND] [--revisit-after WHEN] [--supersedes ID] [--json]`
 
 Re-open a reverted decision — **append-only, never rewrites history** (v0.3.9.1). When the
 constraint that killed a decision no longer holds, this logs a new
-`change_type="supersede"` event that links the prior revert (auto-resolving the entity's
-most recent remove/delete when `--supersedes` is omitted). `prior_attempts` / `blame` /
-`diff` then read the full trail: tried → reverted → re-opened. There is deliberately no
-automatic un-retiring — this command **is** the explicit re-open step.
+`change_type="supersede"` event that links the prior closing event (auto-resolving the
+entity's most recent removal — remove / delete / index_remove / revert / reject — when
+`--supersedes` is omitted, so it also re-opens a standalone rejection). `prior_attempts` /
+`blame` / `diff` then read the full trail: tried → reverted → re-opened. There is
+deliberately no automatic un-retiring — this command **is** the explicit re-open step.
+
+Three flags arrived in v0.3.11 (#31), with the same semantics as `selvedge log`:
+**`-d/--diff`** records the change that re-applies the decision (e.g. the migration),
+**`--revisit-after`** sets a revisit date for the re-opened decision, and
+**`--expires-when`** attaches a machine-checkable expiry condition for the *new* verdict
+(closed grammar, validated — see `selvedge stale` above for the four shapes).
+The storage layer accepted all three all along; the guided flow now records everything
+the raw `selvedge log` path could, and its diff and reasoning pass through the same
+size-bound and secret-shape checks as every other write path.
 
 ```bash
-selvedge supersede payments.card_token -r "Provider now vaults card data — PCI constraint gone."
+selvedge supersede payments.card_token \
+  -r "Provider now vaults card data — PCI constraint gone." \
+  -d "migrations/0042_readd_card_token.sql" \
+  --revisit-after 6mo --expires-when "entity:payments.card_token:changes"
 ```
 
 ### `selvedge index [--model NAME] [--json]`
@@ -243,21 +278,36 @@ paths depends on it.
 ### `selvedge stale [--entity ENTITY] [--project PROJECT] [--agent AGENT] [--limit N]`
 
 Decisions that are due for a revisit — the CLI mirror of the `stale_decisions` MCP tool
-(new in v0.3.8). Two surfacing rules since v0.3.9.1: **`revisit_due`** — `revisit_after`
-has passed **and** the entity is still in active use (pure age never surfaces); and
-**`review_suggested`** — a later change event keyword-matched the decision's `stale_when`
-condition (follow up with `selvedge supersede`). Most-overdue-first. `--json` for cron /
-Slack / digest jobs.
+(new in v0.3.8). Each row's `flag` names which rule surfaced it:
+
+- **`expired`** (v0.3.11) — the decision's `expires_when` condition fired.
+  `expires_when` is a machine-checkable expiry condition in a closed four-shape
+  grammar — `library:NAME>=VERSION` (a named dependency reached a version),
+  `entity:PATH:changes` (a named entity changed again), `date:ISO` (a date passed),
+  `manual:LABEL` (an opaque label for human review) — validated at write time; values
+  outside the grammar are rejected, not stored. Evaluation is local-only: installed
+  package metadata, the event log itself, and the clock. No network, no LLM.
+  `expired_pattern` names the grammar shape that fired.
+- **`manual_review`** (v0.3.11) — a `library:` condition whose dependency isn't locally
+  observable, presented for a human instead of guessed at. `manual:LABEL` conditions
+  never auto-fire; they surface here too.
+- **`revisit_due`** — `revisit_after` has passed **and** the entity is still in active
+  use (pure age never surfaces).
+- **`review_suggested`** (v0.3.9.1) — a later change event keyword-matched the
+  decision's `stale_when` condition (follow up with `selvedge supersede`).
+
+Most-overdue-first. `--json` for cron / Slack / digest jobs.
 
 ```bash
-selvedge stale                       # everything due: past revisit date, or stale_when matched
+selvedge stale                       # everything due: expired, past revisit date, or stale_when matched
 selvedge stale --entity deps/stripe  # scope to one entity
 selvedge stale --json                # for cron / morning reports
 ```
 
 Each row carries the `flag`, the revisit due date, days overdue, the active-use signals
-that fired, any matched terms, and a templated reason. Composes with reporting jobs the
-same way `selvedge digest` (planned for v0.3.16) will.
+that fired, any matched terms, the expiry status and pattern where relevant, and a
+templated reason. Composes with reporting jobs the same way `selvedge digest` (planned
+for v0.3.16) will.
 
 ### `selvedge stats [--since SINCE]`
 
@@ -282,16 +332,31 @@ Manually log a change. Useful for backfilling, post-hoc annotation, or scripts.
 
 ```text
 add | remove | modify | rename | retype | create | delete |
-index_add | index_remove | migrate | revert | supersede
+index_add | index_remove | migrate | revert | reject | supersede
 ```
 
 Invalid types are caught at argument parsing with the full list of valid choices. `revert`
 ("we tried this and rolled it back") and `supersede` (re-open a reverted decision) were
 added in v0.3.9.1 — for the guided re-open flow prefer `selvedge supersede` above.
+**`reject`** (v0.3.11) records "we considered this and decided against it" *without
+writing the change* — the counterpart to `revert` for paths never taken. Good reject
+reasoning names what was rejected *and* what was chosen instead; the validator nudges
+toward that, and suggests a `--stale-when` or `--expires-when` when a reject or revert
+lands without one — the reason a decision was made is also the condition under which it
+should die.
 
 Other flags: `--agent`, `--commit`, `--project`, `--changeset`, `--rename-from`,
-`--revisit-after`, and (v0.3.9.1) `--constraint` (the testable principle behind the
-decision) / `--stale-when` (what would invalidate it, matched by `selvedge stale`).
+`--revisit-after`, (v0.3.9.1) `--constraint` (the testable principle behind the
+decision) / `--stale-when` (what would invalidate it, matched by `selvedge stale`), and
+(v0.3.11) `--expires-when` (a machine-checkable expiry condition in the closed
+four-shape grammar — `library:NAME>=VERSION`, `entity:PATH:changes`, `date:ISO`,
+`manual:LABEL` — validated at write time and evaluated locally by `selvedge stale`).
+
+```bash
+selvedge log users.auth_token reject \
+  -r "Considered a DB-stored auth token; rejected — can't revoke without a write. Kept stateless JWTs." \
+  --expires-when "entity:src/auth/session.py:changes"
+```
 
 `--revisit-after WHEN` (new in v0.3.8) sets a revisit date on the change — an ISO-8601
 date or a relative offset (`90d`, `6mo`), normalized like `--since`. The decision then
