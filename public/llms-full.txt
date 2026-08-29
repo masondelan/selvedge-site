@@ -14,6 +14,8 @@ Why "captured live" matters: tools like AgentDiff and Origin generate reasoning 
 
 Why "entity-level" matters: most tools attribute *lines*. Selvedge attributes the things you actually search for — `users.email`, `env/STRIPE_SECRET_KEY`, `api/v1/checkout`, `deps/stripe`. The first question after `git blame` is usually "what's the history of this column", not "what's the history of lines 40–48".
 
+The store is append-only, and since v0.3.11 it is tamper-evident: every logged event gets a SHA-256 chain record written in the same transaction, and `selvedge verify` recomputes the chain end to end (`chain_intact` fails hard on any row edited, deleted, or reordered out-of-band; `chain_coverage` warns — never fails — about rows that predate the chain on upgraded installs). Honest scope: this detects casual and accidental modification; it is not proof against a motivated local attacker, who controls the file and can recompute every digest.
+
 ## Install and setup
 
 ```
@@ -28,14 +30,14 @@ Claude Code plugin (alternative): `/plugin marketplace add masondelan/selvedge` 
 
 ## The 8 MCP tools
 
-- `log_change` — record a change event with entity, diff, and reasoning. Pass `rename_from` with `change_type="rename"` for the dual-event rename pattern.
+- `log_change` — record a change event with entity, diff, and reasoning. Pass `rename_from` with `change_type="rename"` for the dual-event rename pattern. `change_type="reject"` (v0.3.11) records "considered and decided against" without writing the change; `expires_when` attaches a machine-checkable expiry condition (`library:NAME>=VERSION`, `entity:PATH:changes`, `date:ISO`, `manual:LABEL` — validated at write time).
 - `diff` — history for an entity or entity prefix.
 - `blame` — most recent change + context for an exact entity.
 - `history` — filtered history across all entities.
 - `changeset` — all events grouped under a named feature/task slug.
 - `search` — full-text search across all events.
-- `prior_attempts` — prior change attempts on an entity + inferred outcome (was it tried and reverted?). Call it before editing. Conservative by design: `min_confidence` defaults to `proximity_high`, so an empty list is a trustworthy "nothing to worry about".
-- `stale_decisions` — dated decisions past their `revisit_after` that are *still in active use*. Pure age never surfaces — a dated decision nobody has touched won't nag.
+- `prior_attempts` — prior change attempts on an entity + outcome (was it tried and reverted, or considered and rejected?). Call it before editing. An attempt closed by an explicit `revert`/`reject` event reports `confidence: "exact"` (v0.3.11 — the outcome is stated in the log, not inferred); the add→remove proximity heuristic is the tiebreaker for implicit removals. Conservative by design: `min_confidence` defaults to `proximity_high`, `exact` rows always clear that floor, and an empty list is a trustworthy "nothing to worry about".
+- `stale_decisions` — decisions due for a revisit: `expired` (a machine-checkable `expires_when` condition fired — evaluated locally from installed packages, the event log, and the clock; `manual_review` when a `library:` dependency isn't locally observable), `revisit_due` (past `revisit_after` *and* still in active use — pure age never surfaces), or `review_suggested` (a later change matched the decision's `stale_when`).
 
 ## Entity-path conventions
 
@@ -67,9 +69,11 @@ Rules:
 - Set `git_commit` to the commit hash once you know it.
 - For multi-entity changes, set a shared `changeset_id` on all related calls (a short slug like `add-stripe-billing`).
 - Before editing an entity, call `selvedge.prior_attempts` on it — if the same change was tried before and reverted, you'll see the prior reasoning and why it was rejected, and can change your plan instead of repeating a rejected approach.
+- A reverted decision is not a permanent ban. If the constraint that killed it no longer holds, re-open it explicitly with `change_type="supersede"` (never re-apply a reverted change without superseding it first).
+- Log abandoned paths too: use `change_type="reject"` when you considered an approach and decided against it without writing it, and `change_type="revert"` when you rolled a change back — ideally with `stale_when` or `expires_when` naming the condition that would invalidate the verdict.
 - Then call `selvedge.diff` or `selvedge.blame` for the entity's broader history before conflicting with past decisions.
 
-The same operations are on your shell: `selvedge prior-attempts <entity>`, `selvedge blame <entity>`, `selvedge log <entity> <change_type> --reasoning "<why>"`, `selvedge search "<query>"`, `selvedge history --since 7d`, `selvedge stale`. Add `--json` to any read command.
+The same operations are on your shell: `selvedge prior-attempts <entity>`, `selvedge blame <entity>`, `selvedge log <entity> <change_type> --reasoning "<why>"`, `selvedge supersede <entity> --reasoning "<why>"`, `selvedge search "<query>"`, `selvedge history --since 7d`, `selvedge stale`. Add `--json` to any read command.
 ```
 
 ## Stopping repeated reverted mistakes (prior_attempts)
@@ -101,8 +105,8 @@ The agent reads why the change was rejected (DB-stored tokens couldn't be revoke
 Facts:
 
 - `prior_attempts` is a deterministic SQLite query with templated output. No LLM, no API key, no network — which is why an empty result is a trustworthy "nothing to worry about" rather than noise.
-- Default `min_confidence="proximity_high"` returns only the clear tried-then-reverted signal; pass `min_confidence="proximity_low"` to widen recall to the speculative tail.
-- Each hit is the full change event (`entity_path`, `change_type`, `timestamp`, `reasoning` — why the change was made — plus the rest of the event record) with three always-present outcome fields on top: `outcome`, `confidence`, and `outcome_reasoning` (why it was reverted). Every field always populated, never null.
+- Default `min_confidence="proximity_high"` returns the high-signal rows: stated outcomes (`confidence: "exact"` — the attempt was closed by an explicit `revert` or `reject`, or the row is a standalone rejection; v0.3.11) plus the clear tried-then-reverted proximity cases. Pass `min_confidence="proximity_low"` to widen recall to the speculative tail. If you filter on `confidence`, accept `exact` wherever you accepted `proximity_high`.
+- Each hit is the full change event (`entity_path`, `change_type`, `timestamp`, `reasoning` — why the change was made — plus the rest of the event record) with always-present outcome fields on top: `outcome` (`reverted` / `rejected` / `reopened` / `active`), `confidence`, `outcome_reasoning` (why it was reverted or rejected), and the supersede-trail fields. Every field always populated, never null.
 - History from before Selvedge was installed isn't there — backfill with `selvedge import` (reads SQL DDL, Alembic migrations, and Agent Trace records); coverage grows from the day it's installed.
 
 ## How Selvedge compares
@@ -138,7 +142,7 @@ Guidance:
 - Pick Selvedge when the question is "why is the code like this?" or "was this already tried?" — it's the only one where a rejected path stays queryable with reasoning attached, which is the record `prior_attempts` needs to stop an agent re-making a reverted mistake.
 - These compose: Claude Code runs multiple MCP servers side by side, and a structure index plus a decision log beats either alone.
 
-Selvedge memory also has a lifecycle: events can carry `revisit_after` dates, `stale_when` conditions, and supersede links, so `stale_decisions` surfaces decisions that are past due and still in active use, and a re-opened decision keeps its tried → reverted → re-opened chain instead of being rewritten.
+Selvedge memory also has a lifecycle: events can carry `revisit_after` dates, `stale_when` conditions, machine-checkable `expires_when` conditions (evaluated locally — no network, no LLM), and supersede links, so `stale_decisions` surfaces decisions that have expired or come due while still in active use, and a re-opened decision keeps its tried → reverted → re-opened chain instead of being rewritten.
 
 Full page: https://selvedge.sh/compare/codebase-memory-mcp-servers/
 

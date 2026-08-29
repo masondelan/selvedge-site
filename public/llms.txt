@@ -17,13 +17,13 @@ The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by t
 
 ## MCP tools (8, over stdio)
 - `log_change`: record a change event with entity, diff, and reasoning (pass `rename_from` with `change_type="rename"` for renames).
-- `prior_attempts`: prior change attempts on an entity + inferred outcome — was it tried and reverted? Call it *before* editing.
+- `prior_attempts`: prior change attempts on an entity + outcome — was it tried and reverted, or considered and rejected? Stated outcomes (explicit `revert`/`reject` events) report `confidence: "exact"`; proximity inference is the tiebreaker. Call it *before* editing.
 - `blame`: most recent change + context for an exact entity.
 - `diff`: history for an entity or entity prefix.
 - `history`: filtered history across all entities.
 - `changeset`: all events grouped under a named feature/task slug.
 - `search`: full-text search across all events.
-- `stale_decisions`: dated decisions past their `revisit_after` that are still in active use (pure age never surfaces).
+- `stale_decisions`: decisions due for a revisit — a machine-checkable `expires_when` condition fired, `revisit_after` passed while the entity is still in active use (pure age never surfaces), or a later change matched the decision's `stale_when`.
 
 ## Reference
 - [README](https://github.com/masondelan/selvedge/blob/main/README.md): full overview, MCP tool table, CLI reference, entity-path conventions.
