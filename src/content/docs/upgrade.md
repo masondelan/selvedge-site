@@ -107,13 +107,36 @@ selvedge doctor
 installation, agent-tool wiring, and (in v0.3.6+) the last prune timestamp. If
 anything regressed in the upgrade, `doctor` is the fastest way to find it.
 
+## Coming from 0.3.10? What changes at 0.3.11
+
+Nothing you have to do: no migration, no config changes, no new keys in
+`.selvedge/config.toml`. Two behaviors are worth knowing about before you run
+`selvedge verify` or script against `prior-attempts`:
+
+**The event log becomes tamper-evident on its own.** The first write after the
+upgrade starts a SHA-256 hash chain over new events — genesis is automatic, there is
+no command to run. From then on, `selvedge verify` recomputes the chain end to end
+(`chain_intact`, a hard failure if a chained row was edited or deleted out-of-band)
+and counts rows the chain doesn't cover yet (`chain_coverage`, a warning only).
+**`chain_coverage` WILL warn on every upgraded install** — all your pre-0.3.11 rows
+predate the chain, and that is expected: they are *unchained, not invalid*. The
+warning never fails the command and never breaks CI. Scope worth stating honestly:
+the chain detects casual and accidental modification; it is not proof against a
+motivated local attacker, who controls the file and can recompute every digest.
+
+**`prior_attempts` confidence values move.** An attempt closed by an explicit
+`revert` or `reject` event now reports `confidence: "exact"` — the outcome is stated
+in the log, not inferred — and the proximity heuristic becomes the tiebreaker. The
+API shape is unchanged, but rows that used to report `proximity_high` can now report
+`exact`, so anything filtering on `proximity_high` should accept `exact` alongside it.
+
 ## If the upgrade breaks something
 
 Selvedge follows [semver](https://semver.org/) and the v0.3.x line is committed to
 **drop-in upgrades** — a `pip install -U selvedge` on a 0.3.x should never require
-config changes or a DB migration you have to think about. The 0.3.8 and 0.3.9 releases
-were both drop-in/additive — no breaking changes, no manual migration steps. If something
-does break:
+config changes or a DB migration you have to think about. Every release from 0.3.8
+through 0.3.11 has been drop-in/additive — no breaking changes, no manual migration
+steps. If something does break:
 
 1. Capture `selvedge doctor --json` output.
 2. Check [the changelog](/project/changelog/) for the version you upgraded to —
