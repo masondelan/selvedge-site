@@ -1,50 +1,26 @@
 ---
-// Custom hero shown on the landing page only.
-// Uses Starlight's hero data (title/tagline/actions) + adds the selvedge stripe
-// + an inline install command. Wraps everything in semantic HTML so it
-// matches Starlight's accessibility expectations.
-//
-// Route data moved from `Astro.props` to `Astro.locals.starlightRoute` in
-// Starlight 0.32 — read the entry from there so the override keeps working.
-const { entry } = Astro.locals.starlightRoute;
-const data = entry.data.hero;
+import Terminal from './Terminal.astro';
 ---
-
-<section class="selvedge-hero">
-  <div class="selvedge-hero__wordmark">
-    <span class="selvedge-hero__stripe" aria-hidden="true"></span>
-    {/* Decorative brand wordmark. The crawlable H1 is the tagline below —
-        it carries the actual keywords ("Long-term memory for AI-coded
-        codebases") instead of just the brand string. Both classes set
-        margin: 0, so the tag swap is visually identical. */}
-    <p class="selvedge-hero__title" aria-hidden="true">selvedge</p>
+<section class="selvedge-hero launch-hero">
+  <div class="launch-hero__copy">
+    <h1 class="selvedge-hero__tag">Keep the why<br />with your code.</h1>
+    <p class="hero-explanation">Save project decisions and rejected approaches, so your next coding session can pick up where you left off.</p>
+    <div class="selvedge-hero__cta"><a class="primary" href="#choose-your-agent" data-launch-event="start_click">Set up Selvedge <span aria-hidden="true">→</span></a><a class="secondary" href="#try-the-demo" data-launch-event="demo_click">Try the demo</a></div>
   </div>
-
-  {data?.tagline && <h1 class="selvedge-hero__tag">{data.tagline}</h1>}
-
-  <p class="selvedge-hero__sub">
-    AI writes the code; the reason it chose <em>that</em> approach lives in a chat
-    window that's gone by morning. Selvedge is a
-    <strong>git blame for the <em>why</em></strong> — a local MCP server your agent
-    (Claude Code, Cursor, Copilot) calls as it works, recording the intent behind
-    each change in the moment it makes it, not reconstructing it from the diff
-    afterward.
-  </p>
-
-  <code class="selvedge-hero__install" aria-label="Install command">
-    pip install selvedge
-  </code>
-
-  {data?.actions && data.actions.length > 0 && (
-    <div class="selvedge-hero__cta">
-      {data.actions.map((a: any) => (
-        <a
-          href={a.link}
-          class={a.variant === "primary" ? "primary" : "secondary"}
-        >
-          {a.text}
-        </a>
-      ))}
-    </div>
-  )}
+  <div class="hero-terminal">
+    <Terminal title="selvedge — demo">
+      <div class="terminal-output">
+        <p class="terminal-input"><span>$</span> selvedge demo</p>
+        <p class="terminal-section">One decision. Two sessions.</p>
+        <p class="terminal-muted">Session 1 · save a rejected approach</p>
+        <p>Rejected storing API keys in <span class="terminal-entity">users.api_key</span>: plaintext credentials would be exposed in a database leak. Store a hash instead.</p>
+        <p class="terminal-muted terminal-gap">Session 2 · ask prior_attempts</p>
+        <p><span class="terminal-verdict">rejected</span> · confidence: exact</p>
+        <p>Revisit when: the credential storage and threat model change.</p>
+        <p class="terminal-muted terminal-gap">Temporary database removed.<br />Your project is untouched.</p>
+        <p class="terminal-input terminal-last"><span>$</span> <span class="terminal-cursor" aria-hidden="true"></span></p>
+      </div>
+    </Terminal>
+    <p class="terminal-caption">A shortened view of the included demo. Run it locally below.</p>
+  </div>
 </section>

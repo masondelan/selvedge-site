@@ -2,6 +2,14 @@
 // Imported by astro.config.mjs to build the sidebar from src/data/seo.mjs.
 export const mcpItems = [
   {
+    "label": "Codex",
+    "link": "/mcp/codex/"
+  },
+  {
+    "label": "Gemini CLI",
+    "link": "/mcp/gemini/"
+  },
+  {
     "label": "Cursor",
     "link": "/mcp/cursor/"
   },

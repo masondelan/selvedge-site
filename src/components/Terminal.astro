@@ -1,0 +1,8 @@
+---
+const { title = 'terminal', command = '', copy = false, kind = 'install' } = Astro.props;
+---
+<div class="terminal-window">
+  <div class="terminal-chrome"><span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="terminal-title">{title}</span>{copy && <button class="terminal-copy" type="button" data-copy={command} data-copy-kind={kind}>Copy</button>}</div>
+  {command && <pre class="terminal-command"><code>{command}</code></pre>}
+  <slot />
+</div>

@@ -10,7 +10,7 @@ structuredData:
     - name: "Add the MCP server to Windsurf"
       text: "Add the selvedge-server command as an MCP server in Windsurf (~/.codeium/windsurf/mcp_config.json — or open it from the MCPs icon in the Cascade panel → Configure)."
     - name: "Tell your agent to use it"
-      text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
+      text: "Run selvedge prompt --install .windsurfrules to install instructions for log_change and prior_attempts."
     - name: "Verify the connection"
       text: "Back in the Cascade MCPs panel, refresh the server list — selvedge should connect and expose its 8 tools."
 ---
@@ -44,10 +44,10 @@ Add this to `~/.codeium/windsurf/mcp_config.json` — or open it from the **MCPs
 
 ## Tell your agent when to call it
 
-Selvedge only captures the *why* if your agent knows to call it. Install the one-block instruction set into your project's `CLAUDE.md` / `.cursorrules`:
+Selvedge captures decisions when your agent calls it. Install the instruction block into your project’s .windsurfrules:
 
 ```bash
-selvedge prompt --install CLAUDE.md
+selvedge prompt --install .windsurfrules
 ```
 
 It's also a copy-paste block on the site: [the Selvedge agent prompt block](/prompt-block/).

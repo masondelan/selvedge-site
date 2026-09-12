@@ -1,0 +1,77 @@
+---
+import Terminal from './Terminal.astro';
+const agents = [
+  { id: 'codex', label: 'Codex', doc: '/mcp/codex/', note: 'Writes project .codex/config.toml and AGENTS.md. Open this project in Codex and trust it to load project configuration.' },
+  { id: 'claude-code', label: 'Claude Code', doc: '/mcp/claude-code/', note: 'Writes .mcp.json and CLAUDE.md, plus Claude Code lifecycle hooks. Already using the Selvedge plugin? Keep that installation instead.' },
+  { id: 'cursor', label: 'Cursor', doc: '/mcp/cursor/', note: 'Adds the server to ~/.cursor/mcp.json and instructions to this project’s .cursorrules.' },
+  { id: 'copilot', label: 'Copilot', doc: '/mcp/vscode/', note: 'Writes .vscode/mcp.json and .github/copilot-instructions.md. Use Copilot’s Agent mode and enable the server’s tools.' },
+  { id: 'gemini', label: 'Gemini CLI', doc: '/mcp/gemini/', note: 'Writes this project’s .gemini/settings.json and GEMINI.md. Restart Gemini CLI in the project and approve the server if prompted.' },
+  { id: 'windsurf', label: 'Windsurf', doc: '/mcp/windsurf/', note: 'Adds the server to ~/.codeium/windsurf/mcp_config.json and instructions to this project’s .windsurfrules.' },
+].sort((a, b) => a.label.localeCompare(b.label));
+---
+<div class="agent-setup" data-agent-setup>
+  <div class="agent-picker" role="group" aria-label="Choose your coding agent">
+    {agents.map((agent) => <button type="button" data-agent={agent.id} aria-pressed="false">{agent.label}</button>)}
+  </div>
+  {agents.map((agent) => (
+    <section data-agent-panel={agent.id} hidden aria-label={agent.label + ' setup'}>
+      <div class="setup-heading"><span class="session-label">1. RUN IN YOUR PROJECT FOLDER</span></div>
+      <Terminal title={"~/your-project — " + agent.label + " setup"} command={"uv tool install --upgrade selvedge\nselvedge setup --agent " + agent.id} copy kind="setup" />
+      <p class="setup-prerequisite">Requires <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a> and Python 3.10+. <a href="/start/quickstart/#install">Use pip instead →</a></p>
+      <details class="setup-note"><summary>What setup changes</summary><p>{agent.note} Setup asks before changes and backs up modified files.</p></details>
+      <p><strong>2. Restart {agent.label}</strong> in this project. Enable Selvedge’s tools if prompted.</p>
+      <a class="setup-doc-link" href={agent.doc} data-launch-event="agent_docs">Full {agent.label} instructions →</a>
+    </section>
+  ))}
+  <p class="setup-placeholder" data-setup-placeholder>Choose an agent above to see its setup commands.</p>
+  <div class="first-win" data-first-win hidden>
+    <span class="session-label">3. ASK YOUR AGENT TO REMEMBER SOMETHING</span>
+    <Terminal title="paste into your agent" command="Use Selvedge to record one approach we considered and rejected in this project. Include why we rejected it and what would change our mind. Then look it up with prior_attempts." copy kind="prompt" />
+    <p>Start a new session and ask it to look up the same entity. That’s your first saved decision carried forward.</p>
+    <details><summary>Connected successfully?</summary>
+      <p>You can send one anonymous confirmation to help improve setup. No project contents or contact details are sent.</p>
+      <button type="button" class="setup-feedback" data-feedback>I saved and recalled a decision</button>
+      <p aria-live="polite" data-feedback-status></p>
+    </details>
+  </div>
+  <p class="setup-fineprint">MCP and CLI work across these agents. Session-start reminders and the edit gate are currently Claude Code features. Agents must call Selvedge to record decisions.</p>
+  <noscript><p>JavaScript is off. Read the quickstart for setup commands for all supported agents. <a href="/start/quickstart/">Complete quickstart.</a></p></noscript>
+</div>
+<script>
+  import { track, getCampaign } from '../lib/launch-events';
+  const root = document.querySelector<HTMLElement>('[data-agent-setup]');
+  if (root) {
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-agent]'));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-agent-panel]'));
+    function selectAgent(id: string, record = false) {
+      if (!buttons.some(button => button.dataset.agent === id)) return;
+      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.agent === id)));
+      panels.forEach(panel => { panel.hidden = panel.dataset.agentPanel !== id; });
+      root!.dataset.selectedAgent = id;
+      root!.querySelector<HTMLElement>('[data-setup-placeholder]')!.hidden = true;
+      root!.querySelector<HTMLElement>('[data-first-win]')!.hidden = false;
+      if (record) track('agent_select', id);
+    }
+    buttons.forEach(button => button.addEventListener('click', () => selectAgent(button.dataset.agent!, true)));
+    selectAgent(new URLSearchParams(location.search).get('agent') || '');
+    document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach(button => button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy || '');
+        button.textContent = 'Copied';
+        track(button.dataset.copyKind === 'setup' ? 'setup_copy' : button.dataset.copyKind === 'prompt' ? 'prompt_copy' : 'install_copy', root.dataset.selectedAgent || 'none');
+      } catch { button.textContent = 'Select and copy the command above'; }
+    }));
+    root.querySelector<HTMLButtonElement>('[data-feedback]')?.addEventListener('click', async (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      const status = root.querySelector<HTMLElement>('[data-feedback-status]')!;
+      button.disabled = true;
+      const sent = await track('activation_reported', root.dataset.selectedAgent || 'none');
+      status.textContent = sent ? 'Thank you — confirmation received.' : 'Could not send. Please try again.';
+      button.disabled = sent;
+    });
+    document.querySelectorAll<HTMLAnchorElement>('[data-launch-event]').forEach(link => link.addEventListener('click', () => {
+      track(link.dataset.launchEvent!, root.dataset.selectedAgent || 'none');
+    }));
+    if (getCampaign() !== 'organic') track('landing_view', root.dataset.selectedAgent || 'none');
+  }
+</script>

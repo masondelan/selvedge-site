@@ -13,7 +13,7 @@ export default defineConfig({
     starlight({
       title: "selvedge",
       description:
-        "Long-term memory for AI-coded codebases. A git blame for the why — captured live, by the agent, as the change happens.",
+        "Local decision memory for AI coding agents. Keep the reasons, rejected approaches and conditions for revisiting them across sessions.",
       logo: {
         src: "./src/assets/wordmark.svg",
         replacesTitle: true,
@@ -59,6 +59,7 @@ export default defineConfig({
         "@fontsource-variable/inter/index.css",
         "@fontsource-variable/jetbrains-mono/index.css",
         "./src/styles/selvedge.css",
+        "./src/styles/launch.css",
       ],
       components: {
         // Override the default Starlight hero with our own that includes

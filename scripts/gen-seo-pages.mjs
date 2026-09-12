@@ -35,6 +35,7 @@ function write(relPath, contents) {
 
 // --- /mcp/<slug> setup pages -------------------------------------------------
 
+const promptFiles = { codex: 'AGENTS.md', gemini: 'GEMINI.md', cursor: '.cursorrules', vscode: '.github/copilot-instructions.md', 'claude-code': 'CLAUDE.md', windsurf: '.windsurfrules', cline: '.clinerules', continue: '.continuerules' };
 function clientSteps(c) {
   const add = c.command
     ? `Register the stdio server: run \`${c.command.snippet}\`, or add the selvedge-server command to your MCP config.`
@@ -47,7 +48,7 @@ function clientSteps(c) {
     { name: `Add the MCP server to ${c.name}`, text: plain(add) },
     {
       name: "Tell your agent to use it",
-      text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts.",
+      text: `Run selvedge prompt --install ${promptFiles[c.slug]} to install instructions for log_change and prior_attempts.`,
     },
     { name: "Verify the connection", text: plain(c.verify) },
   ];
@@ -109,10 +110,10 @@ function clientPage(c) {
 
   body.push("## Tell your agent when to call it", "");
   body.push(
-    "Selvedge only captures the *why* if your agent knows to call it. Install the one-block instruction set into your project's `CLAUDE.md` / `.cursorrules`:",
+    `Selvedge captures decisions when your agent calls it. Install the instruction block into your project’s ${promptFiles[c.slug]}:`,
     "",
     "```bash",
-    "selvedge prompt --install CLAUDE.md",
+    `selvedge prompt --install ${promptFiles[c.slug]}`,
     "```",
     "",
     "It's also a copy-paste block on the site: [the Selvedge agent prompt block](/prompt-block/).",

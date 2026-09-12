@@ -10,7 +10,7 @@ structuredData:
     - name: "Add the MCP server to Cursor"
       text: "Add the selvedge-server command as an MCP server in Cursor (~/.cursor/mcp.json (all projects) or .cursor/mcp.json (this project only)). selvedge setup can also write this for you."
     - name: "Tell your agent to use it"
-      text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
+      text: "Run selvedge prompt --install .cursorrules to install instructions for log_change and prior_attempts."
     - name: "Verify the connection"
       text: "Open Cursor Settings → MCP. selvedge should be listed with its 8 tools. Or run selvedge watch in a terminal and make a change — the event prints within a second."
 ---
@@ -46,10 +46,10 @@ Prefer not to touch config files? `selvedge setup` detects Cursor and writes thi
 
 ## Tell your agent when to call it
 
-Selvedge only captures the *why* if your agent knows to call it. Install the one-block instruction set into your project's `CLAUDE.md` / `.cursorrules`:
+Selvedge captures decisions when your agent calls it. Install the instruction block into your project’s .cursorrules:
 
 ```bash
-selvedge prompt --install CLAUDE.md
+selvedge prompt --install .cursorrules
 ```
 
 It's also a copy-paste block on the site: [the Selvedge agent prompt block](/prompt-block/).

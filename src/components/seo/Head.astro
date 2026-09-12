@@ -36,7 +36,7 @@ const isFaq = url.startsWith('/project/faq');
 // The canonical product one-liner. Kept identical to the README's lead so the
 // SoftwareApplication description never drifts from the source of truth.
 const ONE_LINER =
-  'Long-term memory for AI-coded codebases — including what was already tried and rejected. A git blame for AI agents, for the why rather than which model touched which line — captured live, by the agent, as the change happens.';
+  'Local decision memory for AI coding agents. Keep the reasons, rejected approaches and conditions for revisiting them across sessions.';
 
 // Pull page-level metadata from Starlight's frontmatter so we can re-emit
 // what we need without duplicating Starlight's own logic.
@@ -91,7 +91,7 @@ const softwareApplication = {
   description: ONE_LINER,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   softwareRequirements: 'Python 3.10+',
-  softwareVersion: '0.3.11', // keep in sync on release
+  softwareVersion: '0.3.12', // keep in sync on release
   license: 'https://opensource.org/licenses/MIT',
   downloadUrl: 'https://pypi.org/project/selvedge/',
   sameAs: [

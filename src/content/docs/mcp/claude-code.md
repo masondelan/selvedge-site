@@ -10,7 +10,7 @@ structuredData:
     - name: "Add the MCP server to Claude Code"
       text: "Register the stdio server: run claude mcp add selvedge -- uvx --from selvedge selvedge-server, or add the selvedge-server command to your MCP config."
     - name: "Tell your agent to use it"
-      text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
+      text: "Run selvedge prompt --install CLAUDE.md to install instructions for log_change and prior_attempts."
     - name: "Verify the connection"
       text: "Run /mcp inside Claude Code (or claude mcp list in a terminal). selvedge should show as connected with its 8 tools."
 ---
@@ -63,7 +63,7 @@ Two commands — the plugin bootstraps the server via `uvx`/`pipx`, so no prior 
 
 ## Tell your agent when to call it
 
-Selvedge only captures the *why* if your agent knows to call it. Install the one-block instruction set into your project's `CLAUDE.md` / `.cursorrules`:
+Selvedge captures decisions when your agent calls it. Install the instruction block into your project’s CLAUDE.md:
 
 ```bash
 selvedge prompt --install CLAUDE.md

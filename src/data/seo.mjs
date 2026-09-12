@@ -21,6 +21,39 @@ export const ONE_LINER =
 
 export const clients = [
   {
+    slug: "codex", name: "Codex",
+    description: "Connect Selvedge to Codex with project MCP configuration and AGENTS.md. Recall rejected approaches and saved decisions in a new session.",
+    blurb: "Selvedge gives Codex a local store for project decisions and rejected approaches. Run `selvedge setup --agent codex` (0.3.12+) to install project MCP configuration and instructions together.",
+    oneClick: null, autoDetect: true,
+    configPath: "`.codex/config.toml` in a trusted project, or `~/.codex/config.toml` for user-wide setup",
+    configLang: "toml",
+    configSnippet: `[mcp_servers.selvedge]
+command = "uvx"
+args = ["--from", "selvedge", "selvedge-server"]`,
+    verify: "Restart Codex in the trusted project. Enable the Selvedge MCP server in Settings → MCP servers if needed. Ask Codex to record a real rejected approach with `log_change`, then retrieve it with `prior_attempts`. Start a new session and query the same entity.",
+    gotcha: "Codex project configuration loads only for trusted projects. The setup wizard writes `.codex/config.toml` and installs instructions in `AGENTS.md`. Custom TOML entries must be reconciled manually. Make sure `uvx` (manual setup) or `selvedge-server` (wizard setup) is on the PATH Codex uses. Claude Code lifecycle hooks are not installed for Codex.",
+    docsUrl: "https://learn.chatgpt.com/docs/extend/mcp?surface=cli",
+  },
+  {
+    slug: "gemini", name: "Gemini CLI",
+    description: "Connect Selvedge to Gemini CLI with project MCP settings and GEMINI.md instructions. Save and recall project decisions locally.",
+    blurb: "Run `selvedge setup --agent gemini` (0.3.12+) to write the MCP entry and GEMINI.md instructions. Selvedge stores the reasoning Gemini CLI records and makes it available to subsequent sessions.",
+    oneClick: null, autoDetect: true,
+    configPath: "`.gemini/settings.json` in your project",
+    configLang: "json",
+    configSnippet: `{
+  "mcpServers": {
+    "selvedge": {
+      "command": "uvx",
+      "args": ["--from", "selvedge", "selvedge-server"]
+    }
+  }
+}`,
+    verify: "Restart Gemini CLI in the project. Run `/mcp` and confirm Selvedge's tools are available. Ask the agent to save a real rejected approach using `log_change` and retrieve it using `prior_attempts` in a new session.",
+    gotcha: "The agent must be able to find `uvx` (manual config) or `selvedge-server` (wizard setup). Approve the server if prompted. Setup writes GEMINI.md so the agent knows when to use Selvedge; it does not install Claude Code lifecycle hooks.",
+    docsUrl: "https://geminicli.com/docs/tools/mcp-server/",
+  },
+  {
     slug: "cursor",
     name: "Cursor",
     // Short, page-specific meta description (<= ~155 chars ideal).

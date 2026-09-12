@@ -10,7 +10,7 @@ structuredData:
     - name: "Add the MCP server to VS Code"
       text: "Add the selvedge-server command as an MCP server in VS Code (.vscode/mcp.json (this workspace) — or your user mcp.json via the Command Palette's MCP: Open User Configuration)."
     - name: "Tell your agent to use it"
-      text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
+      text: "Run selvedge prompt --install .github/copilot-instructions.md to install instructions for log_change and prior_attempts."
     - name: "Verify the connection"
       text: "Open the Chat view, switch to Agent mode, and open the tools picker — selvedge should be listed with its 8 tools. Or run MCP: List Servers from the Command Palette and confirm selvedge shows as *Running*."
 ---
@@ -45,10 +45,10 @@ Add this to `.vscode/mcp.json` (this workspace) — or your user `mcp.json` via 
 
 ## Tell your agent when to call it
 
-Selvedge only captures the *why* if your agent knows to call it. Install the one-block instruction set into your project's `CLAUDE.md` / `.cursorrules`:
+Selvedge captures decisions when your agent calls it. Install the instruction block into your project’s .github/copilot-instructions.md:
 
 ```bash
-selvedge prompt --install CLAUDE.md
+selvedge prompt --install .github/copilot-instructions.md
 ```
 
 It's also a copy-paste block on the site: [the Selvedge agent prompt block](/prompt-block/).

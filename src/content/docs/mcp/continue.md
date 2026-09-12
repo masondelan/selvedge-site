@@ -10,7 +10,7 @@ structuredData:
     - name: "Add the MCP server to Continue"
       text: "Add the selvedge-server command as an MCP server in Continue (~/.continue/config.yaml (global) — or a workspace file under .continue/mcpServers/)."
     - name: "Tell your agent to use it"
-      text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
+      text: "Run selvedge prompt --install .continuerules to install instructions for log_change and prior_attempts."
     - name: "Verify the connection"
       text: "Switch Continue to Agent mode and open its tools list — the selvedge tools should be available. (MCP tools are only callable in agent/chat-with-tools mode.)"
 ---
@@ -40,10 +40,10 @@ mcpServers:
 
 ## Tell your agent when to call it
 
-Selvedge only captures the *why* if your agent knows to call it. Install the one-block instruction set into your project's `CLAUDE.md` / `.cursorrules`:
+Selvedge captures decisions when your agent calls it. Install the instruction block into your project’s .continuerules:
 
 ```bash
-selvedge prompt --install CLAUDE.md
+selvedge prompt --install .continuerules
 ```
 
 It's also a copy-paste block on the site: [the Selvedge agent prompt block](/prompt-block/).

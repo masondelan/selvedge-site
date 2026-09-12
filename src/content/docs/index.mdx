@@ -1,184 +1,56 @@
 ---
-title: Long-term memory for AI-coded codebases.
-description: A local MCP server that AI coding agents (Claude Code, Cursor, Copilot) call as they work — logging the why behind every change into a SQLite file under .selvedge/ next to your code.
+title: Keep the why with your code.
+description: Save the decisions and rejected approaches behind your code. Recall them in your next coding-agent session. Free, local and open source.
 template: splash
+lastUpdated: 2026-09-12
 hero:
-  tagline: Long-term memory for AI-coded codebases.
-  actions:
-    - text: Get started
-      link: /start/quickstart/
-      icon: right-arrow
-      variant: primary
-    - text: Why Selvedge?
-      link: /start/what-is-selvedge/
-      variant: secondary
-    - text: GitHub
-      link: https://github.com/masondelan/selvedge
-      icon: external
-      variant: secondary
+  tagline: Keep the why with your code.
 ---
+import AgentSetup from '../../components/AgentSetup.astro';
+import Terminal from '../../components/Terminal.astro';
 
-import { Card, CardGrid, Code, LinkCard } from '@astrojs/starlight/components';
-import TerminalDemo from '../../components/TerminalDemo.astro';
+<div class="agent-strip" aria-label="Supported agents"><span class="agent-strip-label">WORKS WITH</span> Claude Code <span>·</span> Codex <span>·</span> Copilot <span>·</span> Cursor <span>·</span> Gemini CLI <span>·</span> Windsurf</div>
 
-## The problem
+## Choose your agent
 
-Six months ago, your AI agent added a column called `user_tier_v2`. You don't know why.
-`git blame` points to a commit from `claude-code` with a generated message that says
-"Update schema." The session that made the change is long gone — and so is the prompt
-that produced it.
+Open a terminal in your project folder. Pick your agent, copy the commands, and follow the setup prompts.
 
-With Selvedge, you run this instead:
+<AgentSetup />
 
-<TerminalDemo />
+## Try the demo
 
-That reasoning was **captured by the agent in the moment** — written into Selvedge from
-the same context that produced the change. Not inferred from the diff afterward by a
-second LLM. Not a hand-typed commit message.
+Want to see it work first? The demo saves a rejection and reads it back through a fresh database connection. It uses a temporary database, so your project stays untouched.
 
-It also reads back out: Selvedge exports its history as [Agent Trace](/compare/agent-trace/)
-records, so the *why* travels into whatever observability or audit tooling already speaks
-that format.
+<Terminal title="terminal — install and try" command={"uv tool install --upgrade selvedge\nselvedge demo"} copy kind="install" />
 
----
+Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) and Python 3.10+. Prefer pip? [Installation instructions →](/start/quickstart/#install)
 
-## What Selvedge does, in three lines
+## What gets remembered
 
-<CardGrid>
-  <Card title="Captures the why, live" icon="pencil">
-    AI agents call Selvedge's MCP tools while they work — `log_change` records what they
-    changed and **why**, in the same context window that produced the change.
-  </Card>
+<div class="memory-rows">
+  <section><h3>The decision</h3><p>What changed and why. Find it by the function, table, dependency or endpoint it belongs to.</p></section>
+  <section><h3>The rejected approach</h3><p>What you considered or rolled back, with the reason. Your next session can check before trying it again.</p></section>
+  <section><h3>When to revisit it</h3><p>What would change your mind. Add a review date or supported expiry condition so a past decision can be reconsidered.</p></section>
+</div>
 
-  <Card title="Tracks entities, not lines" icon="seti:db">
-    Every change is tagged to the *thing you actually search for* — `users.email`,
-    `env/STRIPE_SECRET_KEY`, `api/v1/checkout`, `deps/stripe` — not a line number.
-    Search `users` and you get everything under it.
-  </Card>
+## A small tool that stays with your project
 
-  <Card title="Stays local, stays simple" icon="seti:lock">
-    Almost nothing to install, nothing to run. A SQLite file under `.selvedge/`
-    next to your code. No accounts, no servers, and your code never leaves the machine.
-  </Card>
-</CardGrid>
+Decisions live in `.selvedge/selvedge.db`, a local SQLite file. Selvedge makes no LLM calls and needs no account or subscription. It’s open source under the MIT license.
 
-And it reads back. Before editing an entity, your agent calls
-[`prior_attempts`](/prior-attempts/) — and gets back what was already tried there, and
-how it ended:
+Connect agents to the same project and database to share the history. Moving to another machine? Carry the database with the project, or export a readable decision log. Your chosen coding agent still follows its own data policy.
 
-```jsonc
-prior_attempts({ "entity_path": "users.auth_token" })
-// → one hit, outcome: "reverted" (2026-03-12)
-//   "Tokens in the DB meant we couldn't revoke without a write; moved to
-//    short-lived JWTs verified statelessly. Column unused."
-```
+Selvedge records what you or your agent explicitly save. The installed instructions help the agent use it; they don’t guarantee that every decision is captured.
 
-So the agent doesn't re-add a column the team already pulled — it plans around the
-reason instead. No line-attribution tool surfaces a rejected path at all.
-[Full case study, with the plan it chose instead →](/prior-attempts/)
+## Find Selvedge
 
-More direct answers: [the MCP server that tracks *why* your agent changed code](/track-why/) ·
-[long-term memory for AI coding agents](/agent-memory/) ·
-[a local decision audit trail](/audit-trail/) ·
-[codebase-memory MCP servers, compared](/compare/codebase-memory-mcp-servers/)
+Available through the package registry and MCP directories you already use.
 
----
+<div class="publication-links">
+  <a href="https://pypi.org/project/selvedge/"><strong>PyPI</strong><span>Python package ↗</span></a>
+  <a href="https://smithery.ai/server/masondelan/selvedge"><strong>Smithery</strong><span>MCP directory ↗</span></a>
+  <a href="https://glama.ai/mcp/servers/masondelan/selvedge"><strong>Glama</strong><span>MCP directory ↗</span></a>
+  <a href="https://mcpservers.org/servers/masondelan/selvedge"><strong>MCP Servers</strong><span>MCP directory ↗</span></a>
+  <a href="https://github.com/masondelan/selvedge"><strong>GitHub</strong><span>Source & releases ↗</span></a>
+</div>
 
-## Quickstart
-
-Three commands. The third one is interactive — it detects which AI tools are on your
-machine (Claude Code, Cursor, Copilot) and wires Selvedge into each one's config. Every
-modified file gets a `.bak` written before any change reaches disk.
-
-```bash
-pip install selvedge
-cd your-project
-selvedge setup
-```
-
-That's it. Open a second terminal and run `selvedge watch` to live-tail events as your
-agent makes them. Then start asking your codebase questions:
-
-```bash
-selvedge blame payments.amount         # what changed last and why
-selvedge history --entity users --since 30d  # all changes to users in 30 days
-selvedge changeset add-stripe-billing  # all events for a feature
-selvedge search "stripe"               # full-text search
-```
-
-[Full quickstart →](/start/quickstart/) &nbsp;·&nbsp; [CLI reference →](/reference/cli/) &nbsp;·&nbsp; [MCP tool reference →](/reference/mcp-tools/)
-
----
-
-## Add it to your editor
-
-`selvedge setup` already wires the editors it finds. To add the `selvedge-server`
-MCP server to one yourself, every editor below has a step-by-step page:
-
-<p align="center"><sub>Each page's config runs the server with <a href="https://docs.astral.sh/uv/">uvx</a>, so it works without a global install — just have <code>uv</code> on your machine. Prefer pip? <code>pip install selvedge</code> and point your editor at the <code>selvedge-server</code> command.</sub></p>
-
-<CardGrid>
-  <LinkCard title="Cursor" description="Paste the MCP config, or run selvedge setup." href="/mcp/cursor/" />
-  <LinkCard title="VS Code" description="A .vscode/mcp.json block." href="/mcp/vscode/" />
-  <LinkCard title="Claude Code" description="claude mcp add, or the plugin marketplace." href="/mcp/claude-code/" />
-  <LinkCard title="Cline" description="The autonomous VS Code agent." href="/mcp/cline/" />
-  <LinkCard title="Windsurf" description="Cascade MCP config." href="/mcp/windsurf/" />
-  <LinkCard title="Continue" description="config.yaml mcpServers block." href="/mcp/continue/" />
-</CardGrid>
-
----
-
-## Who it's for
-
-**Teams running long-term, AI-coded codebases.** When the project is big enough that
-someone will touch it again in twelve months, three years — but most of it was written
-by an agent whose context evaporated the day each PR shipped. `git blame` tells you
-*what* changed. Selvedge tells you *why* — even after the agent session, the prompt,
-the developer who asked for it, and the model version are all long gone.
-
-**Solo developers using Claude Code on everyday projects.** Side projects, weekend
-builds, the small internal tool you keep poking at. You don't need enterprise governance
-— you just need to remember why you (or your agent) did the thing you did yesterday,
-last week, last sprint.
-
-If you've ever come back to your own AI-built project and thought "what was this *for*
-again?" — that's the question Selvedge already has the answer to.
-
----
-
-## Where Selvedge fits
-
-AI agents call Selvedge as they work. It captures the *why* into a durable, queryable
-store — and exports it in the open [Agent Trace](/compare/agent-trace/) format, so the
-reasoning travels into whatever observability or audit tooling you already run.
-
-Selvedge does **not** replace `git` (line-level what/when), PR review tools (review-time
-quality), agent observability (LLM call traces), or general-purpose code-host AI
-features. It sits between them — the layer that records *why*, so git, review, and
-observability tools finally have something to point at.
-
-[See the comparison table →](/compare/agent-tools/)
-
----
-
-## Listings
-
-Selvedge is open source (MIT) and lives in four directories beyond GitHub.
-
-<CardGrid>
-  <Card title="PyPI" icon="seti:python">
-    [pypi.org/project/selvedge](https://pypi.org/project/selvedge/) — `pip install selvedge`
-  </Card>
-  <Card title="Smithery" icon="seti:json">
-    [smithery.ai/server/masondelan/selvedge](https://smithery.ai/server/masondelan/selvedge) — MCP catalog
-  </Card>
-  <Card title="Glama" icon="seti:json">
-    [glama.ai/mcp/servers/masondelan/selvedge](https://glama.ai/mcp/servers/masondelan/selvedge) — MCP directory
-  </Card>
-  <Card title="mcpservers.org" icon="seti:json">
-    [mcpservers.org/servers/masondelan/selvedge](https://mcpservers.org/servers/masondelan/selvedge) — MCP directory
-  </Card>
-  <Card title="GitHub" icon="github">
-    [github.com/masondelan/selvedge](https://github.com/masondelan/selvedge) — source, issues, releases
-  </Card>
-</CardGrid>
+<div class="launch-footer"><a href="/start/quickstart/">Documentation →</a><a href="https://github.com/masondelan/selvedge">Source on GitHub ↗</a><a href="/privacy/">Website privacy</a></div>

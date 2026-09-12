@@ -10,7 +10,7 @@ structuredData:
     - name: "Add the MCP server to Cline"
       text: "Add the selvedge-server command as an MCP server in Cline (cline_mcp_settings.json — open it from Cline → MCP Servers → Configure MCP Servers)."
     - name: "Tell your agent to use it"
-      text: "Run selvedge prompt --install CLAUDE.md to drop in the agent-instructions block so the agent knows when to call log_change and prior_attempts."
+      text: "Run selvedge prompt --install .clinerules to install instructions for log_change and prior_attempts."
     - name: "Verify the connection"
       text: "Open Cline's MCP Servers panel — selvedge should appear with a green dot and its 8 tools listed. Then ask Cline to make a structural change and confirm it calls log_change."
 ---
@@ -44,10 +44,10 @@ Add this to `cline_mcp_settings.json` — open it from **Cline → MCP Servers �
 
 ## Tell your agent when to call it
 
-Selvedge only captures the *why* if your agent knows to call it. Install the one-block instruction set into your project's `CLAUDE.md` / `.cursorrules`:
+Selvedge captures decisions when your agent calls it. Install the instruction block into your project’s .clinerules:
 
 ```bash
-selvedge prompt --install CLAUDE.md
+selvedge prompt --install .clinerules
 ```
 
 It's also a copy-paste block on the site: [the Selvedge agent prompt block](/prompt-block/).

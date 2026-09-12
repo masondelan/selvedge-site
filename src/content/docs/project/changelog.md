@@ -7,6 +7,21 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent releases for
 at-a-glance browsing.
 
+## v0.3.12 — 2026-09-12
+
+**Choose your agent and get to a first saved decision.** Setup now configures
+Claude Code, Codex, Copilot, Cursor, Gemini CLI and Windsurf. Use
+`selvedge setup --agent NAME` to choose explicitly, or keep automatic detection.
+The wizard preserves existing configuration and prints restart and first-use
+instructions. Codex's TOML settings receive conservative, conflict-aware edits.
+
+Run `selvedge demo` to save a rejected approach and read it back through a fresh
+database connection. The demo uses a temporary database and leaves your project
+untouched. Status recognizes the supported agents' registry formats.
+
+MCP tools work across supported agents; session-start reminders and the edit
+gate remain Claude Code features. No new dependencies, migrations or MCP tools.
+
 ## v0.3.11 — 2026-08-29
 
 **Abandoned alternatives are first-class, and the log can prove itself.** The

@@ -1,135 +1,98 @@
 ---
 title: Quickstart
-description: Three commands. The third one is an interactive wizard that detects your AI tools and wires Selvedge into each one. Backups before any disk write.
-structuredData:
-  type: howto
-  steps:
-    - name: Install Selvedge
-      text: "Run pip install selvedge to put the selvedge CLI and selvedge-server MCP command on your PATH."
-    - name: Open your project
-      text: "cd into the project you want Selvedge to track."
-    - name: Run the setup wizard
-      text: "Run selvedge setup — it detects Claude Code, Cursor, and Copilot, writes each one's MCP config, installs the agent-instructions block into your prompt file, runs selvedge init, and installs the post-commit hook. Every modified file gets a .bak first."
-    - name: Verify the wiring
-      text: "Open a second terminal and run selvedge watch, then make a change in your AI tool — the event should print within a second. If nothing arrives, run selvedge doctor."
+description: Install Selvedge, try a safe demo, connect your coding agent, and carry your first decision into a new session.
 ---
 
+## Install
+
+Selvedge requires Python 3.10 or newer. With [uv installed](https://docs.astral.sh/uv/getting-started/installation/):
+
 ```bash
-pip install selvedge
+uv tool install --upgrade selvedge
+selvedge --version
+selvedge demo
+```
+
+Agent setup choices and the isolated demo require **Selvedge 0.3.12 or later**. The demo saves a rejection and retrieves it through a fresh connection to a temporary database. It does not write to your project or configured database.
+
+Using pip instead? Install in a virtual environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade selvedge
+selvedge demo
+```
+
+On Windows, activate with `.venv\Scripts\Activate.ps1` in PowerShell. If your system calls Python `python3`, use that to create the environment.
+
+**The agent must be able to launch `selvedge-server`.** Start your editor from the activated terminal, or use the absolute path to that executable in its MCP configuration. With uv tools, run `uv tool update-shell` if needed, then restart your terminal and editor.
+
+## Connect your agent
+
+From your project directory:
+
+```bash
 cd your-project
-selvedge setup
+selvedge setup --agent codex
 ```
 
-That's it. `selvedge setup` is an interactive wizard: it detects which AI tools you have
-(Claude Code, Cursor, Copilot), writes the MCP entry into each one's config, drops the
-canonical agent-instructions block into your project's prompt file (`CLAUDE.md` /
-`.cursorrules` / `copilot-instructions.md`), runs `selvedge init`, and installs the
-post-commit hook. Every modified file gets a `.bak` written next to it before any change
-reaches disk. Re-running is a no-op.
+| Agent | Setup flag | MCP configuration | Instructions |
+| --- | --- | --- | --- |
+| [Codex](/mcp/codex/) | `codex` | `.codex/config.toml` | `AGENTS.md` |
+| [Claude Code](/mcp/claude-code/) | `claude-code` | `.mcp.json` | `CLAUDE.md` |
+| [Cursor](/mcp/cursor/) | `cursor` | `~/.cursor/mcp.json` | `.cursorrules` |
+| [Copilot in VS Code](/mcp/vscode/) | `copilot` | `.vscode/mcp.json` | `.github/copilot-instructions.md` |
+| [Gemini CLI](/mcp/gemini/) | `gemini` | `.gemini/settings.json` | `GEMINI.md` |
+| [Windsurf](/mcp/windsurf/) | `windsurf` | `~/.codeium/windsurf/mcp_config.json` | `.windsurfrules` |
 
-For CI bootstrap or `devcontainer.json` `postCreateCommand`:
+Repeat `--agent` to connect several tools to the same project. Without it, setup detects supported tools. It asks before changes, backs up modified files, installs instructions, initializes the local store and offers a Git post-commit hook. Custom MCP entries raise a conflict. Custom Codex TOML entries require manual reconciliation; `--force` never rewrites them.
 
-```bash
-selvedge setup --non-interactive --yes
-```
+Already using the Selvedge Claude Code plugin? Keep that installation; adding a second MCP server through setup is unnecessary.
 
-## Verify the wiring
+Restart your agent in this project. Approve or enable Selvedge and its tools if prompted. Codex requires a trusted project to load its project configuration. Copilot requires Agent mode.
 
-Open a second terminal in the same project:
+## Save and recall your first decision
+
+Ask your agent:
+
+> Use Selvedge to record one approach we considered and rejected in this project. Include why we rejected it and what would change our mind. Then look it up with prior_attempts.
+
+Use a real decision you can verify. Watch the calls in another terminal:
 
 ```bash
 selvedge watch
 ```
 
-Make any change in your AI tool — add a column, rename a function, add an env var.
-`selvedge watch` should print the new event within a second of the agent calling
-`log_change`. If nothing arrives, run `selvedge doctor` for a single-command health
-check that tells you which step is silently broken.
+Start a new session in the same project. Ask the agent to query `prior_attempts` for that entity. You should see the saved rejection and its reason.
 
-## Query your history
+**MCP access does not automatically capture every decision.** The installed instructions guide your agent to call Selvedge. Session-start delivery, pre-compaction reminders and the schema edit gate are currently Claude Code integrations. Other clients use MCP tools and the CLI.
 
-```bash
-selvedge status                        # recent activity + missing-commit count
-selvedge diff users                    # all changes to the users table
-selvedge diff users.email              # changes to a specific column
-selvedge blame payments.amount         # what changed last and why
-selvedge history --since 30d           # last 30 days of changes
-selvedge history --since 15m           # last 15 minutes ('m' = minutes)
-selvedge changeset add-stripe-billing  # all events for a feature/task
-selvedge search "stripe"               # full-text search
-selvedge stats                         # log_change coverage report (per-agent)
-selvedge import migrations/            # backfill from migration files
-selvedge export --format csv           # dump history to CSV
-```
+## If nothing appears
 
-All read commands support `--json` for machine-readable output.
+1. Run `selvedge --version` and confirm 0.3.12 or later.
+2. Confirm `selvedge-server` is on the PATH your agent uses, or set its absolute path.
+3. Restart the agent after setup and enable its eight Selvedge tools.
+4. Make sure your terminal and agent are in the same project.
+5. Run `selvedge doctor` and explicitly ask the agent to use `log_change`.
 
-## Manual install (if you'd rather wire it up yourself)
-
-If you don't want to run the wizard, the four manual steps it automates:
-
-### 1. Initialize in your project
+## Read your project history
 
 ```bash
-cd your-project
-selvedge init
+selvedge status
+selvedge prior-attempts users.api_key
+selvedge blame users.api_key
+selvedge history --since 7d
+selvedge search "credentials"
+selvedge stale
 ```
 
-### 2. Register the MCP server
+Read commands support `--json`. See the [CLI reference](/reference/cli/) and [MCP tools](/reference/mcp-tools/).
 
-Selvedge is a standard stdio MCP server, so it works with any MCP client. For Claude Code:
+## Unattended setup
 
 ```bash
-claude mcp add selvedge -- selvedge-server
+selvedge setup --agent codex --non-interactive --yes
 ```
 
-Or commit a project-level `.mcp.json` so your whole team gets it:
-
-```json
-{
-  "mcpServers": {
-    "selvedge": {
-      "command": "selvedge-server"
-    }
-  }
-}
-```
-
-Using something else? Every editor has a step-by-step page — [Cursor](/mcp/cursor/), [VS Code](/mcp/vscode/), [Windsurf](/mcp/windsurf/), [Cline](/mcp/cline/), [Continue](/mcp/continue/) — or paste the same `mcpServers` block into your client's config.
-
-### 3. Tell your agent to use it
-
-```bash
-selvedge prompt --install CLAUDE.md
-```
-
-Point `--install` at whichever prompt file your client reads — the block is identical across clients: `CLAUDE.md` (Claude Code), `AGENTS.md` (Codex and other `AGENTS.md`-aware tools), `.cursor/rules/selvedge.md` or `.cursorrules` (Cursor), `GEMINI.md` (Gemini CLI).
-
-This installs the canonical agent-instructions block, sentinel-bracketed
-(`<!-- selvedge:start -->` / `<!-- selvedge:end -->`) so future `--install` calls update
-the bracketed region without disturbing anything else in the file. Or pipe it:
-
-```bash
-selvedge prompt | tee -a CLAUDE.md
-```
-
-### 4. Install the post-commit hook
-
-```bash
-selvedge install-hook
-```
-
-That's the same four steps the wizard runs.
-
-## Coverage checking
-
-Wondering how often your agent actually calls `log_change`? `selvedge stats` (above)
-gives the per-agent breakdown, low-quality-reasoning count, and last call timestamp. To
-cross-reference against git commits, run `python scripts/coverage_check.py --since 30d`
-(in the source repo). Low coverage usually means the system prompt needs strengthening.
-
-## Next
-
-[**CLI reference →**](/reference/cli/) — every flag, every subcommand.
-[**MCP tools →**](/reference/mcp-tools/) — the eight tools agents call.
-[**FAQ →**](/project/faq/) — common questions, gotchas, and limits.
+Without `--yes`, non-interactive setup is a dry run.
