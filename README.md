@@ -67,6 +67,15 @@ The "selvedge stripe" — the thin red vertical rule — appears in the hero, th
 right edge, and the favicon. It evokes the red selvedge thread on classic Japanese
 denim.
 
+Homepage interface:
+
+- The setup and introduction buttons share one outlined treatment, equal sizing,
+  and identical hover and keyboard-focus states. Indigo on warm paper; ecru in dark mode.
+- Keep their styles together in `selvedge.css`; avoid page-specific primary/secondary overrides.
+- Use medium-weight Inter, modest corner radii, and deliberate spacing. Reserve
+  JetBrains Mono for the wordmark, code, and technical labels, and red for small accents.
+- Keep interactions quiet: color changes without lifting buttons, gradients, or decorative shadows.
+
 ## Deploy
 
 Cloudflare Pages, connected to this repo's `main` branch:

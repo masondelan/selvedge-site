@@ -3,13 +3,9 @@
 .launch-hero__copy,.hero-terminal { min-width:0; }
 .launch-eyebrow,.session-label { font:500 .65rem var(--__sl-font-mono); letter-spacing:.06em; color:var(--sl-color-gray-2); }
 .launch-eyebrow { margin:0 0 1.4rem; }
-.launch-hero .selvedge-hero__tag { font-size:clamp(2.5rem,4vw,3.5rem); line-height:1.09; letter-spacing:-.045em; margin:0 0 1.3rem; font-weight:600; }
+.launch-hero .selvedge-hero__tag { font-size:clamp(2.5rem,4vw,3.5rem); line-height:1.12; letter-spacing:-.03em; margin:0 0 1.3rem; font-weight:550; }
 .launch-hero .selvedge-hero__sub { font-size:1.08rem; line-height:1.7; margin:0; color:var(--sl-color-text); max-width:35ch; }
 .hero-explanation { font-size:.95rem; line-height:1.75; color:var(--sl-color-gray-2); max-width:40ch; margin:1rem 0 1.5rem; }
-.launch-hero .selvedge-hero__cta { gap:.65rem; }
-.launch-hero .selvedge-hero__cta a { padding:.7rem 1rem; border-radius:.3rem; font-weight:550; font-size:.86rem; }
-.launch-hero .selvedge-hero__cta .primary { color:#faf6ec; background:#a63326; border-color:#a63326; }
-.launch-hero .selvedge-hero__cta .primary:hover { background:#86291f; border-color:#86291f; }
 .launch-proof { font-size:.75rem; color:var(--sl-color-gray-2); margin:1.1rem 0 0; }
 .terminal-window { background:#151c2a; border:1px solid #343d4d; border-radius:7px; overflow:hidden; box-shadow:0 8px 25px #1017260a; color:#e4e8ef; font-family:var(--__sl-font-mono); margin:1rem 0; }
 .terminal-chrome { background:#1d2533; border-bottom:1px solid #333c4b; padding:.62rem .9rem; display:flex; align-items:center; gap:1rem; min-height:2.6rem; }
