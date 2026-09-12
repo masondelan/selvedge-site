@@ -7,6 +7,28 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent releases for
 at-a-glance browsing.
 
+## v0.3.13 — 2026-09-12
+
+**Review flags stay attached to the decision they describe.** Claude Code's
+session-start summary now keeps expiry and manual-review labels, with their
+explanations, wherever an affected decision appears. Decisions on the same entity
+no longer borrow one another's review status.
+
+The revisit list drops a rejected or reverted decision after an explicit
+`supersede` reopens it. Other decisions on that entity remain eligible for review.
+An expiry condition still requests a review; it never changes a verdict or
+rewrites history automatically.
+
+The release also adds a [community feedback guide](https://github.com/masondelan/selvedge/blob/main/docs/community-feedback.md)
+and a product-feedback issue form. The guide explains how to correct a mistaken
+rejection with `supersede` and how reports become documented product decisions.
+No new dependencies, migrations, MCP tools or default telemetry.
+
+Available on [PyPI](https://pypi.org/project/selvedge/0.3.13/),
+[npm as `selvedge-mcp@0.3.13`](https://www.npmjs.com/package/selvedge-mcp/v/0.3.13),
+and [Smithery](https://smithery.ai/servers/masondelan/selvedge).
+See the [full release notes](https://github.com/masondelan/selvedge/releases/tag/v0.3.13).
+
 ## v0.3.12 — 2026-09-12
 
 **Choose your agent and get to a first saved decision.** Setup now configures

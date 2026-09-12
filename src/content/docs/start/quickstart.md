@@ -13,7 +13,7 @@ selvedge --version
 selvedge demo
 ```
 
-Agent setup choices and the isolated demo require **Selvedge 0.3.12 or later**. The demo saves a rejection and retrieves it through a fresh connection to a temporary database. It does not write to your project or configured database.
+The current release is **[Selvedge 0.3.13](/project/changelog/#v0313--2026-09-12)**, which includes fixes for decision review flags. Agent setup choices and the isolated demo were introduced in 0.3.12. The demo saves a rejection and retrieves it through a fresh connection to a temporary database. It does not write to your project or configured database.
 
 Using pip instead? Install in a virtual environment:
 
@@ -70,7 +70,7 @@ Start a new session in the same project. Ask the agent to query `prior_attempts`
 
 ## If nothing appears
 
-1. Run `selvedge --version` and confirm 0.3.12 or later.
+1. Run `selvedge --version`. Upgrade to the current release, 0.3.13; setup choices and the demo require at least 0.3.12.
 2. Confirm `selvedge-server` is on the PATH your agent uses, or set its absolute path.
 3. Restart the agent after setup and enable its eight Selvedge tools.
 4. Make sure your terminal and agent are in the same project.

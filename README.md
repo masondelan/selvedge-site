@@ -98,6 +98,20 @@ All content is Markdown / MDX under `src/content/docs/`. Sidebar order is hardco
 The landing page (`src/content/docs/index.mdx`) uses the `splash` template, which is
 why it gets the custom hero.
 
+### After a Selvedge release
+
+Use the source repository's `CHANGELOG.md` and published release as the source of
+truth. Update `src/content/docs/project/changelog.md` with the new release and
+refresh the current-version guidance in `src/content/docs/start/quickstart.md`.
+Keep a feature's minimum supported version distinct from the current release.
+
+Run `npm run build`, deploy, and check both live pages. Preserve unrelated homepage
+and style changes. Record the site commit and deployment receipt alongside the
+package release receipts; updating GitHub, PyPI, npm, or Smithery does not update
+this documentation mirror automatically. The source repository's
+[release procedure](https://github.com/masondelan/selvedge/blob/main/docs/releasing.md)
+covers package publication.
+
 ## License
 
 MIT — same as Selvedge itself.
