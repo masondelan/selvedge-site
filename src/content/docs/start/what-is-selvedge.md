@@ -1,18 +1,23 @@
 ---
 title: What is Selvedge?
-description: A local MCP server that captures the why behind every AI-written change, in the same context window that produced the change.
+description: Local decision history for AI coding agents. Save the reasons, rejected approaches and conditions for revisiting them across sessions.
 ---
 
-Selvedge is a local MCP server. AI coding agents (Claude Code, Cursor, Copilot) call it
-as they work to log structured change events with reasoning. Your data stays in a SQLite
-file under `.selvedge/` next to your code.
+Selvedge keeps project decisions and rejected approaches in a local SQLite file
+under `.selvedge/`, next to your code. Your next coding session can look up what
+you decided, why, and what would make it worth revisiting.
+
+Connect it to Claude Code, Codex, Copilot, Cursor, Gemini CLI or Windsurf through
+MCP, the protocol agents use to call tools. Selvedge records what you or your
+agent explicitly save; the installed instructions help the agent know when to
+use it. [Choose your agent and set it up](/#choose-your-agent).
 
 ## The problem it solves
 
-Human-written code leaks intent everywhere — commits, PRs, comments, Slack threads.
-**AI-written code doesn't:** the agent's perfect clarity about each decision lives in the
-prompt and evaporates when the conversation ends. Selvedge captures the why — live, by
-the agent itself, as the change is made. The diff is git's job. The why is Selvedge's.
+A new coding session can see the code without knowing why it ended up that way.
+The workaround you kept or the approach you rejected may only be explained in an
+older conversation. Selvedge gives those decisions a place in the project, so
+you and your agents can retrieve them when the same question comes up again.
 
 ## What Selvedge captures
 
