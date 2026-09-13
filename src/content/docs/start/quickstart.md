@@ -70,11 +70,13 @@ Start a new session in the same project. Ask the agent to query `prior_attempts`
 
 ## If nothing appears
 
-1. Run `selvedge --version`. Upgrade to the current release, 0.3.13; setup choices and the demo require at least 0.3.12.
+1. Run `selvedge --version`. [Upgrade to the current release](/upgrade/); setup choices and the demo require at least 0.3.12.
 2. Confirm `selvedge-server` is on the PATH your agent uses, or set its absolute path.
 3. Restart the agent after setup and enable its eight Selvedge tools.
 4. Make sure your terminal and agent are in the same project.
 5. Run `selvedge doctor` and explicitly ask the agent to use `log_change`.
+
+If your terminal and agent show different history, check [database path resolution and configuration](/reference/configuration/#db-path-resolution). Both must use the same project database.
 
 ## Read your project history
 
@@ -88,6 +90,8 @@ selvedge stale
 ```
 
 Read commands support `--json`. See the [CLI reference](/reference/cli/) and [MCP tools](/reference/mcp-tools/).
+
+Choose consistent [entity paths for functions, tables and dependencies](/reference/entity-paths/) so later queries find the decisions you saved. For a complete example, follow [record, retrieve and revisit a rejected approach](/guides/revisit-a-rejected-approach/).
 
 ## Unattended setup
 

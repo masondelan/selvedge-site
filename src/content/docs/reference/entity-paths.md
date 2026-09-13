@@ -1,5 +1,5 @@
 ---
-title: Entity paths
+title: Entity paths for code and decision history
 description: What counts as an entity, the canonical path conventions, and how prefix matching works across diff, history, and search.
 ---
 
