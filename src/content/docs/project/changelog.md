@@ -18,8 +18,9 @@ This patch also synchronizes release metadata and corrects the npm launcher's
 maintainer pin instructions. It adds no new MCP tools, database migrations,
 runtime dependencies, or default telemetry.
 
-Available on [PyPI](https://pypi.org/project/selvedge/0.3.14/), the official MCP
-registry, and [Smithery](https://smithery.ai/servers/masondelan/selvedge).
+Available on [PyPI](https://pypi.org/project/selvedge/0.3.14/),
+[npm as `selvedge-mcp@0.3.14`](https://www.npmjs.com/package/selvedge-mcp/v/0.3.14),
+the official MCP registry, and [Smithery](https://smithery.ai/servers/masondelan/selvedge).
 See the [full release notes](https://github.com/masondelan/selvedge/releases/tag/v0.3.14).
 
 ## v0.3.13 — 2026-09-12
