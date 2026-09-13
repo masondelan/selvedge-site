@@ -1,5 +1,5 @@
 ---
-title: Configuration
+title: Database paths and configuration
 description: How Selvedge resolves the DB path, environment variables, project vs. global precedence, and the destructive-action opt-in flag.
 ---
 

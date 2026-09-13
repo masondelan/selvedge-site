@@ -1,6 +1,6 @@
 ---
-title: Keep the why with your code.
-description: Save the decisions and rejected approaches behind your code. Recall them in your next coding-agent session. Free, local and open source.
+title: Local memory for AI coding agents
+description: Selvedge is a free, local MCP server that saves project decisions and rejected approaches across AI coding sessions. Set up Claude Code, Codex or Cursor.
 template: splash
 lastUpdated: 2026-09-12
 hero:
@@ -33,9 +33,11 @@ Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) and Pytho
   <section><h3>When to revisit it</h3><p>What would change your mind. Add a review date or supported expiry condition so a past decision can be reconsidered.</p></section>
 </div>
 
+Explore [memory across coding sessions](/agent-memory/), [try a recorded rejection and retrieval](/guides/revisit-a-rejected-approach/), or learn how to [keep a decision audit trail](/audit-trail/).
+
 ## A small tool that stays with your project
 
-Decisions live in `.selvedge/selvedge.db`, a local SQLite file. Selvedge makes no LLM calls and needs no account or subscription. It’s open source under the MIT license.
+Selvedge is a local MCP server for AI coding agents. Decisions live in `.selvedge/selvedge.db`, a local SQLite file. Selvedge makes no LLM calls and needs no account or subscription. It’s open source under the MIT license.
 
 Connect agents to the same project and database to share the history. Moving to another machine? Carry the database with the project, or export a readable decision log. Your chosen coding agent still follows its own data policy.
 

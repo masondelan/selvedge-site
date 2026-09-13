@@ -50,7 +50,7 @@ Selvedge's decision-archaeology positioning legible — an agent about
 to attempt X gets told "this was tried before and rejected, here's
 why." Shipped *with* the positioning artifacts (demo transcript,
 comparison page, README) so the wedge was visible the day it landed.
-See the [changelog](/project/changelog/#v037--2026-06-08) for the full
+See the [full changelog](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md) for the full
 notes.
 
 - **Entity-path canonicalization on write** — fixes the silent
@@ -81,7 +81,7 @@ the second column's evaluator was still three releases out — one
 migration is cheaper than two. Also bundled CLI parity for the v0.3.7
 wedge (`selvedge prior-attempts`) and a CLI-awareness section in the
 agent-instructions block. See the
-[changelog](/project/changelog/#v038--2026-06-16) for the full notes.
+[full changelog](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md) for the full notes.
 
 - **Schema migration v3** — adds `revisit_after` and `expires_when`
   (nullable) to `events`. Perf gated at 10k / 100k / 1M events. The
