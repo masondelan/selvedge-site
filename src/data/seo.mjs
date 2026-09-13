@@ -188,7 +188,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     }
   }
 }`,
-    autoDetect: false,
+    autoDetect: true,
     verify:
       "Back in the Cascade **MCPs** panel, refresh the server list — `selvedge` should connect and expose its 8 tools.",
     gotcha:

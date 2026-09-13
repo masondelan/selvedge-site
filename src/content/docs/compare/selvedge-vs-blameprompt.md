@@ -13,7 +13,7 @@ BlamePrompt records the prompt behind a line. Selvedge records the full structur
 | **Mechanism** | **MCP server** — the agent calls it as work happens | Agent-lifecycle hooks + post-commit hook |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None |
-| **Storage** | SQLite, zero deps | Local |
+| **Storage** | SQLite | Local |
 
 ## Where Selvedge is different
 

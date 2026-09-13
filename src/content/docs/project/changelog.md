@@ -7,6 +7,22 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent releases for
 at-a-glance browsing.
 
+## v0.3.14 — 2026-09-12
+
+**Explicit seven-day prior-attempt windows now match the default.** Passing
+`window_minutes=10080` to Selvedge's `prior_attempts` MCP tool now passes
+validation, matching the existing seven-day default. The accepted range is
+1–10,080 minutes. The maximum result limit remains 1,000.
+
+This patch also synchronizes release metadata and corrects the npm launcher's
+maintainer pin instructions. It adds no new MCP tools, database migrations,
+runtime dependencies, or default telemetry.
+
+Available on [PyPI](https://pypi.org/project/selvedge/0.3.14/),
+[npm as `selvedge-mcp@0.3.14`](https://www.npmjs.com/package/selvedge-mcp/v/0.3.14),
+the official MCP registry, and [Smithery](https://smithery.ai/servers/masondelan/selvedge).
+See the [full release notes](https://github.com/masondelan/selvedge/releases/tag/v0.3.14).
+
 ## v0.3.13 — 2026-09-12
 
 **Review flags stay attached to the decision they describe.** Claude Code's

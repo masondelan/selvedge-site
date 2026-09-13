@@ -91,7 +91,7 @@ const softwareApplication = {
   description: ONE_LINER,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   softwareRequirements: 'Python 3.10+',
-  softwareVersion: '0.3.12', // keep in sync on release
+  softwareVersion: '0.3.14', // keep in sync on release
   license: 'https://opensource.org/licenses/MIT',
   downloadUrl: 'https://pypi.org/project/selvedge/',
   sameAs: [
@@ -102,13 +102,13 @@ const softwareApplication = {
     'https://mcpservers.org/servers/masondelan/selvedge',
   ],
   featureList: [
-    'Captures the reasoning behind each change, live, as the agent works',
+    'Records stated reasoning for changes the agent logs',
     'Entity-level attribution (DB columns, tables, env vars, deps, API routes, functions)',
-    'prior_attempts surfaces paths already tried and reverted, with the reason',
+    'Selvedge prior_attempts retrieves recorded attempts and outcomes',
     'Changesets group related changes across many files',
     'Full-text search over change history',
     'Exports to the Agent Trace format',
-    'Local SQLite storage — no account, and your code never leaves the machine',
+    'Local SQLite storage with no required hosted backend',
   ],
   publisher: { '@id': `${SITE}/#org` },
 };
@@ -228,7 +228,7 @@ const graph: Record<string, unknown> = {
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      // Synced to src/content/docs/project/faq.md on 2026-06-10.
+      // Synced to src/content/docs/project/faq.md on 2026-09-12.
       // Google requires FAQPage markup to match the visible answer text —
       // if you edit the FAQ page copy, re-sync these strings or the page
       // loses FAQ rich-result eligibility.
@@ -238,7 +238,7 @@ const graph: Record<string, unknown> = {
           name: "What's the one-line description?",
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Selvedge is a local MCP server that captures the why behind every AI-written change, in the same context window that produced the change.',
+            text: "Selvedge is a local MCP server and CLI for recording code decisions, stated reasoning, and rejected approaches so they can be retrieved in later sessions.",
           },
         },
         {
@@ -246,7 +246,7 @@ const graph: Record<string, unknown> = {
           name: 'Is it open source?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes. MIT-licensed. Source: github.com/masondelan/selvedge.',
+            text: "Yes. MIT-licensed. Source: github.com/masondelan/selvedge.",
           },
         },
         {
@@ -254,7 +254,7 @@ const graph: Record<string, unknown> = {
           name: 'Where does my data live?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "In a SQLite file under .selvedge/selvedge.db next to your code (or ~/.selvedge/selvedge.db if no project DB is found and you didn't selvedge init). Your code, paths, diffs, and reasoning never leave your machine. Selvedge can make two outbound requests and neither carries any of it: a strictly opt-in usage heartbeat (off unless you enable it) and a PyPI version check. The roadmap includes an optional HTTP layer (v0.4.1) for self-hosted team servers; it's never sending data to us.",
+            text: "In a SQLite file under .selvedge/selvedge.db next to your code, or ~/.selvedge/selvedge.db when no project database is found. Run selvedge init to create a project database. Local history queries do not require a hosted backend. An MCP client may send retrieved records to its model provider. Sharing or publishing the database shares its contents, so private records need a private destination. Selvedge also has an optional usage heartbeat, off by default, and a PyPI version check. These requests do not include code, entity paths, diffs, or reasoning. SELVEDGE_TELEMETRY=0 disables the heartbeat.",
           },
         },
         {
@@ -262,7 +262,7 @@ const graph: Record<string, unknown> = {
           name: 'Can I commit .selvedge/ to git?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Yes — and for most projects, it's a good idea. SQLite + WAL handles concurrent CI checkouts well, and committing the DB means everyone on the team sees the same history. For monorepos where each microservice maintains its own history independently, you might prefer to .gitignore everything except .selvedge/.gitkeep.",
+            text: "Only if everyone with repository access should see its recorded contents. For public repositories, that means the records become public. Keep private reasoning in a private database. Back up the database consistently before sharing it, and plan how collaborators will reconcile changes. A SQLite file in git is not automatic multi-writer history synchronization.",
           },
         },
         {
@@ -270,7 +270,7 @@ const graph: Record<string, unknown> = {
           name: "What if I'm using a different AI tool?",
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Selvedge works with anything that speaks MCP. Claude Code, Cursor, Copilot are detected automatically by selvedge setup. For others, follow the manual install: add the selvedge server to the tool's MCP config and drop the agent-instructions block (selvedge prompt) into the tool's system prompt. If your AI tool doesn't support MCP, Selvedge can't capture live — but you can still use the CLI for manual logging via selvedge log and import historical migrations via selvedge import.",
+            text: "Selvedge exposes standard MCP tools and a CLI. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf; see the editor-specific setup guides for configuration and instruction files. Other MCP clients can be configured manually. Without MCP, an agent or human with shell access can record and retrieve decisions through the CLI. Claude Code lifecycle hooks do not automatically apply to other clients.",
           },
         },
         // The visible "How do I stop my agent repeating a mistake..." entry on
@@ -282,7 +282,7 @@ const graph: Record<string, unknown> = {
           name: 'Why MCP instead of a plain CLI hook?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Because MCP gives the agent access to its own history. Your agent can call selvedge blame and selvedge diff while it's working — so when it goes to modify a column it changed last sprint, it can read the prior reasoning before deciding. A plain CLI hook captures one direction (write). MCP captures both (write + read). For an AI-coded codebase that lives for years, the read direction is at least as valuable as the write direction.",
+            text: "MCP lets a compatible agent discover and call Selvedge tools while it works. The CLI exposes the same local read and write operations, so either route can support recording a decision and querying it before a later edit. Use the interface available in your agent environment.",
           },
         },
         {
@@ -290,7 +290,7 @@ const graph: Record<string, unknown> = {
           name: 'Does the agent really call log_change reliably?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "That's exactly what selvedge stats answers. Per-agent breakdown of total calls, log_change calls, coverage ratio, and missing-reasoning count. If your agent's coverage is low, the system prompt needs strengthening — see docs/fallbacks.md in the source repo for guidance.",
+            text: "Verify it in your workflow. selvedge stats reports observed tool calls, per-agent logging counts, and reasoning-quality signals. The logging ratio is a share of recorded tool calls; it does not measure every edit in the repository. Inspect a later-session retrieval and the actual changes when evaluating coverage.",
           },
         },
         {
@@ -298,7 +298,7 @@ const graph: Record<string, unknown> = {
           name: 'What\'s "reasoning quality validation"?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'log_change runs incoming reasoning through a regex-and-length validator. It catches: empty reasoning, reasoning under 20 characters, and generic placeholders ("user request", "as requested", "per request", "done", "n/a", "none", "todo", "see diff"/"see code"/"see pr", "fix"/"fixed", "add"/"added", "remove"/"removed", "update"/"updated", "change"/"changed"). Failed reasoning still gets logged (warnings are advisory) but appears in the default selvedge stats output as a low-quality-reasoning count. The point is to surface the agent silently shipping low-quality logs so you can fix the prompt.',
+            text: "log_change runs incoming reasoning through a regex-and-length validator. It catches: Empty reasoning Reasoning under 20 characters Generic placeholders: \"user request\", \"as requested\", \"per request\", \"done\", \"n/a\", \"none\", \"todo\", \"see diff\"/\"see code\"/\"see pr\", \"fix\"/\"fixed\", \"add\"/\"added\", \"remove\"/\"removed\", \"update\"/\"updated\", \"change\"/\"changed\" Failed reasoning still gets logged (warnings are advisory) but appears in the default selvedge stats output as a low-quality-reasoning count. The point is to surface the agent silently shipping low-quality logs so you can fix the prompt.",
           },
         },
         {
@@ -306,7 +306,7 @@ const graph: Record<string, unknown> = {
           name: 'Why no LLM in core?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Two reasons. Templated output is deterministic — a regex validator behaves the same on every commit, while an LLM in the loop introduces non-determinism that's miserable to test. And the local-first dependency budget — adding an LLM hop means an API key, a network dependency, latency, and ongoing cost. Selvedge installs in three deps for a reason. PRs that add LLM calls inside core get rejected.",
+            text: "Selvedge uses deterministic rules for history queries and reasoning-quality checks. An LLM call would add a network dependency and a different reliability and cost model. The package has runtime dependencies, including the MCP SDK, Click, and Rich; the optional semantic extra adds a local embeddings model. No LLM is required by the core.",
           },
         },
         {

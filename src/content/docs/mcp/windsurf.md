@@ -8,7 +8,7 @@ structuredData:
     - name: "Install Selvedge"
       text: "Run pip install selvedge to put the selvedge-server MCP command and the selvedge CLI on your PATH."
     - name: "Add the MCP server to Windsurf"
-      text: "Add the selvedge-server command as an MCP server in Windsurf (~/.codeium/windsurf/mcp_config.json — or open it from the MCPs icon in the Cascade panel → Configure)."
+      text: "Add the selvedge-server command as an MCP server in Windsurf (~/.codeium/windsurf/mcp_config.json — or open it from the MCPs icon in the Cascade panel → Configure). selvedge setup can also write this for you."
     - name: "Tell your agent to use it"
       text: "Run selvedge prompt --install .windsurfrules to install instructions for log_change and prior_attempts."
     - name: "Verify the connection"
@@ -25,7 +25,7 @@ Windsurf's Cascade agent loads MCP servers from a single JSON config. Add Selved
 pip install selvedge
 ```
 
-The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so it starts reliably even when your editor doesn't share your shell's PATH — it just needs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.
+The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so the package can be fetched on demand — the editor still needs to find [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.
 
 ## Add the MCP server
 
@@ -41,6 +41,8 @@ Add this to `~/.codeium/windsurf/mcp_config.json` — or open it from the **MCPs
   }
 }
 ```
+
+Prefer not to touch config files? `selvedge setup` detects Windsurf and writes this for you (with a `.bak` first).
 
 ## Tell your agent when to call it
 

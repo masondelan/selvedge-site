@@ -13,7 +13,7 @@ OpenLore is the closest thing to Selvedge in the category, and the most useful c
 | **Mechanism** | **MCP server** — the agent calls it as work happens | MCP server — one-time index + commit-time certificates |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | Call-graph edges |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | Purged — `rejected` is an inactive status, dropped from the queryable store after each decision sync |
-| **Storage** | SQLite, zero deps | SQLite graph in `.openlore/` |
+| **Storage** | SQLite | SQLite graph in `.openlore/` |
 
 ## Where Selvedge is different
 

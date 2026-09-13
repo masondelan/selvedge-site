@@ -78,7 +78,7 @@ function clientPage(c) {
     "pip install selvedge",
     "```",
     "",
-    "The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so it starts reliably even when your editor doesn't share your shell's PATH — it just needs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.",
+    "The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so the package can be fetched on demand — the editor still needs to find [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.",
     "",
   );
 
@@ -142,7 +142,7 @@ const SELVEDGE_ROW = {
   mechanism: "**MCP server** — the agent calls it as work happens",
   grouping: "**Changesets** — named feature/task slugs across many entities",
   priorAttempts: "**Yes** — `prior_attempts` surfaces tried-and-rejected paths",
-  storage: "SQLite, zero deps",
+  storage: "SQLite",
 };
 
 function comparePage(cmp) {

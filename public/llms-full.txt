@@ -1,169 +1,160 @@
 # Selvedge — full reference for AI agents
 
-> Long-term memory for AI-coded codebases. A `git blame` for AI agents — but for the *why*, not just which line which model touched. Captured live, by the agent, as the change happens. Local MCP server, SQLite storage, zero dependencies, MIT. `pip install selvedge`.
+Selvedge is a local MCP server and CLI for recording code decisions, stated reasoning, and rejected approaches. Selvedge's log_change writes structured events; Selvedge's prior_attempts retrieves recorded attempts and outcomes before editing. The package is MIT licensed, uses SQLite, and requires no LLM in the core. It has runtime dependencies including the MCP SDK, Click, and Rich.
 
-This file is a single self-contained reference an AI agent can ingest to understand what Selvedge is, when to use it, and how to call it.
+## Capture and retrieval
 
-## What it is
+Records contain what an agent or user logged. Connecting the server does not automatically capture every edit or place every decision in the next session's context. Treat recorded reasoning as a stated explanation to review, not proof of truth. An empty result means no qualifying record was found under the query and filters, not that the approach was never tried.
 
-Selvedge is a local Model Context Protocol (MCP) server. AI coding agents (Claude Code, Cursor, Copilot) call it as they work to log structured change events with reasoning, and to read prior reasoning before they act. The data stays in a SQLite file under `.selvedge/` next to the code. No cloud, no external dependencies.
-
-The problem it solves: human-written code leaks intent everywhere — commit messages, PR descriptions, inline comments, the chat that preceded it. AI-written code doesn't. The agent has perfect clarity about *why* it made each decision, but that context lives in the prompt and evaporates when the conversation ends. Six months later `git blame` tells you *what* changed and *when* — it can't tell you *why*. Selvedge captures the why, live, by the agent itself, as the change is made.
-
-Why "captured live" matters: tools like AgentDiff and Origin generate reasoning *after* the change by feeding the diff back to a second LLM. Selvedge's reasoning is the agent's own intent, written from the same context window that produced the change — no inference, no hallucinated explanations, and an empty `reasoning` field is itself a useful signal.
-
-Why "entity-level" matters: most tools attribute *lines*. Selvedge attributes the things you actually search for — `users.email`, `env/STRIPE_SECRET_KEY`, `api/v1/checkout`, `deps/stripe`. The first question after `git blame` is usually "what's the history of this column", not "what's the history of lines 40–48".
-
-The store is append-only, and since v0.3.11 it is tamper-evident: every logged event gets a SHA-256 chain record written in the same transaction, and `selvedge verify` recomputes the chain end to end (`chain_intact` fails hard on any row edited, deleted, or reordered out-of-band; `chain_coverage` warns — never fails — about rows that predate the chain on upgraded installs). Honest scope: this detects casual and accidental modification; it is not proof against a motivated local attacker, who controls the file and can recompute every digest.
+Keep the same database available across sessions, use consistent entity paths, and retrieve relevant history before editing. After checking whether an old reason still applies, record the evidence for a new decision. Neither a database nor instructions guarantee that an agent follows the record.
 
 ## Install and setup
 
-```
+```bash
 pip install selvedge
 cd your-project
 selvedge setup
 ```
 
-`selvedge setup` is an interactive wizard: it detects which AI tools you have (Claude Code, Cursor, Copilot), writes the MCP entry into each one's config, drops the canonical agent-instructions block into your prompt file (`CLAUDE.md` / `.cursorrules` / `copilot-instructions.md`), runs `selvedge init`, and installs the post-commit hook. Every modified file gets a `.bak` first. Re-running is a no-op.
+Use https://selvedge.sh/start/quickstart/ and the client-specific guides. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf. Claude Code lifecycle hooks do not apply automatically to other clients. A manual MCP connection and project instructions are separate parts of setup.
 
-Claude Code plugin (alternative): `/plugin marketplace add masondelan/selvedge` then `/plugin install selvedge@selvedge` (run `pip install selvedge` first).
+Claude Code plugin alternative:
+
+```text
+/plugin marketplace add masondelan/selvedge
+/plugin install selvedge@selvedge
+```
+
+The plugin launcher uses an installed selvedge-server when available, or bootstraps through supported uvx/pipx paths. Consult the setup guide for prerequisites. Verify that the tools load, save a decision, start a later session, and retrieve the same entity.
 
 ## The 8 MCP tools
 
-- `log_change` — record a change event with entity, diff, and reasoning. Pass `rename_from` with `change_type="rename"` for the dual-event rename pattern. `change_type="reject"` (v0.3.11) records "considered and decided against" without writing the change; `expires_when` attaches a machine-checkable expiry condition (`library:NAME>=VERSION`, `entity:PATH:changes`, `date:ISO`, `manual:LABEL` — validated at write time).
-- `diff` — history for an entity or entity prefix.
-- `blame` — most recent change + context for an exact entity.
-- `history` — filtered history across all entities.
-- `changeset` — all events grouped under a named feature/task slug.
-- `search` — full-text search across all events.
-- `prior_attempts` — prior change attempts on an entity + outcome (was it tried and reverted, or considered and rejected?). Call it before editing. An attempt closed by an explicit `revert`/`reject` event reports `confidence: "exact"` (v0.3.11 — the outcome is stated in the log, not inferred); the add→remove proximity heuristic is the tiebreaker for implicit removals. Conservative by design: `min_confidence` defaults to `proximity_high`, `exact` rows always clear that floor, and an empty list is a trustworthy "nothing to worry about".
-- `stale_decisions` — decisions due for a revisit: `expired` (a machine-checkable `expires_when` condition fired — evaluated locally from installed packages, the event log, and the clock; `manual_review` when a `library:` dependency isn't locally observable), `revisit_due` (past `revisit_after` *and* still in active use — pure age never surfaces), or `review_suggested` (a later change matched the decision's `stale_when`).
+- Selvedge's `log_change`: record an event with an entity path, change type, and optional reasoning, diff, agent, changeset, and linked commit. Useful explanations state the problem, constraints, alternatives, and evidence. `reject` means considered and declined without implementing; `revert` means implemented and rolled back.
+- Selvedge's `prior_attempts`: retrieve recorded attempts and outcomes. Explicit rejection or reversion evidence can report `confidence: "exact"`; proximity-based inferences are labeled separately. The default confidence floor is `proximity_high`. Exact describes the outcome evidence, not correctness. An optional fuzzy lookup ranks candidates using local embeddings and never rewrites history.
+- `blame`: the most recent recorded change and context for an exact entity.
+- `diff`: recorded history for an entity or prefix.
+- `history`: filtered history across entities.
+- `changeset`: events grouped under a named changeset.
+- `search`: full-text search of recorded events.
+- `stale_decisions`: surface supported expiry conditions, revisit dates with later activity signals, and possible stale-condition matches. Unobservable installed dependency versions request manual review. These signals do not automatically change a verdict.
 
-## Entity-path conventions
+Read https://selvedge.sh/reference/mcp-tools/ for current parameters and limits. `selvedge stats` measures observed tool calls and reasoning-quality signals; its logging ratio is not the share of all repository edits captured.
 
-```
-users.email           DB column (table.column)
-users                 DB table
-src/auth.py::login    Function in a file (path::symbol)
+## Entity paths
+
+```text
+users.email           Database column
+users                 Database table
+src/auth.py::login    Function in a file
 src/auth.py           File
 api/v1/users          API route
 deps/stripe           Dependency
 env/STRIPE_SECRET_KEY Environment variable
 ```
 
-Prefix queries work everywhere: `users` returns `users`, `users.email`, `users.created_at`, etc.
+Use the exact entity for blame. Prefix-capable queries, such as diff and filtered history, can retrieve broader areas. Check individual tool parameters rather than assuming prefix behavior everywhere. Record renames explicitly so the history can follow the relationship.
 
-## The canonical agent-instructions block
+## Agent instructions
 
-This is what `selvedge setup` / `selvedge prompt` installs into your project's `CLAUDE.md` / `.cursorrules`. It is the single source of truth for when an agent should call Selvedge:
+The following is the public instruction block from Selvedge. Generate the block for your installed version with `selvedge prompt`. Adapt its use to your client's supported tools and to the intended database; private reasoning belongs in a private destination.
 
-```
+```markdown
 ## Selvedge — change tracking
 
 You have access to Selvedge (MCP server: `selvedge`) for change tracking.
 
-Rules:
-- Call `selvedge.log_change` immediately after adding, modifying, or removing any DB column, table, function, API endpoint, dependency, or env variable.
-- Set `reasoning` to the user's original request or the problem being solved. Write at least one full sentence.
-- Set `agent` to the tool you're using, e.g. "claude-code", "cursor", or "codex".
+**Rules:**
+
+- Call `selvedge.log_change` immediately after adding, modifying, or
+  removing any DB column, table, function, API endpoint, dependency,
+  or env variable.
+- Set `reasoning` to the user's original request or the problem being
+  solved. Write at least one full sentence — the server will warn on
+  empty, very short, or generic values like "user request" or "done".
+  Good example: "User asked to add 2FA — needs phone number to send
+  SMS verification codes."
+- Set `agent` to the tool you're using, e.g. "claude-code", "cursor",
+  or "codex".
+- Set `session_id` if you have access to the current session/conversation ID.
 - Set `git_commit` to the commit hash once you know it.
-- For multi-entity changes, set a shared `changeset_id` on all related calls (a short slug like `add-stripe-billing`).
-- Before editing an entity, call `selvedge.prior_attempts` on it — if the same change was tried before and reverted, you'll see the prior reasoning and why it was rejected, and can change your plan instead of repeating a rejected approach.
-- A reverted decision is not a permanent ban. If the constraint that killed it no longer holds, re-open it explicitly with `change_type="supersede"` (never re-apply a reverted change without superseding it first).
-- Log abandoned paths too: use `change_type="reject"` when you considered an approach and decided against it without writing it, and `change_type="revert"` when you rolled a change back — ideally with `stale_when` or `expires_when` naming the condition that would invalidate the verdict.
-- Then call `selvedge.diff` or `selvedge.blame` for the entity's broader history before conflicting with past decisions.
+- For multi-entity changes (e.g. adding a whole feature), set a shared
+  `changeset_id` on all related `log_change` calls — use a short slug
+  like `add-stripe-billing`. This lets anyone query the full scope of
+  the change with `selvedge.changeset()`.
+- Before editing an entity, call `selvedge.prior_attempts` on it — if the
+  same change was tried before and reverted, you'll see the prior
+  reasoning and why it was rejected, and can change your plan instead of
+  repeating a rejected approach. (If the Selvedge PreToolUse hook is
+  installed, this check is enforced: schema/migration edits are blocked
+  until prior_attempts has been consulted this session.)
+- A reverted decision is not a permanent ban. If the constraint that
+  killed it no longer holds, re-open it explicitly with
+  `change_type="supersede"` (never re-apply a reverted change without
+  superseding it first).
+- Log abandoned paths too: use `change_type="reject"` when you considered
+  an approach and decided against it without writing it, and
+  `change_type="revert"` when you rolled a change back — ideally with
+  `stale_when` or `expires_when` naming the condition that would
+  invalidate the verdict, so `stale_decisions` can surface it later.
+- Then call `selvedge.diff` or `selvedge.blame` for the entity's broader
+  history before conflicting with past decisions.
 
-The same operations are on your shell: `selvedge prior-attempts <entity>`, `selvedge blame <entity>`, `selvedge log <entity> <change_type> --reasoning "<why>"`, `selvedge supersede <entity> --reasoning "<why>"`, `selvedge search "<query>"`, `selvedge history --since 7d`, `selvedge stale`. Add `--json` to any read command.
+**The same operations are on your shell.** Selvedge is MCP-first, but the
+identical local store is also a CLI (`selvedge` is on your PATH after
+install). When the MCP server isn't loaded, you're in a shell-only subagent,
+or you just want to keep context light, use the equivalents:
+
+- Check an entity first: `selvedge prior-attempts <entity>` (was it tried and
+  reverted before?), then `selvedge blame <entity>` / `selvedge diff <entity>`
+  for its broader history.
+- Log a change: `selvedge log <entity> <change_type> --reasoning "<why>"`
+  (change_type: add, remove, modify, rename, retype, create, delete,
+  index_add, index_remove, migrate, revert, reject, supersede; for a
+  rename add `--rename-from <old>`).
+- Re-open a reverted decision: `selvedge supersede <entity> --reasoning "<why>"`.
+- Find things: `selvedge search "<query>"`, `selvedge history --since 7d`,
+  `selvedge stale` (decisions now due for a revisit).
+
+Add `--json` to any read command; `selvedge <command> --help` gives detail on
+demand.
 ```
 
-## Stopping repeated reverted mistakes (prior_attempts)
+## Worked decision lifecycle
 
-The failure mode: an agent re-tries a change a previous session already made and reverted, because the reason for the revert lived in a chat session that's gone. The code went back; the why didn't go anywhere the next agent can read. The fix: before editing an entity, the agent calls `prior_attempts` on it — one tool call, before anything is written.
+Follow https://selvedge.sh/guides/revisit-a-rejected-approach/ for a tested caching example: record a rejection with its constraint, query it in a later session, and supersede it when shared invalidation passes the relevant tests. The example is hypothetical, not a customer outcome.
 
-Worked example (full case study: https://selvedge.sh/prior-attempts — transcript: https://github.com/masondelan/selvedge/blob/main/docs/demos/prior-attempts.md). An agent asked to keep mobile users signed in across restarts is about to re-add a `users.auth_token` column that an earlier session added and reverted:
+Supported `expires_when` conditions include a date, an entity change, or an observable installed dependency version. `manual:` labels do not auto-fire. A due `revisit_after` date also requires a later activity signal. `stale_when` keyword matches are suggestions to inspect evidence. Reopen the intended record explicitly after review; keep its original explanation.
 
-```jsonc
-// tool call
-prior_attempts({ "entity_path": "users.auth_token" })
+## Storage, sharing, and integrity
 
-// tool result  (default min_confidence = "proximity_high")
-[
-  {
-    "entity_path": "users.auth_token",
-    "change_type": "add",
-    "timestamp": "2026-03-12T17:40:11Z",
-    "reasoning": "Store a per-user auth token so the mobile app can stay signed in across restarts.",
-    "outcome": "reverted",
-    "confidence": "proximity_high",
-    "outcome_reasoning": "Reverted: tokens in the DB meant we couldn't revoke without a write; moved to short-lived JWTs verified statelessly. Column unused."
-  }
-]
+The project database defaults to `.selvedge/selvedge.db`; without a project database, a user-level database can be used. Local history operations require no hosted backend. An MCP client may send tool results to a model provider. Publishing or sharing the database exposes its recorded contents to the recipients.
+
+Optional usage telemetry is off by default. Its allowlisted payload excludes code, entity paths, diffs, and reasoning. A separate PyPI version check may make an outbound request. See https://selvedge.sh/project/faq/ and the package telemetry documentation for controls.
+
+`selvedge verify` checks a SHA-256 event chain for inconsistencies. It helps detect casual or accidental modification; someone who controls the database can rewrite records and recompute digests. Integrity checks do not prove completeness or the truth of reasoning. Preserve consistent backups and check who can access a database before sharing it.
+
+## Import and export
+
+Selvedge supports SQL DDL, Alembic, and Agent Trace imports. Importing structural history does not recover unstated reasoning. Agent Trace v0.1.0 is described at https://agent-trace.dev/; Selvedge stores decision metadata under `dev.selvedge`. Verify that receiving tools preserve the fields you need.
+
+```bash
+selvedge export --format agent-trace
+selvedge import --help
 ```
 
-The agent reads why the change was rejected (DB-stored tokens couldn't be revoked without a write; the team standardized on short-lived stateless JWTs), keeps the JWT approach, and solves the problem compatibly — a refresh token in the OS keychain plus a stateless `/auth/refresh` endpoint — then logs its own reasoning with `log_change` so the next session inherits the decision.
+## Choose the record format you can maintain
 
-Facts:
-
-- `prior_attempts` is a deterministic SQLite query with templated output. No LLM, no API key, no network — which is why an empty result is a trustworthy "nothing to worry about" rather than noise.
-- Default `min_confidence="proximity_high"` returns the high-signal rows: stated outcomes (`confidence: "exact"` — the attempt was closed by an explicit `revert` or `reject`, or the row is a standalone rejection; v0.3.11) plus the clear tried-then-reverted proximity cases. Pass `min_confidence="proximity_low"` to widen recall to the speculative tail. If you filter on `confidence`, accept `exact` wherever you accepted `proximity_high`.
-- Each hit is the full change event (`entity_path`, `change_type`, `timestamp`, `reasoning` — why the change was made — plus the rest of the event record) with always-present outcome fields on top: `outcome` (`reverted` / `rejected` / `reopened` / `active`), `confidence`, `outcome_reasoning` (why it was reverted or rejected), and the supersede-trail fields. Every field always populated, never null.
-- History from before Selvedge was installed isn't there — backfill with `selvedge import` (reads SQL DDL, Alembic migrations, and Agent Trace records); coverage grows from the day it's installed.
-
-## How Selvedge compares
-
-| | Reasoning source | Granularity | Mechanism | Grouping | Storage |
-|---|---|---|---|---|---|
-| Selvedge | Captured live, by the agent in the same context that produced the change | Entity (column, table, env var, dep, route, function) | MCP server — agent calls it as work happens | Changesets across many entities | SQLite, zero deps |
-| OpenLore | Derived — tree-sitter static analysis of code state, plus commit-gated decision notes | AST node (18 languages + 12 IaC) | MCP server — one-time index + commit-time certificates | Call-graph edges | SQLite graph in `.openlore/` |
-| AgentDiff (sunilmallya) | Inferred post-hoc by Claude Haiku from the diff at session end | Line | Claude Code lifecycle hooks → local daemon | Session/task | JSONL on disk |
-| Origin | Prompt receipts, captured live per turn | Line | Agent lifecycle hooks + git post-commit hook | None | Git notes + sessions branch |
-| Git AI | Attribution metadata | Line | Agent-invoked checkpoint → Git notes at commit | None | Git notes |
-| BlamePrompt | Prompt receipts — prompt, cost, tools; no stated rationale | Line | Agent-lifecycle hooks + post-commit hook | None | Git notes |
-
-Selvedge does not replace git (line-level what/when), PR review tools, or agent observability (LLM call traces). It sits between them — the provenance-as-first-class-citizen layer.
-
-## Picking a codebase-memory MCP server
-
-"Codebase memory" is four different jobs wearing one name. Pick by the memory you're missing:
-
-| Job | The question it answers | Representative servers |
-|---|---|---|
-| Code intelligence | "How is this codebase structured — who calls what?" | codebase-memory-mcp, OpenLore |
-| Session context | "What was I doing before this session died?" | Memory Keeper (mcp-memory-keeper) |
-| General memory | "What do we know about this user/project?" | mem0, official server-memory, claude-code-memory |
-| Decision provenance | "Why is the code like this — and what was already tried?" | Selvedge |
-
-Guidance:
-
-- Pick codebase-memory-mcp for the strongest structure index (call tracing, dead code) — things Selvedge doesn't do at all.
-- Pick OpenLore for a structure index plus decision notes from one deterministic local-first server — the closest thing to Selvedge in the category. The decisive difference: OpenLore derives memory from code state and purges rejected decisions from its queryable store after each sync (a decision synced before rejection leaves an annotation in the spec markdown; the queryable record is what disappears). Selvedge keeps rejected paths queryable.
-- Pick Memory Keeper for resuming long sessions that die with un-checkpointed context.
-- Pick mem0 or the official memory server for durable facts and preferences that follow a user across applications.
-- Pick Selvedge when the question is "why is the code like this?" or "was this already tried?" — it's the only one where a rejected path stays queryable with reasoning attached, which is the record `prior_attempts` needs to stop an agent re-making a reverted mistake.
-- These compose: Claude Code runs multiple MCP servers side by side, and a structure index plus a decision log beats either alone.
-
-Selvedge memory also has a lifecycle: events can carry `revisit_after` dates, `stale_when` conditions, machine-checkable `expires_when` conditions (evaluated locally — no network, no LLM), and supersede links, so `stale_decisions` surfaces decisions that have expired or come due while still in active use, and a re-opened decision keeps its tried → reverted → re-opened chain instead of being rewritten.
-
-Full page: https://selvedge.sh/compare/codebase-memory-mcp-servers/
-
-## Agent Trace
-
-[Agent Trace](https://agent-trace.dev/) is an open wire format for AI code attribution traces, published by Cursor (RFC, Jan 2026). Its original GitHub home went 404 in August 2026; the spec and schema survive, frozen at v0.1.0, at agent-trace.dev. Selvedge emits and reads that format — Agent Trace is the wire format; Selvedge is the live capture + query layer — with no runtime dependency on the upstream project.
-
-```
-selvedge export --format agent-trace    # emit Agent Trace v0.1.0 records (--ndjson, --collapse-by-session)
-selvedge import --format agent-trace     # round-trip a Selvedge export, or ingest foreign producers best-effort
-```
-
-Selvedge's reasoning and entity-level provenance ride along in each record's `metadata` under the reverse-domain `dev.selvedge` namespace.
+Maintained instruction files hold standing guidance. ADRs can record decisions, alternatives, and consequences. Selvedge adds structured events and entity queries. All require useful recording and retrieval; a maintained ADR index may already meet your needs. See https://selvedge.sh/compare/instructions-and-adrs/.
 
 ## Links
 
-- Home: https://selvedge.sh
-- Track the why: https://selvedge.sh/track-why/
+- Home: https://selvedge.sh/
+- Quickstart: https://selvedge.sh/start/quickstart/
+- Revisit a rejected approach: https://selvedge.sh/guides/revisit-a-rejected-approach/
 - Agent memory: https://selvedge.sh/agent-memory/
 - Audit trail: https://selvedge.sh/audit-trail/
-- Codebase-memory MCP servers, compared: https://selvedge.sh/compare/codebase-memory-mcp-servers/
+- Codex setup: https://selvedge.sh/mcp/codex/
+- Gemini CLI setup: https://selvedge.sh/mcp/gemini/
 - GitHub: https://github.com/masondelan/selvedge
-- PyPI: https://pypi.org/project/selvedge/ (`pip install selvedge`)
-- Changelog: https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md
+- PyPI: https://pypi.org/project/selvedge/
+- Changelog: https://selvedge.sh/project/changelog/

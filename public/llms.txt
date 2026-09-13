@@ -1,12 +1,12 @@
 # Selvedge
 
-> Long-term memory for AI-coded codebases — a `git blame` for AI agents, but for the *why*, not just which line which model touched. Selvedge is a local MCP server that AI coding agents (Claude Code, Cursor, Copilot) call as they work to log structured change events with reasoning — and that agents query before they act, so they can see whether a change was tried and reverted before repeating it. Data stays in a local SQLite file under `.selvedge/`. Zero dependencies, MIT licensed.
+> Selvedge is a local MCP server and CLI for recording code decisions, stated reasoning, and rejected approaches. Selvedge's log_change writes events; Selvedge's prior_attempts retrieves recorded attempts and outcomes before a later edit. SQLite storage, MIT licensed, no LLM in the core. Capture and retrieval require the agent or user to call the tools.
 
 The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by the agent, in the same context that produced the change — not inferred post-hoc from the diff by a second model. Install with `pip install selvedge`, then `selvedge setup`.
 
 ## Start here
 - [Home](https://selvedge.sh): what Selvedge is, who it's for, the quickstart.
-- [Quickstart](https://selvedge.sh/start/quickstart/): `pip install selvedge`, the `selvedge setup` wizard, wiring into Claude Code / Cursor / Copilot.
+- [Quickstart](https://selvedge.sh/start/quickstart/): `pip install selvedge`, the `selvedge setup` wizard, wiring into Claude Code / Cursor / Copilot / Codex / Gemini CLI.
 - [Agent prompt block](https://selvedge.sh/prompt-block/): the copy-paste `CLAUDE.md` / `.cursorrules` block that tells an agent when and how to call Selvedge. Also emitted by `selvedge prompt`.
 - [Stop your agent repeating reverted mistakes](https://selvedge.sh/prior-attempts): case study of the prior_attempts tool — the agent checks an entity's history before editing and changes plan when the change was tried and reverted.
 - [The MCP server that tracks why your AI agent changed code](https://selvedge.sh/track-why/): the write path (`log_change`, live, in the agent's own words) and the read path (`blame`, `history`) for decision provenance.
@@ -14,6 +14,13 @@ The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by t
 - [A local decision audit trail for AI-written code](https://selvedge.sh/audit-trail/): who/what/when/why per entity, searchable, exportable as Agent Trace records.
 - [How Selvedge compares](https://selvedge.sh/compare/agent-tools/): Selvedge vs. AgentDiff / Origin / Git AI / BlamePrompt — captured-live + entity-level + changesets.
 - [Best MCP servers for codebase memory, compared](https://selvedge.sh/compare/codebase-memory-mcp-servers/): the honest map — code intelligence vs. session context vs. general memory vs. decision provenance, and when Selvedge is not the right pick.
+
+- [Revisit a rejected approach](https://selvedge.sh/guides/revisit-a-rejected-approach/): tested CLI walkthrough.
+- [Instruction files and ADRs](https://selvedge.sh/compare/instructions-and-adrs/): choose a record format your team will maintain.
+- [Codex setup](https://selvedge.sh/mcp/codex/): MCP configuration and project instructions.
+- [Gemini CLI setup](https://selvedge.sh/mcp/gemini/): MCP configuration and project instructions.
+
+An empty query result means no qualifying record was found, not that the approach was never tried. MCP clients may send retrieved records to their model providers. Keep private records in a private destination.
 
 ## MCP tools (8, over stdio)
 - `log_change`: record a change event with entity, diff, and reasoning (pass `rename_from` with `change_type="rename"` for renames).
@@ -29,7 +36,7 @@ The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by t
 - [README](https://github.com/masondelan/selvedge/blob/main/README.md): full overview, MCP tool table, CLI reference, entity-path conventions.
 - [Changelog](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md): what shipped, per version.
 - [Architecture](https://github.com/masondelan/selvedge/blob/main/docs/architecture.md): data model, phase plan, non-goals.
-- [Agent Trace interop](https://selvedge.sh/compare/agent-trace/): Selvedge exports and imports the Agent Trace v0.1.0 record format (published by Cursor; now frozen — the upstream repo is gone, spec survives at agent-trace.dev).
+- [Agent Trace interop](https://selvedge.sh/compare/agent-trace/): Selvedge supports Agent Trace v0.1.0 import and export. Verify field preservation in receiving tools.
 - [prior_attempts demo](https://github.com/masondelan/selvedge/blob/main/docs/demos/prior-attempts.md): worked transcript of an agent checking history and changing its plan.
 
 ## Install

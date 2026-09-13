@@ -1,6 +1,6 @@
 ---
 title: The MCP server that tracks why your AI agent changed code
-description: Selvedge records the reasoning behind every AI-written change — logged live by the agent over MCP into local SQLite, and answerable later with selvedge blame.
+description: Selvedge records stated reasoning for code decisions through MCP or CLI, stores it in local SQLite, and retrieves it later with blame and prior_attempts.
 structuredData:
   type: techarticle
   # Answers below are verbatim plain-text copies (markdown stripped) of the
@@ -44,7 +44,7 @@ An agent session adds a column called `user_tier_v2`. The commit message says `U
 
 ## What tracking the why looks like
 
-With Selvedge wired in, the agent's [instruction block](/prompt-block/) tells it to log each change as it makes it:
+Selvedge's `log_change` tool records the reason the agent provides. Its [instruction block](/prompt-block/) tells the agent when to log; connecting the server alone does not capture every change. In this hypothetical example:
 
 ```jsonc
 // tool call, made by the agent in the same context that produced the change
@@ -87,18 +87,18 @@ The same answer is available to the agent over MCP as `blame`, and in bulk as `h
 
 ## What Selvedge is
 
-Decision provenance for AI-coded codebases: the why behind every change, and what was already tried and rejected. It's 8 MCP tools that also work as a plain CLI: `log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`. Data lives in a SQLite file under `.selvedge/` next to your code. MIT licensed. No account, no LLM anywhere in the core, and no network hop on the data path — your code, diffs, and reasoning never leave the machine.
+Decision history for AI-coded codebases: recorded reasons, and what was already tried and rejected. It's 8 MCP tools that also work as a plain CLI: `log_change`, `prior_attempts`, `blame`, `diff`, `history`, `changeset`, `search`, `stale_decisions`. Data lives in a SQLite file under `.selvedge/` next to your code. MIT licensed, with no LLM in the core or required hosted backend. An MCP client can send retrieved records to its model provider, and publishing the database shares its contents. Keep private records in a private destination.
 
 ```bash
 pip install selvedge
-selvedge setup   # detects Claude Code / Cursor / Copilot, installs the prompt block
+selvedge setup   # configure a supported client and install agent instructions
 ```
 
 [Full quickstart →](/start/quickstart/)
 
 ## The read path is the point
 
-Capture is half the loop. The other half: before editing an entity, the agent calls [`prior_attempts`](/prior-attempts/) and finds out whether the thing it's about to do was already tried and reverted — so the team pays for each lesson once. The full history is also a [decision audit trail](/audit-trail/) you can search and export as [Agent Trace](/compare/agent-trace/) records.
+Capture is half the loop. The other half: before editing an entity, the agent can call [Selvedge's `prior_attempts`](/prior-attempts/) to inspect qualifying recorded attempts and outcomes. It still needs to assess whether the evidence applies to the proposed edit. The full history is also a [decision audit trail](/audit-trail/) you can search and export as [Agent Trace](/compare/agent-trace/) records.
 
 ## FAQ
 

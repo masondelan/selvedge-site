@@ -1,6 +1,6 @@
 ---
 title: Stop your AI coding agent from repeating a mistake it already made and reverted
-description: AI agents repeat reverted mistakes because the reason for the revert dies with the session. prior_attempts is the MCP tool that lets the agent check an entity's history before editing. Local, SQLite, no LLM in the loop.
+description: Selvedge's prior_attempts MCP tool retrieves recorded attempts and outcomes for an entity before editing. Local SQLite history with no LLM in the core.
 head:
   - tag: meta
     attrs:
@@ -49,7 +49,9 @@ structuredData:
         installs both the server config and the prompt block.
 ---
 
-Agents repeat reverted mistakes because the reason for the revert dies with the session that made it. The code went back; the *why* didn't go anywhere the next agent can read. The fix is unglamorous: keep a per-entity record of what was tried, and have the agent check it before editing. Selvedge is an open-source MCP server that does this. The check is a single tool call, `prior_attempts`, and it happens before the agent writes anything.
+Agents repeat reverted mistakes because the reason for the revert dies with the session that made it. The code went back; the *why* didn't go anywhere the next agent can read. The fix is unglamorous: keep a per-entity record of what was tried, and have the agent check it before editing. Selvedge is an open-source MCP server that does this. The check uses Selvedge's `prior_attempts` tool. Instructions ask the agent to run it before editing; only applicable installed hooks enforce a check. Retrieval does not guarantee that the agent follows the result.
+
+For a reproducible CLI walkthrough, see [record, retrieve, and revisit a rejected approach](/guides/revisit-a-rejected-approach/). The scenario below illustrates a recorded decision and is not a customer result.
 
 ## The failure, concretely
 

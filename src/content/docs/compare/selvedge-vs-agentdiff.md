@@ -13,7 +13,7 @@ Both answer "why did the agent write this?" — but they capture the answer at o
 | **Mechanism** | **MCP server** — the agent calls it as work happens | Claude Code lifecycle hooks → local daemon |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None |
-| **Storage** | SQLite, zero deps | JSONL on disk |
+| **Storage** | SQLite | JSONL on disk |
 
 ## Where Selvedge is different
 
