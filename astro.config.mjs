@@ -79,6 +79,7 @@ export default defineConfig({
             { label: "How it works", link: "/start/how-it-works/" },
             { label: "Agent prompt block", link: "/prompt-block/" },
             { label: "Stop repeated mistakes", link: "/prior-attempts/" },
+            { label: "Revisit a rejected approach", link: "/guides/revisit-a-rejected-approach/" },
           ],
         },
         {
@@ -108,6 +109,7 @@ export default defineConfig({
           label: "Compare",
           items: [
             { label: "Selvedge vs. git blame", link: "/compare/git-blame/" },
+            { label: "Instruction files and ADRs", link: "/compare/instructions-and-adrs/" },
             { label: "Selvedge vs. AgentDiff & friends", link: "/compare/agent-tools/" },
             { label: "Codebase-memory servers", link: "/compare/codebase-memory-mcp-servers/" },
             { label: "Agent Trace interop", link: "/compare/agent-trace/" },

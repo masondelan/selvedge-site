@@ -14,7 +14,7 @@ Agent Trace is the wire format. Selvedge is the live capture + query layer that 
 
 |  | Reasoning source | Granularity | Mechanism | Grouping | Prior attempts | Storage |
 |---|---|---|---|---|---|---|
-| **Selvedge** | **Captured live**, by the agent in the same context that produced the change | **Entity** — DB column, table, env var, dep, API route, function | **MCP server** — agent calls it as work happens | **Changesets** — named feature/task slugs across many entities | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | SQLite, zero deps |
+| **Selvedge** | **Captured live**, by the agent in the same context that produced the change | **Entity** — DB column, table, env var, dep, API route, function | **MCP server** — agent calls it as work happens | **Changesets** — named feature/task slugs across many entities | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | SQLite |
 | AgentDiff | **Inferred post-hoc** by Claude Haiku from the diff at session end | Line | Git pre/post-commit hook | None | None | JSONL on disk |
 | Origin | Captured at commit time | Line | Git hook | None | None | Local |
 | Git AI | Attribution metadata | Line | Git hook + Agent Trace alliance | None | None | Git notes |

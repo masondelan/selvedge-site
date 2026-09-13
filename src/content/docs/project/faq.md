@@ -5,8 +5,7 @@ description: Common questions about Selvedge — what it does, what it doesn't, 
 
 ## What's the one-line description?
 
-Selvedge is a local MCP server that captures the *why* behind every AI-written change,
-in the same context window that produced the change.
+Selvedge is a local MCP server and CLI for recording code decisions, stated reasoning, and rejected approaches so they can be retrieved in later sessions.
 
 ## Is it open source?
 
@@ -14,39 +13,23 @@ Yes. MIT-licensed. Source: [github.com/masondelan/selvedge](https://github.com/m
 
 ## Where does my data live?
 
-In a SQLite file under `.selvedge/selvedge.db` next to your code (or
-`~/.selvedge/selvedge.db` if no project DB is found and you didn't `selvedge init`).
+In a SQLite file under `.selvedge/selvedge.db` next to your code, or `~/.selvedge/selvedge.db` when no project database is found. Run `selvedge init` to create a project database.
 
-Your code, file paths, diffs, and reasoning never leave your machine. Nothing in the
-store is ever transmitted.
+Local history queries do not require a hosted backend. An MCP client may send retrieved records to its model provider. Sharing or publishing the database shares its contents, so private records need a private destination.
 
-To be precise rather than absolute: Selvedge can make two outbound requests, and
-neither one carries any of that. A usage heartbeat is **strictly opt-in** — nothing is
-sent unless you turn it on, and `SELVEDGE_TELEMETRY=0` disables it unconditionally. A
-version check queries PyPI's public JSON API to tell you when a newer release exists.
-Both are off the data path entirely. The roadmap includes an optional HTTP layer
-(v0.4.1) for self-hosted team servers; it's never sending data to us.
+Selvedge also has an optional usage heartbeat, off by default, and a PyPI version check. These requests do not include code, entity paths, diffs, or reasoning. `SELVEDGE_TELEMETRY=0` disables the heartbeat.
 
 ## Can I commit `.selvedge/` to git?
 
-Yes — and for most projects, it's a good idea. SQLite + WAL handles concurrent CI
-checkouts well, and committing the DB means everyone on the team sees the same
-history.
+Only if everyone with repository access should see its recorded contents. For public repositories, that means the records become public. Keep private reasoning in a private database.
 
-For monorepos where each microservice maintains its own history independently, you
-might prefer to `.gitignore` everything except `.selvedge/.gitkeep`.
+Back up the database consistently before sharing it, and plan how collaborators will reconcile changes. A SQLite file in git is not automatic multi-writer history synchronization.
 
 ## What if I'm using a different AI tool?
 
-Selvedge works with anything that speaks MCP. Claude Code, Cursor, Copilot are
-detected automatically by `selvedge setup`. For others, follow the manual install:
-add `{"mcpServers": {"selvedge": {"command": "selvedge-server"}}}` to the tool's MCP
-config and drop the agent-instructions block (`selvedge prompt`) into the tool's
-system prompt.
+Selvedge exposes standard MCP tools and a CLI. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf; see the editor-specific setup guides for configuration and instruction files. Other MCP clients can be configured manually.
 
-If your AI tool doesn't support MCP, Selvedge can't capture *live* — but you can still
-use the CLI for manual logging via `selvedge log` and import historical migrations via
-`selvedge import`.
+Without MCP, an agent or human with shell access can record and retrieve decisions through the CLI. Claude Code lifecycle hooks do not automatically apply to other clients.
 
 ## How do I stop my agent repeating a mistake it already made and reverted?
 
@@ -57,20 +40,11 @@ example: [stop your agent repeating reverted mistakes](/prior-attempts/).
 
 ## Why MCP instead of a plain CLI hook?
 
-Because MCP gives the agent **access to its own history**. Your agent can call
-`selvedge blame` and `selvedge diff` while it's working — so when it goes to modify a
-column it changed last sprint, it can read the prior reasoning before deciding.
-
-A plain CLI hook captures one direction (write). MCP captures both (write + read).
-For an AI-coded codebase that lives for years, the read direction is at least as
-valuable as the write direction.
+MCP lets a compatible agent discover and call Selvedge tools while it works. The CLI exposes the same local read and write operations, so either route can support recording a decision and querying it before a later edit. Use the interface available in your agent environment.
 
 ## Does the agent really call `log_change` reliably?
 
-That's exactly what `selvedge stats` answers. Per-agent breakdown of total calls,
-log_change calls, coverage ratio, and missing-reasoning count. If your agent's coverage
-is low, the system prompt needs strengthening — see `docs/fallbacks.md` in the source
-repo for guidance.
+Verify it in your workflow. `selvedge stats` reports observed tool calls, per-agent logging counts, and reasoning-quality signals. The logging ratio is a share of recorded tool calls; it does not measure every edit in the repository. Inspect a later-session retrieval and the actual changes when evaluating coverage.
 
 ## What's "reasoning quality validation"?
 
@@ -89,15 +63,7 @@ agent silently shipping low-quality logs so you can fix the prompt.
 
 ## Why no LLM in core?
 
-Two reasons:
-
-1. **Templated output is deterministic.** A regex validator behaves the same on every
-   commit. An LLM in the loop introduces non-determinism that's miserable to test.
-2. **Local-first dependency budget.** Adding an LLM hop means an API key, a network
-   dependency, latency, and ongoing cost. Selvedge installs in three deps for a
-   reason.
-
-PRs that add LLM calls inside core get rejected.
+Selvedge uses deterministic rules for history queries and reasoning-quality checks. An LLM call would add a network dependency and a different reliability and cost model. The package has runtime dependencies, including the MCP SDK, Click, and Rich; the optional semantic extra adds a local embeddings model. No LLM is required by the core.
 
 ## Will my old database keep working when I upgrade?
 

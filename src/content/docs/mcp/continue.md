@@ -25,7 +25,7 @@ Continue configures MCP servers in YAML. Add a `selvedge` entry under `mcpServer
 pip install selvedge
 ```
 
-The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so it starts reliably even when your editor doesn't share your shell's PATH — it just needs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.
+The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so the package can be fetched on demand — the editor still needs to find [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.
 
 ## Add the MCP server
 

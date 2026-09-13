@@ -13,7 +13,7 @@ Git AI stores attribution metadata in git notes under its own Git AI standard. S
 | **Mechanism** | **MCP server** — the agent calls it as work happens | Agent-invoked checkpoint → Git notes at commit |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | None |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None |
-| **Storage** | SQLite, zero deps | Git notes |
+| **Storage** | SQLite | Git notes |
 
 ## Where Selvedge is different
 

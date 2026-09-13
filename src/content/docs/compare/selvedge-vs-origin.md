@@ -13,7 +13,7 @@ Origin ([opsworks-co/origin-cli](https://github.com/opsworks-co/origin-cli)) cap
 | **Mechanism** | **MCP server** — the agent calls it as work happens | Agent lifecycle hooks + global git post-commit hook |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | Branch-level `trail` view; no entity-spanning changesets |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None — `rework` flags reverted AI code post-hoc, without rationale |
-| **Storage** | SQLite, zero deps | Git notes (`refs/notes/origin`) + a sessions branch; optional cloud sync |
+| **Storage** | SQLite | Git notes (`refs/notes/origin`) + a sessions branch; optional cloud sync |
 
 ## Where Selvedge is different
 
