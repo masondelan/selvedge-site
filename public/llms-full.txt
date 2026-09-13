@@ -158,3 +158,273 @@ Maintained instruction files hold standing guidance. ADRs can record decisions, 
 - GitHub: https://github.com/masondelan/selvedge
 - PyPI: https://pypi.org/project/selvedge/
 - Changelog: https://selvedge.sh/project/changelog/
+
+
+# Code decision concepts
+
+Source: https://selvedge.sh/concepts/
+
+Definitions used in Selvedge’s documentation for preserving and retrieving coding decisions. Start with the question you need to answer, then follow a concept to its practical guide. General concepts are distinguished from Selvedge-specific behavior; examples illustrate the workflow and are not customer results.
+
+## Find the concept you need
+
+| Question | Concept |
+| --- | --- |
+| Where did this change come from, and what evidence explains it? | [AI code provenance](/concepts/ai-code-provenance/) |
+| What should an agent retain across sessions? | [Agent memory](/concepts/agent-memory/) |
+| Was this approach considered or tried before? | [Prior attempt](/concepts/prior-attempt/) |
+| How do I find decisions about a function or column? | [Entity-level tracking](/concepts/entity-level-tracking/) |
+| Which recorded decisions belong to the same task? | [Changeset](/concepts/changeset/) |
+| What would justify reconsidering an old decision? | [Stale decision](/concepts/stale-decision/) |
+| Was the explanation supplied during the work or reconstructed later? | [Recorded versus inferred reasoning](/concepts/captured-live-vs-inferred/) |
+
+## Put a definition to work
+
+Selvedge is a local MCP server and CLI for recording code decisions, stated reasons, and outcomes. Selvedge's `log_change` writes the event; Selvedge's `prior_attempts` retrieves recorded approaches and outcomes before a later edit. This workflow needs both capture and retrieval. A connected server does not automatically preserve every decision or guarantee that an agent follows it.
+
+Start with the [worked rejection-and-revisit guide](/guides/revisit-a-rejected-approach/). It shows how to record a constraint, retrieve it in another session, and preserve the original explanation when new evidence justifies a revision.
+
+If you are choosing how to keep this history, compare [instruction files, ADRs, and event records](/compare/instructions-and-adrs/). A maintained document can be sufficient; choose a format your project will actually use. For commands and parameters, use the [MCP tool reference](/reference/mcp-tools/) and [quickstart](/start/quickstart/).
+
+
+# What is AI code provenance?
+
+Source: https://selvedge.sh/concepts/ai-code-provenance/
+
+AI code provenance is the recorded origin and history of an AI-assisted code change: the affected code, the people or tools involved, and the evidence linking them to the change. Decision provenance adds the stated reason, alternatives, constraints, and outcome. A provenance record supports inspection; it does not by itself prove that the code or its explanation is correct.
+
+## What belongs in the record?
+
+A useful record lets a later reader follow an explanation back to its source. For a coding decision, that can include an entity path, event time, agent identifier, commit, stated reason, and outcome. Not every record contains every field. A missing commit or explanation is a gap to identify, not a detail to reconstruct silently.
+
+Suppose a patch removes process-local caching. Git can show the patch and its commit history. A recorded explanation might add that another worker could serve an old profile after an update. The explanation connects the change to a requirement; a linked test or incident supplies evidence to evaluate it. This is an illustrative example, not a measured customer outcome.
+
+## What does Selvedge record?
+
+Selvedge's `log_change` stores structured events and the reasoning supplied by an agent or user. Selvedge's `blame`, `history`, and `changeset` tools retrieve those records. Its [`prior_attempts`](/concepts/prior-attempt/) tool adds a view of recorded approaches and outcomes before another edit.
+
+These records complement Git. An event is not a complete copy of the repository, and a linked commit does not authenticate every statement in the reason. Agent names and explanations are supplied metadata. Use the [MCP tool reference](/reference/mcp-tools/) to check the fields and query limits.
+
+## Keep the kinds of evidence separate
+
+- **Attribution:** which contributor or tool is associated with a change.
+- **Stated reasoning:** the explanation recorded by an agent or person.
+- **Observed outcome:** what a linked test, review, or incident actually established.
+
+One does not substitute for the others. In particular, an explanation inferred later from a diff has a different source from one recorded during the work. See [recorded versus inferred reasoning](/concepts/captured-live-vs-inferred/).
+
+For exchanging records, see [Selvedge's Agent Trace support](/compare/agent-trace/). Check which fields a receiving tool preserves before relying on a round trip.
+
+
+# What is agent memory for a coding project?
+
+Source: https://selvedge.sh/concepts/agent-memory/
+
+Agent memory is information retained beyond an agent’s current context and made available to later work. For a coding project, it can include instructions, facts, session context, and decisions with their outcomes. Persistence and retrieval are separate requirements: a saved record helps only when the relevant agent can find it and assess whether it still applies.
+
+## Three useful patterns
+
+These are overlapping patterns for choosing what to preserve, not a universal taxonomy or a ranking of products.
+
+| Pattern | What it preserves | Examples and a useful question |
+| --- | --- | --- |
+| Maintained documents | Standing instructions, reviewed decisions, explanations, and linked notes | Instruction files, ADRs, and [Basic Memory](https://docs.basicmemory.com/welcome), which represents a knowledge graph in Markdown. Can the team keep the relevant record current and easy to find? |
+| Retrieved facts and context | Information saved for recall across interactions | [Mem0](https://docs.mem0.ai/introduction) provides memory across sessions and tools. The [MCP reference memory server](https://github.com/modelcontextprotocol/servers/blob/main/src/memory/README.md) stores entities, relations, and observations. Which facts and sources does the next task need? |
+| Decision and outcome events | A sequence of recorded approaches, explanations, rejections, and later revisions | Selvedge stores events against entity paths. What was considered or tried here, why, and what happened next? |
+
+The same project may use all three. A general memory system can store a decision, and an ADR can describe a rejection. Selvedge supplies an event structure and queries for that workflow; it does not make other record formats incapable of preserving reasoning. The examples above come from the linked product documentation, checked September 13, 2026; they are not a feature-by-feature evaluation.
+
+## Where Selvedge fits
+
+Selvedge is a local MCP server and CLI for [decision provenance](/concepts/ai-code-provenance/). Selvedge's `log_change` captures the explanation supplied during the work, and Selvedge's `prior_attempts` retrieves recorded approaches and outcomes for an entity before a later edit. It stores the record in SQLite and does not require an LLM in its core.
+
+It needs useful logging, consistent [entity paths](/concepts/entity-level-tracking/), and retrieval at the right time. Connecting the MCP server does not automatically capture every decision or guarantee that the agent follows the record. The MCP client may send retrieved text to its model provider; local storage alone does not determine the whole data path.
+
+## Choose by the next question
+
+For a few standing rules, start with a maintained instruction file. For a reviewed architectural choice, an indexed ADR may be sufficient. For repeated questions about a particular function's earlier approaches and outcomes, consider structured decision events. Code navigation and current-code search answer another useful question: what does the repository contain now?
+
+Use the [instruction files and ADR comparison](/compare/instructions-and-adrs/) to choose a format, or follow the [across-session setup guide](/agent-memory/) and verify that a later session retrieves an actual record.
+
+
+# What is a prior attempt in a coding decision?
+
+Source: https://selvedge.sh/concepts/prior-attempt/
+
+A prior attempt is an earlier approach considered or implemented for a task or part of a codebase. A useful record preserves the approach, its stated reason, its outcome, and any condition for reconsidering it. A rejected proposal, a rolled-back implementation, and an approach with no recorded outcome carry different evidence and should remain distinguishable.
+
+## Rejected and reverted mean different things
+
+Suppose a team considers process-local caching for a profile loader. It declines the approach because updates would not be visible across workers. That is a **rejection**: the approach was considered without being implemented.
+
+If the team implements the cache and later rolls it back after finding stale reads, that is a **reversion**. The two records can support similar future decisions, but only the second describes an implementation that was rolled back. This example is hypothetical.
+
+In Selvedge, `reject` and `revert` are explicit event types supplied through `log_change` or the CLI. A reason should say which constraint mattered and point to available evidence. A [revisit condition](/concepts/stale-decision/) makes it possible to reconsider the approach when circumstances change.
+
+## How Selvedge retrieves an earlier approach
+
+Selvedge's `prior_attempts` tool examines recorded attempts and outcomes for an entity. The CLI equivalent is:
+
+```bash
+selvedge prior-attempts src/cache.py::load_profile --json
+```
+
+An explicit rejection can appear with `outcome: "rejected"` and `confidence: "exact"`. Here, exact describes the recorded outcome evidence. It does not prove that the original decision was correct or that its constraint still applies. Other results can use labeled inference from event patterns; consult the [tool reference](/reference/mcp-tools/) for confidence filters.
+
+An empty result means no qualifying record was found for that query and its filters. It does not establish that the approach was never tried.
+
+## Use the history to make a new decision
+
+Before editing, retrieve the record, inspect its evidence, and compare the old constraint with the current project. If the reason still holds, account for it in the plan. If it no longer holds, explain the new evidence and record the revision. A past rejection is neither an automatic veto nor an automatic green light once it becomes old.
+
+The [worked rejection-and-revisit guide](/guides/revisit-a-rejected-approach/) shows the complete Selvedge workflow, including preserving the original explanation when reopening the decision.
+
+
+# What is entity-level tracking for code decisions?
+
+Source: https://selvedge.sh/concepts/entity-level-tracking/
+
+Entity-level tracking associates a record with an identifiable part of a system, such as a function, database column, route, or dependency. It lets a reader ask for the history of that thing using a consistent identifier. The quality of the result depends on recorded coverage and identifier maintenance; names do not automatically establish identity through every rename or refactor.
+
+## Pick the thing a future reader will ask about
+
+For a decision about login behavior, a function path can be more useful than a line range. For a database constraint, the table or column may be the useful unit. Choose a consistent level of detail: a reason logged only against a whole file may be harder to find when the next query names a function.
+
+Selvedge's [entity-path conventions](/reference/entity-paths/) include:
+
+| Entity | Example identifier |
+| --- | --- |
+| Function | `src/auth.py::login` |
+| File | `src/auth.py` |
+| Database column | `users.email` |
+| API route | `api/v1/users` |
+| Dependency | `deps/stripe` |
+
+These are identifiers, not a request to include secret values in a record. Keep sensitive reasoning in the intended private database.
+
+## Query scope matters
+
+Selvedge's `blame` asks for the most recent recorded change to an exact entity. Prefix-capable queries such as `diff` can inspect a broader area. Tool parameters differ; do not assume every query has the same matching rules.
+
+```bash
+selvedge blame users.email --json
+selvedge diff users --json
+```
+
+The first lookup concerns a specific column. The second can collect history under the users namespace. Neither command proves that all code changes were logged.
+
+## Preserve identity when names change
+
+If a symbol moves or a column is renamed, record the rename using Selvedge's supported rename fields and inspect the history under the relevant names. Matching old and new identifiers requires evidence; Selvedge does not infer every semantic refactor from repository files.
+
+Entity records and Git history work together. Git supplies the code diff and commit history, while an entity event can supply the recorded reason and outcome for the thing being changed. A [changeset](/concepts/changeset/) groups events when one task affects several entities.
+
+For a later-session lookup of a function's rejected approach, see the [practical guide](/guides/revisit-a-rejected-approach/).
+
+
+# What is a changeset in Selvedge?
+
+Source: https://selvedge.sh/concepts/changeset/
+
+In Selvedge, a changeset is a group of recorded events sharing a changeset identifier for a feature, task, or other unit of work. It connects decisions across affected entities so a reader can inspect their recorded scope together. A Selvedge changeset is a grouping label, not a Git commit, database transaction, or guarantee that every related change was captured.
+
+## One task can affect several entities
+
+Consider a hypothetical billing change that adds a database column, modifies a charging function, and changes an API response. Each event can have its own entity and explanation while sharing the identifier `add-stripe-billing`.
+
+Selvedge's `log_change` accepts `changeset_id`. The `changeset` tool retrieves events stored under that identifier. The CLI equivalent is:
+
+```bash
+selvedge changeset add-stripe-billing --json
+```
+
+The result groups what was recorded. It does not discover omitted edits by scanning the repository.
+
+## Changeset, commit, and session
+
+| Identifier | What it refers to |
+| --- | --- |
+| `changeset_id` | A chosen grouping of related Selvedge events |
+| `git_commit` | The commit associated with an event, when supplied |
+| `session_id` | The agent session associated with an event, when supplied |
+
+A task may span multiple sessions or commits. A commit may contain work from several tasks. Keep the identifiers separate and use the available links to inspect the actual code, rather than treating a shared label as proof that the events were applied atomically.
+
+## Make the group useful to the next reader
+
+Use a descriptive identifier and reuse it for the related events. Give each event an explanation specific to its entity. If an approach is later rejected or reverted, preserve that outcome and retrieve the entity's [prior attempts](/concepts/prior-attempt/) before trying it again.
+
+For example, a later reader of the billing group should be able to distinguish the reason for the new column from the reason for an API change. Repeating a generic phrase such as “billing update” on every event loses that detail.
+
+See the [MCP tool reference](/reference/mcp-tools/) for event fields and query limits, and [entity-level tracking](/concepts/entity-level-tracking/) for choosing the affected parts of the system.
+
+
+# What is a stale decision in an AI-coded project?
+
+Source: https://selvedge.sh/concepts/stale-decision/
+
+A stale decision is a recorded choice whose assumptions, constraints, or review conditions may no longer match the current project. A stale signal requests reassessment; it does not establish that the decision is wrong or that a rejected approach is now safe. Useful decision records state both the original reason and the evidence that would justify reconsidering it.
+
+## Age is only one signal
+
+A dependency pin might remain necessary for years. Another decision might become questionable as soon as a related API changes. The relevant question is whether the reason still applies, not simply how old the record is.
+
+For a hypothetical caching rejection, “reconsider after shared invalidation is implemented and tested” is more useful than “do not cache.” It states what a later reader should verify before reopening the approach.
+
+## How Selvedge surfaces records for review
+
+Selvedge's `stale_decisions` tool uses the conditions recorded with a decision:
+
+| Field | What a signal means |
+| --- | --- |
+| `revisit_after` | The date has passed and a later activity signal exists for the entity or its changeset. |
+| `expires_when` | A supported condition involving a date, entity change, or observable installed dependency version has fired. An unobservable dependency version calls for manual review. |
+| `stale_when` | Words in a later change match the stated condition, suggesting a possible reason to inspect the decision. |
+
+The last signal is a textual match, not a test that the condition has been satisfied. None of these signals automatically changes the verdict.
+
+```bash
+selvedge stale --json
+```
+
+Check the [MCP tool reference](/reference/mcp-tools/) for current condition syntax, activity rules, and limits. Do not assume an arbitrary natural-language condition is machine-checkable.
+
+## Reassess before reopening
+
+Read the original explanation and supporting evidence. Check the relevant code, tests, or dependency state. If the constraint still holds, retain it. If new evidence justifies a different decision, record that evidence and use an explicit `supersede` event for the intended decision while preserving its history.
+
+The [rejection-and-revisit guide](/guides/revisit-a-rejected-approach/) demonstrates that process. Recording a new decision does not execute the code change or prove its safety; code review and appropriate tests still supply that evidence.
+
+
+# Recorded versus inferred reasoning: what is the difference?
+
+Source: https://selvedge.sh/concepts/captured-live-vs-inferred/
+
+Recorded reasoning is an explanation explicitly supplied by an agent or person and preserved with a decision. Reasoning captured during the work has access to that session’s stated context. Inferred reasoning is an explanation reconstructed later from evidence such as code, diffs, or logs. Both can be useful, but neither should be presented as proof of a hidden thought process or of the decision’s correctness.
+
+## The difference is the source of the explanation
+
+Suppose a patch removes a process-local cache. From the diff alone, a later reader might infer a performance, correctness, or memory-use concern. A contemporaneous record might instead state: “Another worker can serve an old profile after an update.” The recorded sentence preserves a specific explanation that the diff may not contain.
+
+That sentence is still a claim. A linked test or incident can support it; recording it does not make it true. This example is hypothetical.
+
+| Evidence | What it can support | What it does not establish alone |
+| --- | --- | --- |
+| Code or diff | The implementation or observed code change | The complete reason for choosing it |
+| Explanation recorded during work | What the agent or person explicitly stated in that context | Their hidden reasoning, factual accuracy, or complete alternatives |
+| Later inference | A possible explanation based on the available evidence | That the original author held that explanation |
+| Linked test or observation | A result under the stated conditions | Every future outcome or the complete decision history |
+
+## What Selvedge captures
+
+Selvedge's `log_change` records the `reasoning` text supplied by its caller. Calling it during the work can preserve context before the session ends. Selvedge does not inspect a model's private thought process, and connecting the server alone does not capture every decision.
+
+The time of a database event is not proof that its explanation was written at the time of the original change. If a record is imported, backfilled, or written later, preserve that source and timing distinction in the explanation and available metadata.
+
+Selvedge can also infer some **outcomes** from recorded event patterns in `prior_attempts`. That is a different inference from reconstructing the reason a change was made. The tool labels its evidence confidence; an explicit recorded rejection can be exact evidence of the recorded outcome without proving that its explanation was correct. See [prior attempts](/concepts/prior-attempt/).
+
+## Keep evidence inspectable
+
+Use a brief explanation of the problem, constraint, and chosen approach. Link a commit, test, or reviewed record where available. Label later interpretation as interpretation and keep the original source accessible. A summary can help a reader navigate a long history without replacing the evidence it summarizes.
+
+See [AI code provenance](/concepts/ai-code-provenance/) for the fields that connect a decision to its source, or follow the [worked decision-record guide](/guides/revisit-a-rejected-approach/) to practice capture and retrieval.

@@ -32,6 +32,16 @@ An empty query result means no qualifying record was found, not that the approac
 - `search`: full-text search across all events.
 - `stale_decisions`: decisions due for a revisit — a machine-checkable `expires_when` condition fired, `revisit_after` passed while the entity is still in active use (pure age never surfaces), or a later change matched the decision's `stale_when`.
 
+## Concepts
+- [Concepts hub](https://selvedge.sh/concepts/): definitions and links to practical guides.
+- [AI code provenance](https://selvedge.sh/concepts/ai-code-provenance/): AI code provenance is the recorded origin and history of an AI-assisted code change: the affected code, the people or tools involved, and the evidence linking them to the change.
+- [Agent memory](https://selvedge.sh/concepts/agent-memory/): Agent memory is information retained beyond an agent’s current context and made available to later work.
+- [Prior attempt](https://selvedge.sh/concepts/prior-attempt/): A prior attempt is an earlier approach considered or implemented for a task or part of a codebase.
+- [Entity-level tracking](https://selvedge.sh/concepts/entity-level-tracking/): Entity-level tracking associates a record with an identifiable part of a system, such as a function, database column, route, or dependency.
+- [Changeset](https://selvedge.sh/concepts/changeset/): In Selvedge, a changeset is a group of recorded events sharing a changeset identifier for a feature, task, or other unit of work.
+- [Stale decision](https://selvedge.sh/concepts/stale-decision/): A stale decision is a recorded choice whose assumptions, constraints, or review conditions may no longer match the current project.
+- [Recorded versus inferred reasoning](https://selvedge.sh/concepts/captured-live-vs-inferred/): Recorded reasoning is an explanation explicitly supplied by an agent or person and preserved with a decision.
+
 ## Reference
 - [README](https://github.com/masondelan/selvedge/blob/main/README.md): full overview, MCP tool table, CLI reference, entity-path conventions.
 - [Changelog](https://github.com/masondelan/selvedge/blob/main/CHANGELOG.md): what shipped, per version.
