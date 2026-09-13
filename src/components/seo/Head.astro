@@ -298,7 +298,7 @@ const graph: Record<string, unknown> = {
           name: 'What\'s "reasoning quality validation"?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "log_change runs incoming reasoning through a regex-and-length validator. It catches: - Empty reasoning - Reasoning under 20 characters - Generic placeholders: \"user request\", \"as requested\", \"per request\", \"done\", \"n/a\", \"none\", \"todo\", \"see diff\"/\"see code\"/\"see pr\", \"fix\"/\"fixed\", \"add\"/\"added\", \"remove\"/\"removed\", \"update\"/\"updated\", \"change\"/\"changed\" Failed reasoning still gets logged (warnings are advisory) but appears in the default selvedge stats output as a low-quality-reasoning count. The point is to surface the agent silently shipping low-quality logs so you can fix the prompt.",
+            text: "log_change runs incoming reasoning through a regex-and-length validator. It catches: Empty reasoning Reasoning under 20 characters Generic placeholders: \"user request\", \"as requested\", \"per request\", \"done\", \"n/a\", \"none\", \"todo\", \"see diff\"/\"see code\"/\"see pr\", \"fix\"/\"fixed\", \"add\"/\"added\", \"remove\"/\"removed\", \"update\"/\"updated\", \"change\"/\"changed\" Failed reasoning still gets logged (warnings are advisory) but appears in the default selvedge stats output as a low-quality-reasoning count. The point is to surface the agent silently shipping low-quality logs so you can fix the prompt.",
           },
         },
         {
