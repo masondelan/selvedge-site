@@ -63,3 +63,7 @@ A retrieved decision is evidence for the next task. It still needs a relevance c
 The practical loop is small: record the reason, retrieve it before editing, check whether it still holds, and preserve the explanation when it changes.
 
 References: [Selvedge 0.3.13 release](https://github.com/masondelan/selvedge/releases/tag/v0.3.13), [MCP tool reference](https://selvedge.sh/reference/mcp-tools/).
+
+## Help test later-session retrieval
+
+Trying this in a project you control? [Join the voluntary feedback pilot](https://github.com/masondelan/selvedge/discussions/49). We want to hear about failed or confusing setup and retrieval as well as successful lookups. Read the participation and consent details before replying; the discussion is public, so share only redacted, non-sensitive notes.

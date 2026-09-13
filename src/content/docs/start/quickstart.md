@@ -13,7 +13,7 @@ selvedge --version
 selvedge demo
 ```
 
-The current release is **[Selvedge 0.3.13](/project/changelog/#v0313--2026-09-12)**, which includes fixes for decision review flags. Agent setup choices and the isolated demo were introduced in 0.3.12. The demo saves a rejection and retrieves it through a fresh connection to a temporary database. It does not write to your project or configured database.
+The current release is **[Selvedge 0.3.14](/project/changelog/#v0314--2026-09-12)**, which fixes validation of an explicit seven-day prior-attempt window and includes the earlier decision-review fixes. Agent setup choices and the isolated demo were introduced in 0.3.12. The demo saves a rejection and retrieves it through a fresh connection to a temporary database. It does not write to your project or configured database.
 
 Using pip instead? Install in a virtual environment:
 
@@ -96,3 +96,7 @@ selvedge setup --agent codex --non-interactive --yes
 ```
 
 Without `--yes`, non-interactive setup is a dry run.
+
+## Help test later-session retrieval
+
+Trying this in a project you control? [Join the voluntary feedback pilot](https://github.com/masondelan/selvedge/discussions/49). We want to hear about failed or confusing setup and retrieval as well as successful lookups. Read the participation and consent details before replying; the discussion is public, so share only redacted, non-sensitive notes.
