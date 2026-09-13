@@ -90,6 +90,7 @@ export default defineConfig({
             { label: "Track the why", link: "/track-why/" },
             { label: "Agent memory", link: "/agent-memory/" },
             { label: "Audit trail", link: "/audit-trail/" },
+            { label: "Concepts", link: "/concepts/" },
           ],
         },
         {
