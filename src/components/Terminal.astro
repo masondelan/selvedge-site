@@ -1,8 +1,14 @@
 ---
 const { title = 'terminal', command = '', copy = false, kind = 'install' } = Astro.props;
 ---
-<div class="terminal-window">
-  <div class="terminal-chrome"><span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="terminal-title">{title}</span>{copy && <button class="terminal-copy" type="button" data-copy={command} data-copy-kind={kind}>Copy</button>}</div>
+<!-- Opt this UI out of Starlight's prose spacing, including its sibling margins. -->
+<div class="terminal-window not-content">
+  <div class="terminal-chrome">
+    <span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="terminal-title" title={title}>{title}</span>
+    {copy && <button class="terminal-copy" type="button" data-copy={command} data-copy-kind={kind}>Copy</button>}
+  </div>
   {command && <pre class="terminal-command"><code>{command}</code></pre>}
+  {copy && <p class="terminal-copy-status sr-only" role="status" data-copy-status></p>}
   <slot />
 </div>

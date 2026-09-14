@@ -15,7 +15,8 @@ export default defineConfig({
       description:
         "Local decision memory for AI coding agents. Keep the reasons, rejected approaches and conditions for revisiting them across sessions.",
       logo: {
-        src: "./src/assets/wordmark.svg",
+        light: "./src/assets/wordmark.svg",
+        dark: "./src/assets/wordmark-dark.svg",
         replacesTitle: true,
       },
       favicon: "/favicon.svg",
