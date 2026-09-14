@@ -55,11 +55,22 @@ const agents = [
     buttons.forEach(button => button.addEventListener('click', () => selectAgent(button.dataset.agent!, true)));
     selectAgent(new URLSearchParams(location.search).get('agent') || '');
     document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach(button => button.addEventListener('click', async () => {
+      const status = button.closest('.terminal-window')?.querySelector<HTMLElement>('[data-copy-status]');
       try {
         await navigator.clipboard.writeText(button.dataset.copy || '');
         button.textContent = 'Copied';
+        if (status) {
+          status.classList.add('sr-only');
+          status.textContent = 'Copied to clipboard.';
+        }
         track(button.dataset.copyKind === 'setup' ? 'setup_copy' : button.dataset.copyKind === 'prompt' ? 'prompt_copy' : 'install_copy', root.dataset.selectedAgent || 'none');
-      } catch { button.textContent = 'Select and copy the command above'; }
+      } catch {
+        button.textContent = 'Copy';
+        if (status) {
+          status.classList.remove('sr-only');
+          status.textContent = 'Copy unavailable. Select and copy the text above.';
+        }
+      }
     }));
     root.querySelector<HTMLButtonElement>('[data-feedback]')?.addEventListener('click', async (event) => {
       const button = event.currentTarget as HTMLButtonElement;

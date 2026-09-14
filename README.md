@@ -75,6 +75,14 @@ Homepage interface:
 - Use medium-weight Inter, modest corner radii, and deliberate spacing. Reserve
   JetBrains Mono for the wordmark, code, and technical labels, and red for small accents.
 - Keep interactions quiet: color changes without lifting buttons, gradients, or decorative shadows.
+- Keep custom terminal UI inside Starlight's `not-content` boundary so prose
+  sibling margins cannot displace its controls. Lights stay on one baseline;
+  titles shrink before controls, and clipboard errors appear below the command.
+- At phone widths, use at least 14px command text and 44px Copy targets. Check
+  the homepage and each agent panel at 320px, 390px and 440px, plus tablet and
+  desktop, in both themes. Preserve full command text and avoid page overflow.
+- Use the matching light/dark wordmark assets; SVG images do not inherit the
+  surrounding page's text color.
 
 ## Deploy
 
