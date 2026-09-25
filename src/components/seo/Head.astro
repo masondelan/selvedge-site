@@ -156,7 +156,7 @@ if (!isHome && !isFaq) {
 
 // Frontmatter-declared FAQ (structuredData.faq) → FAQPage node. The dedicated
 // /project/faq page keeps its hand-synced block below; this is for content
-// pages that carry a visible FAQ section (e.g. /prior-attempts).
+// pages that opt in and carry matching visible questions and answers.
 const faqNode =
   !isFaq && faqItems.length
     ? {
@@ -262,10 +262,9 @@ const graph: Record<string, unknown> = {
             text: "Selvedge exposes standard MCP tools and a CLI. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf; see the editor-specific setup guides for configuration and instruction files. Other MCP clients can be configured manually. Without MCP, an agent or human with shell access can record and retrieve decisions through the CLI. Claude Code lifecycle hooks do not automatically apply to other clients.",
           },
         },
-        // The visible "How do I stop my agent repeating a mistake..." entry on
-        // the FAQ page is deliberately NOT marked up here: the same question is
-        // marked up on /prior-attempts (its canonical page), and Google says a
-        // FAQ repeated across pages should carry markup on only one of them.
+        // The repeated-mistake answer remains visible on the FAQ page and links
+        // to the fuller guide; this descriptive schema includes only a subset
+        // of the visible questions.
         {
           '@type': 'Question',
           name: 'Why MCP instead of a plain CLI hook?',
