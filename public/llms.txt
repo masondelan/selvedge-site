@@ -8,12 +8,12 @@ The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by t
 - [Home](https://selvedge.sh): what Selvedge is, who it's for, the quickstart.
 - [Quickstart](https://selvedge.sh/start/quickstart/): `pip install selvedge`, the `selvedge setup` wizard, wiring into Claude Code / Cursor / Copilot / Codex / Gemini CLI.
 - [Agent prompt block](https://selvedge.sh/prompt-block/): the copy-paste `CLAUDE.md` / `.cursorrules` block that tells an agent when and how to call Selvedge. Also emitted by `selvedge prompt`.
-- [Stop your agent repeating reverted mistakes](https://selvedge.sh/prior-attempts): case study of the prior_attempts tool — the agent checks an entity's history before editing and changes plan when the change was tried and reverted.
+- [How to stop AI coding agents repeating mistakes](https://selvedge.sh/prior-attempts/): a copyable project rule and hypothetical caching example. Record a rejected approach, retrieve it before editing, and reconsider it when the constraint changes; retrieval does not guarantee compliance.
 - [The MCP server that tracks why your AI agent changed code](https://selvedge.sh/track-why/): the write path (`log_change`, live, in the agent's own words) and the read path (`blame`, `history`) for decision provenance.
-- [Long-term memory for AI coding agents](https://selvedge.sh/agent-memory/): decisions that survive the session — entity-keyed and deterministic, with expiry via `stale_decisions`. Not a vector store.
+- [AI coding agent memory across sessions](https://selvedge.sh/agent-memory/): preserve decision records and retrieve them in later sessions. Default lookup uses entity paths and deterministic rules; optional fuzzy lookup ranks candidates with local embeddings.
 - [A local decision audit trail for AI-written code](https://selvedge.sh/audit-trail/): who/what/when/why per entity, searchable, exportable as Agent Trace records.
 - [How Selvedge compares](https://selvedge.sh/compare/agent-tools/): Selvedge vs. AgentDiff / Origin / Git AI / BlamePrompt — captured-live + entity-level + changesets.
-- [Best MCP servers for codebase memory, compared](https://selvedge.sh/compare/codebase-memory-mcp-servers/): the honest map — code intelligence vs. session context vs. general memory vs. decision provenance, and when Selvedge is not the right pick.
+- [Codebase memory MCP servers for Claude Code, compared](https://selvedge.sh/compare/codebase-memory-mcp-servers/): a sourced comparison of code navigation, session context, general memory and decision history. Includes overlap between tools and a later-session retrieval checklist.
 
 - [Revisit a rejected approach](https://selvedge.sh/guides/revisit-a-rejected-approach/): tested CLI walkthrough.
 - [Instruction files and ADRs](https://selvedge.sh/compare/instructions-and-adrs/): choose a record format your team will maintain.

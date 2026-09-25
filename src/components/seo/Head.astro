@@ -2,19 +2,16 @@
 // Custom <head> overrides for Starlight.
 //
 // What this fixes / adds:
-//   - og:type=website on the homepage (default Starlight emits "article" everywhere,
-//     which is wrong for the root page — Google honors og:type for entity typing).
+//   - Homepage og:type is set in frontmatter so Starlight replaces its default
+//     instead of emitting two conflicting values.
 //   - Explicit twitter:title and twitter:description (Starlight currently omits them
 //     and relies on fallback; explicit is safer across crawlers).
 //   - JSON-LD structured data:
-//       * Organization (sitewide) — gives Google a knowledge-graph entity for Selvedge
-//         with sameAs links to GitHub, PyPI, X.
-//       * WebSite (sitewide) — declares the site name + potentialAction so Google can
-//         render the sitelinks search box.
-//       * SoftwareApplication (homepage only) — Selvedge is a dev tool; this is the
-//         canonical schema for software listings and unlocks rich results.
-//       * FAQPage (FAQ page only) — inline strings kept in sync with the FAQ page.
-//         FAQPage is a known eligible rich-result type.
+//       * Organization and WebSite describe the publisher and site identity.
+//       * SoftwareApplication describes the homepage's developer tool.
+//       * FAQPage describes visible questions and answers. Google retired FAQ
+//         rich results in May 2026; this markup makes no search-feature promise.
+//     Structured data does not guarantee rankings, rich results, or AI citations.
 //
 // Registration:
 //   In astro.config.mjs, set:
@@ -46,12 +43,12 @@ const data = entry?.data ?? {};
 const pageTitle = data.title ?? 'selvedge';
 const pageDescription =
   data.description ??
-  'A local MCP server that AI coding agents call as they work — logging the why behind every change into a SQLite file under .selvedge/ next to your code.';
+  ONE_LINER;
 
 // Per-page JSON-LD hint (see src/content.config.ts). Pages default to
 // TechArticle; setup/tutorial pages declare structuredData.type: howto.
 // Pages with a visible FAQ section declare structuredData.faq — the answers
-// must match the visible page text or the page loses rich-result eligibility.
+// must match the visible page text. FAQ markup is descriptive, not a ranking lever.
 const structuredData = data.structuredData ?? { type: 'techarticle' };
 const faqItems: { question: string; answer: string }[] = structuredData.faq ?? [];
 const lastUpdated: Date | undefined = route?.lastUpdated;
@@ -159,7 +156,7 @@ if (!isHome && !isFaq) {
 
 // Frontmatter-declared FAQ (structuredData.faq) → FAQPage node. The dedicated
 // /project/faq page keeps its hand-synced block below; this is for content
-// pages that carry a visible FAQ section (e.g. /prior-attempts).
+// pages that opt in and carry matching visible questions and answers.
 const faqNode =
   !isFaq && faqItems.length
     ? {
@@ -204,13 +201,9 @@ const graph: Record<string, unknown> = {
 
 <Default><slot /></Default>
 
-{/* og:type override — Starlight defaults to article; fix to website on the root */}
-{isHome && <meta property="og:type" content="website" />}
-
 {/* Explicit Twitter fields (better than relying on og:* fallback) */}
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={pageDescription} />
-<meta name="twitter:site" content="@notmason__" />
 <meta name="twitter:creator" content="@notmason__" />
 
 {/* Sitewide JSON-LD graph */}
@@ -219,9 +212,7 @@ const graph: Record<string, unknown> = {
   set:html={JSON.stringify(graph)}
 />
 
-{/* FAQPage schema, emitted only on /project/faq. Inline list so the schema does
-    not depend on DOM-scraping at runtime — Google's crawler does not execute JS
-    for structured data discovery. Keep these strings in sync with the FAQ page. */}
+{/* FAQPage schema is rendered into HTML and must match the visible FAQ page. */}
 {isFaq && (
   <script
     type="application/ld+json"
@@ -229,9 +220,7 @@ const graph: Record<string, unknown> = {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
       // Synced to src/content/docs/project/faq.md on 2026-09-12.
-      // Google requires FAQPage markup to match the visible answer text —
-      // if you edit the FAQ page copy, re-sync these strings or the page
-      // loses FAQ rich-result eligibility.
+      // Keep this descriptive markup in sync with the visible answer text.
       mainEntity: [
         {
           '@type': 'Question',
@@ -273,10 +262,9 @@ const graph: Record<string, unknown> = {
             text: "Selvedge exposes standard MCP tools and a CLI. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf; see the editor-specific setup guides for configuration and instruction files. Other MCP clients can be configured manually. Without MCP, an agent or human with shell access can record and retrieve decisions through the CLI. Claude Code lifecycle hooks do not automatically apply to other clients.",
           },
         },
-        // The visible "How do I stop my agent repeating a mistake..." entry on
-        // the FAQ page is deliberately NOT marked up here: the same question is
-        // marked up on /prior-attempts (its canonical page), and Google says a
-        // FAQ repeated across pages should carry markup on only one of them.
+        // The repeated-mistake answer remains visible on the FAQ page and links
+        // to the fuller guide; this descriptive schema includes only a subset
+        // of the visible questions.
         {
           '@type': 'Question',
           name: 'Why MCP instead of a plain CLI hook?',

@@ -1,12 +1,12 @@
 ---
-title: The Selvedge agent prompt block
-description: The copy-paste CLAUDE.md / .cursorrules block that tells your AI coding agent to check prior reverted attempts before editing, and to log why it changed code — captured live, as the change happens.
+title: Selvedge project instructions for AI coding agents
+description: Install or copy project instructions for Claude Code, Codex and Cursor. Ask your agent to check prior decisions before edits, then verify a later-session lookup.
 ---
 
-Paste this into your project's `CLAUDE.md`, `.cursorrules`, or `copilot-instructions.md`. It tells your AI coding agent three things: **call `prior_attempts` before editing an entity** (so it doesn't repeat a change the team already reverted), **log `why` it changed code** the moment it does, and **log the paths it *didn't* take** — rejections and reverts, with the condition that would invalidate them.
+Use project instructions to ask your coding agent to **check prior decisions before editing**, **record why it changed code**, and **save rejected approaches with their reasons**. Selvedge supplies the tools and this instruction block; a connected server or a saved instruction does not guarantee that the agent follows it.
 
-:::tip[One block, three new habits]
-Your agent now checks its own history before it writes, leaves a durable trail of *why* behind every change, and records abandoned alternatives instead of letting them evaporate. `pip install selvedge` first, then drop this in. Or just run `selvedge prompt --install CLAUDE.md` and Selvedge installs (and keeps it updated) for you.
+:::tip[Install for your editor]
+Run `selvedge setup --agent claude-code`, `selvedge setup --agent codex`, or `selvedge setup --agent cursor` from your project after [installing Selvedge](/start/quickstart/). Setup offers the relevant MCP configuration and instruction files. For an existing configuration, `selvedge prompt` prints the current block, and `selvedge prompt --install CLAUDE.md` updates it in a chosen file. See the [client guides](/start/quickstart/) for other agents.
 :::
 
 ## Copy this
@@ -87,8 +87,18 @@ selvedge prompt --install CLAUDE.md   # idempotent; writes a .bak first
 
 ## What your agent does with it
 
-- **Before editing** `users.card_token`, the agent calls `prior_attempts` and learns it was added and reverted 28 days ago ("storing card tokens pulled us into PCI-DSS scope — moved to Stripe-managed methods"). It changes its plan instead of repeating the mistake. The same flow, end to end with a real transcript: [stop your agent repeating reverted mistakes](/prior-attempts/).
-- **After changing** anything structural, it logs the *why* in its own words — so six months later, `selvedge blame` answers the question `git blame` can't.
-- **After deciding against** an approach, it logs a `reject` (v0.3.11) — so the path never taken is on the record too, and the next session's `prior_attempts` returns it as a stated outcome instead of re-deriving the dead end.
+These are the requested behaviors to verify:
+
+- **Before editing**, retrieve the relevant entity's history and assess whether recorded constraints still apply. The [mistake-prevention rule](/prior-attempts/) shows a concise instruction and a worked example.
+- **After a change**, record the stated reason and outcome. Use a shared [changeset](/concepts/changeset/) identifier to group related events across entities.
+- **After declining an approach**, record a `reject` with the reason and a condition for review. Use `revert` for an implemented approach that was rolled back.
+
+## Verify the instructions in a new session
+
+1. Ask your agent to record one real decision with an entity path and a useful reason.
+2. End that session and start a new one in the same project, using the same database.
+3. Ask it to retrieve the decision before editing that entity. Inspect both the tool result and the agent's plan.
+
+If the record is missing, check the database location, entity path and whether logging actually happened. If it is found but ignored, review the agent's instructions and tool use. Applicable Claude Code hooks can gate selected edits; the instruction block alone does not enforce them in every client. The [agent memory guide](/agent-memory/) explains persistence and retrieval, and the [concepts hub](/concepts/) defines the terms used here.
 
 Full docs: [selvedge.sh](https://selvedge.sh) · `pip install selvedge` · [GitHub](https://github.com/masondelan/selvedge)

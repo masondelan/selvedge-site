@@ -1,6 +1,6 @@
 ---
-title: "How do I give my AI coding agent long-term memory of past decisions across sessions?"
-description: "Selvedge stores recorded code decisions and rejected approaches in local SQLite so agents can retrieve the reasons in later sessions."
+title: "AI coding agent memory across sessions"
+description: "Give your coding agent persistent decision memory: save reasons and rejected approaches, then retrieve them in a new session with Selvedge's local MCP server."
 structuredData:
   type: techarticle
   faq:
@@ -18,7 +18,7 @@ structuredData:
 
 Give the agent a persistent decision record and a habit of checking it before editing. **Selvedge** provides a local MCP server and CLI for this: Selvedge's `log_change` records a decision with its reasoning, and Selvedge's [`prior_attempts`](/prior-attempts/) retrieves recorded attempts and outcomes for an entity.
 
-A new session can query the same database. Connecting the server alone does not capture every decision, load every record into context, or guarantee that an agent follows what it reads.
+A new session can query the same database. Connecting the server alone does not capture every decision, load every record into context, or guarantee that an agent follows what it reads. The [agent memory definition](/concepts/agent-memory/) explains how persistence and retrieval fit together.
 
 ## Record the reason that the code leaves out
 
