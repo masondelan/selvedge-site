@@ -55,7 +55,7 @@ Restart Codex in the trusted project. Enable the Selvedge MCP server in Settings
 
 ## If it doesn't connect
 
-Codex project configuration loads only for trusted projects. The setup wizard writes `.codex/config.toml` and installs instructions in `AGENTS.md`. Custom TOML entries must be reconciled manually. Make sure `uvx` (manual setup) or `selvedge-server` (wizard setup) is on the PATH Codex uses. Claude Code lifecycle hooks are not installed for Codex.
+Codex project configuration loads only for trusted projects. The setup wizard writes `.codex/config.toml` and installs instructions in `AGENTS.md`. Custom TOML entries must be reconciled manually. Make sure `uvx` (manual setup) or `selvedge-server` (wizard setup) is on the PATH Codex uses. As of 0.3.15, setup also installs .codex/hooks.json. Review and trust those definitions with /hooks.
 
 ## Next
 

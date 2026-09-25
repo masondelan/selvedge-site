@@ -24,16 +24,14 @@
 //   Then Starlight's <Default /> rendering is preserved — we only append to <head>.
 
 import Default from '@astrojs/starlight/components/Head.astro';
+import { product } from '../../data/product.mjs';
 
 const SITE = 'https://selvedge.sh';
 const url = Astro.url.pathname;
 const isHome = url === '/' || url === '';
 const isFaq = url.startsWith('/project/faq');
 
-// The canonical product one-liner. Kept identical to the README's lead so the
-// SoftwareApplication description never drifts from the source of truth.
-const ONE_LINER =
-  'Local decision memory for AI coding agents. Keep the reasons, rejected approaches and conditions for revisiting them across sessions.';
+const ONE_LINER = product.shortDescription;
 
 // Pull page-level metadata from Starlight's frontmatter so we can re-emit
 // what we need without duplicating Starlight's own logic.
@@ -88,7 +86,7 @@ const softwareApplication = {
   description: ONE_LINER,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   softwareRequirements: 'Python 3.10+',
-  softwareVersion: '0.3.14', // keep in sync on release
+  softwareVersion: product.version,
   license: 'https://opensource.org/licenses/MIT',
   downloadUrl: 'https://pypi.org/project/selvedge/',
   sameAs: [
@@ -259,7 +257,7 @@ const graph: Record<string, unknown> = {
           name: "What if I'm using a different AI tool?",
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Selvedge exposes standard MCP tools and a CLI. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf; see the editor-specific setup guides for configuration and instruction files. Other MCP clients can be configured manually. Without MCP, an agent or human with shell access can record and retrieve decisions through the CLI. Claude Code lifecycle hooks do not automatically apply to other clients.",
+            text: "Selvedge exposes standard MCP tools and a CLI. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf; see the editor-specific setup guides for configuration and instruction files. Other MCP clients can be configured manually. Without MCP, an agent or human with shell access can record and retrieve decisions through the CLI. Native lifecycle adapters exist for all six setup targets; capabilities and activation differ. Copilot hooks target VS Code Local. Windsurf provides edit and command checks without startup or compaction hooks.",
           },
         },
         // The repeated-mistake answer remains visible on the FAQ page and links

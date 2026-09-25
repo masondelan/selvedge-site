@@ -40,7 +40,7 @@ selvedge prior-attempts src/cache.py::load_profile --json
 
 In the isolated example check, the result included `outcome: "rejected"` and `confidence: "exact"`. Here, “exact” describes the explicit recorded rejection; it does not prove that the decision was correct or remains applicable.
 
-Agents can use Selvedge's `prior_attempts` MCP tool for this lookup. Selvedge also has Claude Code hooks for selected delivery and edit-checking workflows. Other supported agents use MCP tools and instructions; connecting them does not give them Claude Code's hook behavior.
+Agents can use Selvedge's `prior_attempts` MCP tool for this lookup. Selvedge also provides [native lifecycle adapters](/guides/agent-lifecycle-hooks/) for its six setup targets. Capabilities vary: review and activate the generated hooks in your client, and verify their execution separately from MCP access.
 
 ## Reconsider explicitly when the evidence changes
 

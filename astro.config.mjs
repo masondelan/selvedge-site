@@ -2,6 +2,7 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 // Generated from src/data/seo.mjs by scripts/gen-seo-pages.mjs.
 import { mcpItems, compareItems } from "./src/data/seo-nav.mjs";
+import { product } from "./src/data/product.mjs";
 
 import cloudflare from "@astrojs/cloudflare";
 
@@ -12,8 +13,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "selvedge",
-      description:
-        "Local decision memory for AI coding agents. Keep the reasons, rejected approaches and conditions for revisiting them across sessions.",
+      description: product.shortDescription,
       logo: {
         light: "./src/assets/wordmark.svg",
         dark: "./src/assets/wordmark-dark.svg",
@@ -77,6 +77,11 @@ export default defineConfig({
           items: [
             { label: "What is Selvedge?", link: "/start/what-is-selvedge/" },
             { label: "Quickstart", link: "/start/quickstart/" },
+            { label: "Verify your first decision", link: "/guides/verify-first-decision/" },
+            { label: "Evaluate decision memory", link: "/guides/evaluate-decision-memory/" },
+            { label: "Share memory between agents", link: "/guides/share-memory-between-agents/" },
+            { label: "Agent lifecycle hooks", link: "/guides/agent-lifecycle-hooks/" },
+            { label: "Compatibility and capabilities", link: "/reference/compatibility/" },
             { label: "How it works", link: "/start/how-it-works/" },
             { label: "Agent prompt block", link: "/prompt-block/" },
             { label: "Stop repeated mistakes", link: "/prior-attempts/" },

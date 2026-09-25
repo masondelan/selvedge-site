@@ -31,7 +31,7 @@ export const clients = [
 command = "uvx"
 args = ["--from", "selvedge", "selvedge-server"]`,
     verify: "Restart Codex in the trusted project. Enable the Selvedge MCP server in Settings → MCP servers if needed. Ask Codex to record a real rejected approach with `log_change`, then retrieve it with `prior_attempts`. Start a new session and query the same entity.",
-    gotcha: "Codex project configuration loads only for trusted projects. The setup wizard writes `.codex/config.toml` and installs instructions in `AGENTS.md`. Custom TOML entries must be reconciled manually. Make sure `uvx` (manual setup) or `selvedge-server` (wizard setup) is on the PATH Codex uses. Claude Code lifecycle hooks are not installed for Codex.",
+    gotcha: "Codex project configuration loads only for trusted projects. The setup wizard writes `.codex/config.toml` and installs instructions in `AGENTS.md`. Custom TOML entries must be reconciled manually. Make sure `uvx` (manual setup) or `selvedge-server` (wizard setup) is on the PATH Codex uses. As of 0.3.15, setup also installs .codex/hooks.json. Review and trust those definitions with /hooks.",
     docsUrl: "https://learn.chatgpt.com/docs/extend/mcp?surface=cli",
   },
   {
@@ -50,7 +50,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
   }
 }`,
     verify: "Restart Gemini CLI in the project. Run `/mcp` and confirm Selvedge's tools are available. Ask the agent to save a real rejected approach using `log_change` and retrieve it using `prior_attempts` in a new session.",
-    gotcha: "The agent must be able to find `uvx` (manual config) or `selvedge-server` (wizard setup). Approve the server if prompted. Setup writes GEMINI.md so the agent knows when to use Selvedge; it does not install Claude Code lifecycle hooks.",
+    gotcha: "The agent must be able to find `uvx` (manual config) or `selvedge-server` (wizard setup). Approve the server if prompted. Setup writes GEMINI.md so the agent knows when to use Selvedge; as of 0.3.15 it also offers native BeforeTool, SessionStart and PreCompress hooks. Review them in project settings.",
     docsUrl: "https://geminicli.com/docs/tools/mcp-server/",
   },
   {
