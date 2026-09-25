@@ -15,7 +15,7 @@ import AgentSetup from '../../components/AgentSetup.astro';
 import Terminal from '../../components/Terminal.astro';
 import { agents } from '../../data/product.mjs';
 
-<div class="agent-strip" aria-label="Supported agents"><span class="agent-strip-label">WORKS WITH</span> {agents.map((agent, i) => <>{i > 0 && <span> · </span>}{agent.label}</>)}</div>
+<div class="agent-strip" aria-label="Supported agents"><span class="agent-strip-label">WORKS WITH</span> {agents.map((agent, i) => <>{i > 0 && <span> · </span>}{agent.shortLabel ?? agent.label}</>)}</div>
 
 [Check compatibility and capabilities](/reference/compatibility/) · [Verify your first decision](/guides/verify-first-decision/)
 

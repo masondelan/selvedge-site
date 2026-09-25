@@ -39,7 +39,7 @@ This is a small author-written fixture suite. It does not measure real repositor
 
 ## Initial pilot results
 
-The [September 25, 2026 run](https://github.com/masondelan/selvedge/tree/main/bench/decision_memory/results/2026-09-25) used Claude Code 2.1.170, model `claude-sonnet-4-6`, and Selvedge 0.3.14. All 48 measured trials completed.
+The [September 25, 2026 UTC run](https://github.com/masondelan/selvedge/tree/main/bench/decision_memory/results/2026-09-25) used Claude Code 2.1.170, model `claude-sonnet-4-6`, and Selvedge 0.3.14. All 48 measured trials completed.
 
 | Condition | Correct final choices |
 | --- | --- |
