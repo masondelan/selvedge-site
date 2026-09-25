@@ -2,6 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "selvedge-site",
   "compatibility_date": "2026-06-26",
+  "d1_databases": [{
+    "binding": "LAUNCH_METRICS",
+    "database_name": "selvedge-launch-metrics",
+    "database_id": "a8c6ee92-5e15-40f9-b613-7b9b1caac86c",
+    "migrations_dir": "migrations"
+  }],
   "observability": {
     "enabled": true
   },
