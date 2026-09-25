@@ -1,20 +1,23 @@
 ---
-title: Local memory for AI coding agents
-description: Selvedge is a free, local MCP server that saves project decisions and rejected approaches across AI coding sessions. Set up Claude Code, Codex or Cursor.
+title: Persistent decision memory for AI coding agents
+description: Preserve why code changed and which approaches were rejected. Selvedge gives AI coding agents local decision memory through MCP and CLI.
 template: splash
 head:
   - tag: meta
     attrs:
       property: og:type
       content: website
-lastUpdated: 2026-09-12
+lastUpdated: 2026-09-24
 hero:
   tagline: Keep the why with your code.
 ---
 import AgentSetup from '../../components/AgentSetup.astro';
 import Terminal from '../../components/Terminal.astro';
+import { agents } from '../../data/product.mjs';
 
-<div class="agent-strip" aria-label="Supported agents"><span class="agent-strip-label">WORKS WITH</span> Claude Code <span>·</span> Codex <span>·</span> Copilot <span>·</span> Cursor <span>·</span> Gemini CLI <span>·</span> Windsurf</div>
+<div class="agent-strip" aria-label="Supported agents"><span class="agent-strip-label">WORKS WITH</span> {agents.map((agent, i) => <>{i > 0 && <span> · </span>}{agent.label}</>)}</div>
+
+[Check compatibility and capabilities](/reference/compatibility/) · [Verify your first decision](/guides/verify-first-decision/)
 
 ## Choose your agent
 
@@ -38,7 +41,7 @@ Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) and Pytho
   <section><h3>When to revisit it</h3><p>What would change your mind. Add a review date or supported expiry condition so a past decision can be reconsidered.</p></section>
 </div>
 
-Explore [memory across coding sessions](/agent-memory/), [try a recorded rejection and retrieval](/guides/revisit-a-rejected-approach/), or learn how to [keep a decision audit trail](/audit-trail/).
+Learn to [share decisions between agents](/guides/share-memory-between-agents/), explore [memory across coding sessions](/agent-memory/), [try a recorded rejection and retrieval](/guides/revisit-a-rejected-approach/), or learn how to [keep a decision audit trail](/audit-trail/).
 
 ## A small tool that stays with your project
 

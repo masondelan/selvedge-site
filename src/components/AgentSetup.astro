@@ -1,13 +1,6 @@
 ---
 import Terminal from './Terminal.astro';
-const agents = [
-  { id: 'codex', label: 'Codex', doc: '/mcp/codex/', note: 'Writes project .codex/config.toml and AGENTS.md. Open this project in Codex and trust it to load project configuration.' },
-  { id: 'claude-code', label: 'Claude Code', doc: '/mcp/claude-code/', note: 'Writes .mcp.json and CLAUDE.md, plus Claude Code lifecycle hooks. Already using the Selvedge plugin? Keep that installation instead.' },
-  { id: 'cursor', label: 'Cursor', doc: '/mcp/cursor/', note: 'Adds the server to ~/.cursor/mcp.json and instructions to this project’s .cursorrules.' },
-  { id: 'copilot', label: 'Copilot', doc: '/mcp/vscode/', note: 'Writes .vscode/mcp.json and .github/copilot-instructions.md. Use Copilot’s Agent mode and enable the server’s tools.' },
-  { id: 'gemini', label: 'Gemini CLI', doc: '/mcp/gemini/', note: 'Writes this project’s .gemini/settings.json and GEMINI.md. Restart Gemini CLI in the project and approve the server if prompted.' },
-  { id: 'windsurf', label: 'Windsurf', doc: '/mcp/windsurf/', note: 'Adds the server to ~/.codeium/windsurf/mcp_config.json and instructions to this project’s .windsurfrules.' },
-].sort((a, b) => a.label.localeCompare(b.label));
+import { agents } from '../data/product.mjs';
 ---
 <div class="agent-setup" data-agent-setup>
   <div class="agent-picker" role="group" aria-label="Choose your coding agent">
@@ -39,11 +32,13 @@ const agents = [
   <p class="setup-placeholder" data-setup-placeholder>Choose an agent above to see its setup commands.</p>
   <div class="first-win" data-first-win hidden>
     <span class="session-label">3. ASK YOUR AGENT TO REMEMBER SOMETHING</span>
-    <Terminal title="paste into your agent" command="Use Selvedge to record one approach we considered and rejected in this project. Include why we rejected it and what would change our mind. Then look it up with prior_attempts." copy kind="prompt" />
-    <p>Start a new session and ask it to look up the same entity. That’s your first saved decision carried forward.</p>
-    <details><summary>Connected successfully?</summary>
-      <p>You can send one anonymous confirmation to help improve setup. No project contents or contact details are sent.</p>
-      <button type="button" class="setup-feedback" data-feedback>I saved and recalled a decision</button>
+    <Terminal title="paste into your agent" command="Use Selvedge to record one real approach we considered and rejected in this project. Include the entity, why we rejected it, and what would change our mind. Do not invent a decision; ask me if none is available. Then look it up with prior_attempts and show me the entity path." copy kind="prompt" />
+    <span class="session-label">4. OPEN A NEW SESSION IN THIS PROJECT</span>
+    <Terminal title="paste into a fresh agent session" command="Ask me for the entity path I saved in my previous session. Then use Selvedge prior_attempts to retrieve its decision. Show the recorded reason and outcome, and assess whether the original constraint still applies before proposing any edit." copy kind="prompt" />
+    <p>Compare the retrieved reason with what you saved. <a href="/guides/verify-first-decision/">Verify your first decision →</a> If the result is empty, run <code>selvedge doctor</code> and check that both sessions use the same database.</p>
+    <details><summary>Recalled it in a new session?</summary>
+      <p>You can voluntarily report this milestone. This is a self-report, not an automatic check of your project. No project contents or contact details are sent.</p>
+      <button type="button" class="setup-feedback" data-feedback>I recalled my decision in a new session</button>
       <p aria-live="polite" data-feedback-status></p>
     </details>
   </div>

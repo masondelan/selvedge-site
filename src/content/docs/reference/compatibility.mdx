@@ -1,0 +1,47 @@
+---
+title: Selvedge compatibility and capabilities
+description: Check Selvedge agent setup, MCP and CLI support, native lifecycle hooks, local storage, and the limits of recorded decision memory.
+lastUpdated: 2026-09-24
+---
+import AgentCompatibility from '../../../components/AgentCompatibility.astro';
+import { product } from '../../../data/product.mjs';
+
+**{product.category}.** {product.description}
+
+These facts describe Selvedge **{product.version}**. The package's <a href={`https://github.com/masondelan/selvedge/tree/v${product.version}`}>released source</a> is the authority for shipped behavior. Client permissions and instruction support also affect actual use.
+
+## Agent support
+
+All six setup targets can use the same eight MCP tools. The CLI also supports recording and retrieving decisions. Setup installs the configuration and instruction files below; paths without `~/` are relative to the project.
+
+<AgentCompatibility />
+
+All six targets have native hook adapters as of 0.3.15. Codex, Cursor, VS Code Copilot **Local** and Gemini CLI support startup context, a watched-edit gate, and advisory compaction notifications. Windsurf/Cascade provides edit and command checks. A notification does not inject model context or save a decision automatically.
+
+Read the [capabilities, activation and validation limits](/guides/agent-lifecycle-hooks/). The new adapters have contract and subprocess coverage; Codex's edit denial and retry were also observed in CLI 0.154.0-alpha.6.2. The other four new clients have not yet been tested end to end. Copilot CLI/cloud/Agent Host are not covered by the Local adapter. Other MCP clients can be configured manually through the [MCP reference](/reference/mcp-tools/).
+
+## When Selvedge is useful
+
+| Need | What Selvedge provides | What you still need to do |
+| --- | --- | --- |
+| Preserve why code changed | Stated rationale tied to a function, table, route, dependency or other entity | Record useful reasons while the context is available |
+| Check earlier rejected approaches | Explicit rejected/reverted outcomes and queryable history | Retrieve the relevant record and assess whether its constraint applies |
+| Carry decisions between coding tools | MCP and CLI access to the same local store | Connect both clients to the same database |
+| Reconsider an old decision | Review dates, supported expiry conditions and superseding events | Inspect current evidence; review signals do not decide correctness |
+| Keep storage under your control | Local SQLite, MIT license, no required account or hosted service | Back up the database and control who can read it |
+
+## What “reasoning” means
+
+Selvedge stores explanations explicitly supplied by people or agents. It does not extract a model's hidden internal reasoning or establish that a saved explanation is correct. Imported history is limited to what its source contains. [Recorded versus inferred reasoning](/concepts/captured-live-vs-inferred/) explains the distinction.
+
+## Storage, dependencies and privacy
+
+Run `selvedge init` or setup to create `.selvedge/selvedge.db` in your project. A global fallback and overrides also exist; use `selvedge doctor` to inspect the effective path. The core requires Python 3.10+ and declared runtime dependencies. Default history queries need neither an LLM nor embeddings; optional fuzzy lookup uses local embeddings.
+
+Your coding client may send retrieved records to its model provider. Local storage does not change that client's policy. An optional usage heartbeat is off by default; the CLI also has a PyPI version check. See the [FAQ](/project/faq/#where-does-my-data-live) and [configuration reference](/reference/configuration/).
+
+## Choose and verify
+
+Standing rules and reviewed architecture decisions may be well served by maintained instruction files or ADRs. Selvedge adds entity queries and explicit outcome history. Read the [comparison](/compare/instructions-and-adrs/), then [verify a real decision in a fresh session](/guides/verify-first-decision/). A successful lookup demonstrates retrieval; a tested change demonstrates how the agent used it.
+
+For a controlled comparison, [evaluate decision memory](/guides/evaluate-decision-memory/) with alternative information delivery and cases where old advice no longer applies.

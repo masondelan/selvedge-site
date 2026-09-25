@@ -31,9 +31,10 @@ structuredData:
         Alembic migrations, and Agent Trace records.
     - question: Which AI coding tools does it work with?
       answer: >-
-        Anything that speaks MCP. selvedge setup auto-detects Claude Code,
-        Cursor, and Copilot and wires in both the server and the agent prompt
-        block.
+        Selvedge setup supports Claude Code, Codex, Copilot, Cursor, Gemini CLI,
+        and Windsurf. It installs MCP configuration and agent instructions.
+        Selvedge lifecycle hooks are currently specific to Claude Code;
+        other MCP clients can be configured manually.
 ---
 
 Six months from now, someone will look at a change your AI agent made today and ask the only question that matters: *why is it like this?* The diff is in git. The prompt, the constraint that forced the approach, the alternative that was rejected — those lived in a chat window that no longer exists. Selvedge is an open-source MCP server that closes that gap: the agent logs the *why* at the moment it makes the change, and anyone (human or agent) can query it later.
@@ -75,6 +76,8 @@ reads. Cut over once backfill passes checksum; then drop user_tier.
 ```
 
 The same answer is available to the agent over MCP as `blame`, and in bulk as `history` — so "what changed in `users` in the last 30 days, and why" is one call, not an archaeology dig.
+
+Here, reasoning means the explanation explicitly supplied by the agent or person. Selvedge does not extract hidden model reasoning or verify that the explanation is correct.
 
 ## Things people try first
 
@@ -120,4 +123,6 @@ They have no logged reasoning — Selvedge doesn't guess. You can backfill schem
 
 **Which AI coding tools does it work with?**
 
-Anything that speaks MCP. `selvedge setup` auto-detects Claude Code, Cursor, and Copilot and wires in both the server and the agent prompt block.
+Selvedge setup supports Claude Code, Codex, Copilot, Cursor, Gemini CLI, and Windsurf. It installs MCP configuration and agent instructions. Native lifecycle adapters are available for all six setup targets, with different capabilities by client. Review the [compatibility guide](/reference/compatibility/); other MCP clients can be configured manually.
+
+[Check current compatibility and capabilities](/reference/compatibility/).

@@ -60,7 +60,7 @@ Restart Gemini CLI in the project. Run `/mcp` and confirm Selvedge's tools are a
 
 ## If it doesn't connect
 
-The agent must be able to find `uvx` (manual config) or `selvedge-server` (wizard setup). Approve the server if prompted. Setup writes GEMINI.md so the agent knows when to use Selvedge; it does not install Claude Code lifecycle hooks.
+The agent must be able to find `uvx` (manual config) or `selvedge-server` (wizard setup). Approve the server if prompted. Setup writes GEMINI.md so the agent knows when to use Selvedge; as of 0.3.15 it also offers native BeforeTool, SessionStart and PreCompress hooks. Review them in project settings.
 
 ## Next
 

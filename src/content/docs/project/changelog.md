@@ -7,6 +7,24 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent releases for
 at-a-glance browsing.
 
+## v0.3.15 — 2026-09-25
+
+**Native lifecycle adapters for all six setup targets.** Setup now offers hooks
+for Codex, Cursor, VS Code Copilot Local, Gemini CLI and Windsurf/Cascade alongside
+Claude Code. Existing configuration is preserved, modified files receive backups,
+and customized or malformed hook configurations produce visible conflicts.
+
+Startup context, watched-edit gates and advisory compaction notifications vary
+by client. Windsurf/Cascade provides edit and command checks only. Review and
+activate the generated definitions; read the [lifecycle guide](/guides/agent-lifecycle-hooks/)
+for the exact scope and validation evidence.
+
+The release also includes a [reproducible decision-memory pilot](/guides/evaluate-decision-memory/)
+with all 48 measured trials and controls. It adds no dependencies, MCP tools,
+database migrations or default telemetry.
+
+See the [release notes](https://github.com/masondelan/selvedge/releases/tag/v0.3.15).
+
 ## v0.3.14 — 2026-09-12
 
 **Explicit seven-day prior-attempt windows now match the default.** Passing

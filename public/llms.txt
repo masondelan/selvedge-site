@@ -5,8 +5,14 @@
 The diff is git's job. The *why* is Selvedge's. Reasoning is captured live, by the agent, in the same context that produced the change — not inferred post-hoc from the diff by a second model. Install with `pip install selvedge`, then `selvedge setup`.
 
 ## Start here
+
+- [Evaluate decision memory](https://selvedge.sh/guides/evaluate-decision-memory/): Controls, observable evidence, failures and pilot limitations.
+- [Native lifecycle hooks](https://selvedge.sh/guides/agent-lifecycle-hooks/): per-client activation, edit gates, startup context, compaction notifications and validation limits.
+- [Compatibility and capabilities](https://selvedge.sh/reference/compatibility/): released behavior, setup targets, native lifecycle capabilities, storage and limitations.
+- [Verify your first decision](https://selvedge.sh/guides/verify-first-decision/): check recording, fresh-session retrieval and application separately.
+- [Share memory between agents](https://selvedge.sh/guides/share-memory-between-agents/): a repeatable handoff using the same database, including worktree and context-loss caveats.
 - [Home](https://selvedge.sh): what Selvedge is, who it's for, the quickstart.
-- [Quickstart](https://selvedge.sh/start/quickstart/): `pip install selvedge`, the `selvedge setup` wizard, wiring into Claude Code / Cursor / Copilot / Codex / Gemini CLI.
+- [Quickstart](https://selvedge.sh/start/quickstart/): `pip install selvedge`, the `selvedge setup` wizard, wiring into Claude Code / Cursor / Copilot / Codex / Gemini CLI / Windsurf.
 - [Agent prompt block](https://selvedge.sh/prompt-block/): the copy-paste `CLAUDE.md` / `.cursorrules` block that tells an agent when and how to call Selvedge. Also emitted by `selvedge prompt`.
 - [How to stop AI coding agents repeating mistakes](https://selvedge.sh/prior-attempts/): a copyable project rule and hypothetical caching example. Record a rejected approach, retrieve it before editing, and reconsider it when the constraint changes; retrieval does not guarantee compliance.
 - [The MCP server that tracks why your AI agent changed code](https://selvedge.sh/track-why/): the write path (`log_change`, live, in the agent's own words) and the read path (`blame`, `history`) for decision provenance.
