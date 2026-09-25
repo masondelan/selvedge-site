@@ -5,6 +5,7 @@
   "private": true,
   "description": "Marketing site and docs for Selvedge — selvedge.sh",
   "scripts": {
+    "test": "node --test scripts/measurement.test.mjs",
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",

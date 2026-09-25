@@ -16,9 +16,22 @@ const agents = [
   {agents.map((agent) => (
     <section data-agent-panel={agent.id} hidden aria-label={agent.label + ' setup'}>
       <div class="setup-heading"><span class="session-label">1. RUN IN YOUR PROJECT FOLDER</span></div>
-      <Terminal title={"~/your-project — " + agent.label + " setup"} command={"uv tool install --upgrade selvedge\nselvedge setup --agent " + agent.id} copy kind="setup" />
+      <Terminal title={"~/your-project — " + agent.label + " setup"} command={"uv tool install --upgrade selvedge &&\nselvedge setup --agent " + agent.id} copy kind="setup" />
       <p class="setup-prerequisite">Requires <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a> and Python 3.10+. <a href="/start/quickstart/#install">Use pip instead →</a></p>
       <details class="setup-note"><summary>What setup changes</summary><p>{agent.note} Setup asks before changes and backs up modified files.</p></details>
+      <details class="setup-note" data-measured-install>
+        <summary>Help us measure installs (optional)</summary>
+        <p>This alternative command sends Selvedge one confirmation after installation or upgrade succeeds. It shares only your selected agent and campaign labels, using a one-use code that expires after seven days. No project data is sent and ongoing product telemetry stays off. <a href="/privacy/">Privacy details.</a></p>
+        <p>For bash or zsh, with curl installed. The regular command above works without this confirmation.</p>
+        <button type="button" class="setup-feedback" data-prepare-install={agent.id}>Prepare optional command</button>
+        <p aria-live="polite" data-install-status></p>
+        <div data-measured-command hidden>
+          <Terminal title="optional install confirmation">
+            <pre class="terminal-command"><code data-install-command></code></pre>
+          </Terminal>
+          <button type="button" class="setup-feedback" data-copy="" data-copy-kind="setup">Copy optional command</button>
+        </div>
+      </details>
       <p><strong>2. Restart {agent.label}</strong> in this project. Enable Selvedge’s tools if prompted.</p>
       <a class="setup-doc-link" href={agent.doc} data-launch-event="agent_docs">Full {agent.label} instructions →</a>
     </section>
@@ -38,7 +51,8 @@ const agents = [
   <noscript><p>JavaScript is off. Read the quickstart for setup commands for all supported agents. <a href="/start/quickstart/">Complete quickstart.</a></p></noscript>
 </div>
 <script>
-  import { track, getCampaign } from '../lib/launch-events';
+  import { track, getCampaign, getCreative } from '../lib/launch-events';
+  import { measuredCommand } from '../lib/measurement.mjs';
   const root = document.querySelector<HTMLElement>('[data-agent-setup]');
   if (root) {
     const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-agent]'));
@@ -54,6 +68,32 @@ const agents = [
     }
     buttons.forEach(button => button.addEventListener('click', () => selectAgent(button.dataset.agent!, true)));
     selectAgent(new URLSearchParams(location.search).get('agent') || '');
+    root.querySelectorAll<HTMLButtonElement>('[data-prepare-install]').forEach(button => button.addEventListener('click', async () => {
+      const details = button.closest<HTMLElement>('[data-measured-install]')!;
+      const status = details.querySelector<HTMLElement>('[data-install-status]')!;
+      if (navigator.doNotTrack === '1') {
+        status.textContent = 'Do Not Track is enabled. Please use the regular setup command above.';
+        return;
+      }
+      button.disabled = true;
+      try {
+        const response = await fetch('/api/install-receipt', {
+          method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ consent: true, agent: button.dataset.prepareInstall, campaign: getCampaign(), creative: getCreative() }),
+        });
+        if (!response.ok) throw new Error('Receipt unavailable');
+        const { token } = await response.json();
+        const command = measuredCommand(button.dataset.prepareInstall!, token);
+        details.querySelector<HTMLElement>('[data-install-command]')!.textContent = command;
+        details.querySelector<HTMLButtonElement>('[data-copy]')!.dataset.copy = command;
+        details.querySelector<HTMLElement>('[data-measured-command]')!.hidden = false;
+        button.hidden = true;
+        status.textContent = 'Review and copy the command below. Running it sends the optional confirmation; preparing it does not count as an install.';
+      } catch {
+        status.textContent = 'Confirmation is unavailable. Use the regular setup command above, or try again.';
+        button.disabled = false;
+      }
+    }));
     document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach(button => button.addEventListener('click', async () => {
       const status = button.closest('.terminal-window')?.querySelector<HTMLElement>('[data-copy-status]');
       try {
