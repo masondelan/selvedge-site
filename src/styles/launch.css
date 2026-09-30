@@ -79,3 +79,14 @@
   .setup-fineprint { margin-top:1rem; padding-top:.5rem; }
   .agent-picker button { font-size:.8125rem; }
 }
+
+/* Quickstart has one agent choice; the selected command stays close to it. */
+.agent-picker { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; border: 0; padding: 0; }
+.agent-picker label { font-size: .875rem; font-weight: 500; }
+.agent-picker select {
+  width: min(100%, 22rem); min-height: 44px; margin: 0;
+  border: 1px solid var(--sl-color-gray-4); border-radius: 4px;
+  padding: .6rem .8rem; background: var(--sl-color-bg); color: var(--sl-color-text);
+  font: 400 .9rem var(--__sl-font);
+}
+.agent-picker select:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }

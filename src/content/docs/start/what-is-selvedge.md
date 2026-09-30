@@ -3,14 +3,15 @@ title: What is Selvedge?
 description: Local decision history for AI coding agents. Save the reasons, rejected approaches and conditions for revisiting them across sessions.
 ---
 
-Selvedge keeps project decisions and rejected approaches in a local SQLite file
-under `.selvedge/`, next to your code. Your next coding session can look up what
+Selvedge is a local MCP server and CLI that gives AI coding agents persistent
+decision memory. It saves project decisions and rejected approaches in a SQLite
+file under `.selvedge/`, next to your code. Your next coding session can look up what
 you decided, why, and what would make it worth revisiting.
 
 Connect it to Claude Code, Codex, Copilot, Cursor, Gemini CLI or Windsurf through
 MCP, the protocol agents use to call tools. Selvedge records what you or your
 agent explicitly save; the installed instructions help the agent know when to
-use it. [Choose your agent and set it up](/#choose-your-agent).
+use it. [Choose your agent and set it up](/start/quickstart/#choose-your-agent).
 
 ## The problem it solves
 
@@ -72,19 +73,19 @@ capture themselves.
 
 ## How that's different from "ask an LLM about the diff"
 
-The category that's emerging around this — sometimes called "git blame for AI agents" —
-mostly works by feeding the diff back to a second LLM after the fact and asking it to
-reconstruct intent. That's better than nothing, but it's a guess. The agent that made
-the change knew exactly why; by the time you ask a fresh LLM to explain the diff, that
-context is gone.
+A diff shows what changed. It does not necessarily contain the reason, the
+alternatives you ruled out, or the constraint you were working around. A fresh
+agent can infer an explanation, but that inference may differ from the original
+decision.
 
-Selvedge takes the other approach: it gives the *original* agent a way to record its
-intent **as it works**. The reasoning is the agent's own — written from the same context
-window that produced the change. No inference, no hallucinated explanations. And an
-empty `reasoning` field is itself a useful signal: the agent didn't have one.
+Selvedge gives you and your agent a way to save that explanation while the context
+is available, then retrieve the recorded account later. It stores stated
+reasoning; it cannot prove that the explanation is accurate or that every decision
+was captured. [Verify a real decision across two sessions](/guides/verify-first-decision/)
+before relying on it in your workflow.
 
 ## Next
 
-[**Quickstart →**](/start/quickstart/) Three commands.
+[**Quickstart →**](/start/quickstart/) Install, connect your agent, and verify a decision.
 [**How it works →**](/start/how-it-works/) The MCP plumbing in plain prose.
 [**Comparison table →**](/compare/agent-tools/) Selvedge vs. AgentDiff, Origin, Git AI, BlamePrompt.

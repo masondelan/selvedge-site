@@ -1,97 +1,104 @@
 ---
 title: Quickstart
-description: Install Selvedge, try a safe demo, connect your coding agent, and carry your first decision into a new session.
+tableOfContents: false
+description: Install Selvedge, connect your coding agent, and save a decision you can recall in your next session.
 ---
 
-import AgentCompatibility from "../../../components/AgentCompatibility.astro";
+import AgentSetup from "../../../components/AgentSetup.astro";
+import Terminal from "../../../components/Terminal.astro";
 import { product } from "../../../data/product.mjs";
 
 ## Install
 
-Selvedge requires Python 3.10 or newer. With [uv installed](https://docs.astral.sh/uv/getting-started/installation/):
+Run in your terminal. Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) and Python 3.10+.
 
-```bash
-uv tool install --upgrade selvedge
-selvedge --version
-selvedge demo
-```
+<Terminal title="terminal" command={"uv tool install --upgrade selvedge\nselvedge --version"} copy kind="install" />
 
-The current release is <a href={product.changelogUrl}><strong>Selvedge {product.version}</strong></a>, which adds native lifecycle adapters for all six setup targets. Review the generated hooks in your client to activate them. Agent setup choices and the isolated demo were introduced in 0.3.12. The demo saves a rejection and retrieves it through a fresh connection to a temporary database. It does not write to your project or configured database.
+<p class="quickstart-release">Current release: <a href={product.changelogUrl}>Selvedge {product.version}</a>.</p>
 
-Using pip instead? Install in a virtual environment:
+<details>
+<summary>Use pip instead</summary>
+
+Install in a virtual environment:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade selvedge
+```
+
+On Windows, activate with `.venv\Scripts\Activate.ps1` in PowerShell. If your system calls Python `python3`, use that to create the environment. Start your editor from the activated terminal, or use the absolute path to `selvedge-server` in its MCP configuration.
+
+</details>
+
+<details>
+<summary>Try a demo first</summary>
+
+```bash
 selvedge demo
 ```
 
-On Windows, activate with `.venv\Scripts\Activate.ps1` in PowerShell. If your system calls Python `python3`, use that to create the environment.
+The demo saves a rejected approach and retrieves it through a fresh connection to a temporary database. It does not write to your project. The demo requires Selvedge 0.3.12 or newer.
 
-**The agent must be able to launch `selvedge-server`.** Start your editor from the activated terminal, or use the absolute path to that executable in its MCP configuration. With uv tools, run `uv tool update-shell` if needed, then restart your terminal and editor.
+</details>
 
 ## Connect your agent
 
-From your project directory:
+In your project folder, run the command for your agent.
 
-```bash
-cd your-project
-selvedge setup --agent codex
-```
+<AgentSetup />
 
-<AgentCompatibility />
+[Check compatibility and lifecycle hooks →](/reference/compatibility/)
 
-Repeat `--agent` to connect several tools to the same project. Without it, setup detects supported tools. It asks before changes, backs up modified files, installs instructions, initializes the local store and offers a Git post-commit hook. Custom MCP entries raise a conflict. Custom Codex TOML entries require manual reconciliation; `--force` never rewrites them.
+<span id="save-and-recall-your-first-decision"></span>
 
-Already using the Selvedge Claude Code plugin? Keep that installation; adding a second MCP server through setup is unnecessary.
+## Save one decision
 
-Restart your agent in this project. Approve or enable Selvedge and its tools if prompted. Codex requires a trusted project to load its project configuration. Copilot requires Agent mode.
+Paste this into your connected coding agent:
 
-## Save and recall your first decision
+<Terminal title="paste into your agent" command="Use Selvedge to save one real decision from this project, including why we made it and any approach we rejected. Ask me if no decision is available; do not invent one. Show me the saved entity path and record ID." copy kind="prompt" />
 
-Follow the [complete first-decision verification](/guides/verify-first-decision/) to check the database, saved record, fresh-session lookup and actual application separately.
+Open a **new session in the same project**. Give your agent the saved entity path and ask it to retrieve the decision with `prior_attempts`. Check that the result matches what you saved.
 
-Ask your agent:
+Only decisions explicitly saved to Selvedge can be recalled.
 
-> Use Selvedge to record one real approach we considered and rejected in this project. Include the entity, why we rejected it, and what would change our mind. Do not invent a decision; ask me if none is available. Then show the saved entity path and record ID.
+[Walk through the verification →](/guides/verify-first-decision/)
 
-Use a real decision you can verify. Watch the calls in another terminal:
+## Need a hand?
 
-```bash
-selvedge watch
-```
+<details id="if-nothing-appears">
+<summary>My agent cannot find Selvedge or my saved decision</summary>
 
-Start a new session in the same project. Ask the agent to query `prior_attempts` for that entity. You should see the saved rejection and its reason.
+1. Run `selvedge doctor` and [check your version](/upgrade/).
+2. Confirm `selvedge-server` is on your agent’s PATH. With uv, run `uv tool update-shell`, then restart your terminal and editor.
+3. Restart your agent in this project and enable Selvedge’s tools. Codex needs a trusted project; Copilot uses VS Code Local in Agent mode.
+4. Confirm both sessions use the [same project database](/reference/configuration/#db-path-resolution).
+5. Ask the agent explicitly to use `log_change`, then look up the saved entity with `prior_attempts`.
 
-**MCP access does not automatically capture every decision.** The installed instructions guide your agent to call Selvedge. Native lifecycle hooks add startup context, watched-edit checks and compaction notifications where the client supports them. Windsurf provides edit and command checks only. Follow the [lifecycle activation guide](/guides/agent-lifecycle-hooks/); successful MCP access alone does not prove hook execution.
+Native lifecycle adapters are available for all six agents; capabilities and activation differ. [Activate and verify your agent’s hooks](/guides/agent-lifecycle-hooks/).
 
-## If nothing appears
+</details>
 
-1. Run `selvedge --version`. [Upgrade to the current release](/upgrade/); setup choices and the demo require at least 0.3.12.
-2. Confirm `selvedge-server` is on the PATH your agent uses, or set its absolute path.
-3. Restart the agent after setup and enable its eight Selvedge tools.
-4. Make sure your terminal and agent are in the same project.
-5. Run `selvedge doctor` and explicitly ask the agent to use `log_change`.
-
-If your terminal and agent show different history, check [database path resolution and configuration](/reference/configuration/#db-path-resolution). Both must use the same project database.
-
-## Read your project history
+<details id="read-your-project-history">
+<summary>Use the CLI to read history</summary>
 
 ```bash
 selvedge status
 selvedge prior-attempts users.api_key
-selvedge blame users.api_key
 selvedge history --since 7d
 selvedge search "credentials"
-selvedge stale
 ```
 
-Read commands support `--json`. See the [CLI reference](/reference/cli/) and [MCP tools](/reference/mcp-tools/).
+Replace `users.api_key` with your saved entity path. Read commands support `--json`. See the [CLI reference](/reference/cli/), [MCP tools](/reference/mcp-tools/), and [entity path guide](/reference/entity-paths/).
 
-Choose consistent [entity paths for functions, tables and dependencies](/reference/entity-paths/) so later queries find the decisions you saved. For a complete example, follow [record, retrieve and revisit a rejected approach](/guides/revisit-a-rejected-approach/).
+</details>
 
-## Unattended setup
+<details id="unattended-setup">
+<summary>Connect multiple agents or automate setup</summary>
+
+Repeat `--agent` to connect several tools to one project. Without it, setup detects supported tools. Custom MCP entries raise a conflict; custom Codex TOML entries need manual reconciliation. `--force` never rewrites those entries.
+
+For unattended setup:
 
 ```bash
 selvedge setup --agent codex --non-interactive --yes
@@ -99,6 +106,16 @@ selvedge setup --agent codex --non-interactive --yes
 
 Without `--yes`, non-interactive setup is a dry run.
 
-## Help test later-session retrieval
+</details>
 
-Trying this in a project you control? [Join the voluntary feedback pilot](https://github.com/masondelan/selvedge/discussions/49). We want to hear about failed or confusing setup and retrieval as well as successful lookups. Read the participation and consent details before replying; the discussion is public, so share only redacted, non-sensitive notes.
+<details id="help-test-later-session-retrieval">
+<summary>Share feedback</summary>
+
+Trying this in a project you control? [Join the voluntary feedback pilot](https://github.com/masondelan/selvedge/discussions/49). The discussion is public; share only redacted, non-sensitive notes.
+
+You can also report that you recalled a decision in a new session. This is a voluntary self-report, not an automatic check. No project contents or contact details are sent.
+
+<button type="button" class="setup-feedback" data-feedback>I recalled my decision in a new session</button>
+<p aria-live="polite" data-feedback-status></p>
+
+</details>

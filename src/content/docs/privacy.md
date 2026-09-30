@@ -3,13 +3,13 @@ title: Website privacy
 description: Anonymous website counts and optional install confirmations.
 ---
 
-The website records anonymous interaction events: visits from our campaign, setup and demo clicks, selected agent, copied commands, documentation clicks, and optional “saved and recalled a decision” confirmations.
+The website records anonymous interaction events: visits from our campaign, setup and demo clicks, selected agent, copied setup prompts and commands, documentation clicks, and optional “saved and recalled a decision” confirmations.
 
 Each interaction event contains only its type, the selected agent, and fixed campaign and creative labels. Daily counts use no cookies, persistent visitor IDs, advertising pixels or browser fingerprinting. They contain no project files, decisions, chat contents, email addresses or contact details. Browsers sending Do Not Track are excluded.
 
 Daily aggregate counts are stored in Cloudflare D1. We do not store request headers or IP addresses in these counts. Cloudflare also processes normal website requests and operational logs to serve and protect the site. See [Cloudflare’s privacy policy](https://www.cloudflare.com/privacypolicy/).
 
-Copied commands are expressions of interest, not confirmed installations. The optional success button is a self-reported outcome; it does not inspect your machine.
+Copied prompts and commands are expressions of interest, not confirmed installations. Copying the homepage prompt does not send it to an AI service; you choose where to paste it. The optional success button is a self-reported outcome; it does not inspect your machine.
 
 ## Optional install confirmation
 

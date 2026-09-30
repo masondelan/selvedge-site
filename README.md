@@ -25,7 +25,7 @@ Cloudflare Pages picks up the `dist/` directory automatically.
 
 ```text
 .
-├── astro.config.mjs                 Astro + Starlight config (sidebar, hero override, CSS)
+├── astro.config.mjs                 Astro + Starlight config (sidebar, page frame, CSS)
 ├── public/
 │   ├── CNAME                        selvedge.sh
 │   ├── _headers                     Cloudflare cache + security headers
@@ -35,10 +35,11 @@ Cloudflare Pages picks up the `dist/` directory automatically.
 │   ├── assets/
 │   │   └── wordmark.svg             Logo — lowercase mono with red selvedge stripe
 │   ├── components/
-│   │   └── SelvedgeHero.astro       Custom landing hero (replaces Starlight default)
+│   │   ├── Homepage.astro           Minimal introduction and copyable setup prompt
+│   │   └── PageFrame.astro          Homepage frame; standard Starlight for docs
 │   ├── content/
 │   │   └── docs/
-│   │       ├── index.mdx            Landing page (uses splash template)
+│   │       ├── index.mdx            Homepage search metadata (splash template)
 │   │       ├── start/               What is Selvedge / Quickstart / How it works
 │   │       ├── reference/           CLI / MCP tools / Entity paths / Configuration
 │   │       ├── compare/             vs. git blame / vs. agent tools / Agent Trace interop
@@ -69,9 +70,10 @@ denim.
 
 Homepage interface:
 
-- The setup and introduction buttons share one outlined treatment, equal sizing,
-  and identical hover and keyboard-focus states. Indigo on warm paper; ecru in dark mode.
-- Keep their styles together in `selvedge.css`; avoid page-specific primary/secondary overrides.
+- The homepage is a narrow, left-aligned introduction with one underlined setup-prompt action.
+  Keep documentation, CLI quickstart, source and privacy links visible.
+- Homepage spacing lives in `homepage.css` and uses the shared palette from `selvedge.css`.
+  The prompt remains readable without JavaScript; copying must report actual clipboard success.
 - Use medium-weight Inter, modest corner radii, and deliberate spacing. Reserve
   JetBrains Mono for the wordmark, code, and technical labels, and red for small accents.
 - Keep interactions quiet: color changes without lifting buttons, gradients, or decorative shadows.
@@ -81,8 +83,8 @@ Homepage interface:
 - At phone widths, use at least 14px command text and 44px Copy targets. Check
   the homepage and each agent panel at 320px, 390px and 440px, plus tablet and
   desktop, in both themes. Preserve full command text and avoid page overflow.
-- Use the matching light/dark wordmark assets; SVG images do not inherit the
-  surrounding page's text color.
+- The homepage wordmark is live JetBrains Mono text with the red stripe. Documentation
+  uses the matching light/dark SVG assets; images cannot inherit surrounding text color.
 
 ## Deploy
 
@@ -103,14 +105,21 @@ All content is Markdown / MDX under `src/content/docs/`. Sidebar order is hardco
 1. Drop a new `.md` or `.mdx` file under the appropriate section folder
 2. Add a `{ label, link }` entry to the matching sidebar group in `astro.config.mjs`
 
-The landing page (`src/content/docs/index.mdx`) uses the `splash` template, which is
-why it gets the custom hero.
+The homepage metadata lives in `src/content/docs/index.mdx`. `PageFrame.astro` renders
+`Homepage.astro` only at `/`; documentation retains its standard navigation, search
+and metadata. Agent setup controls live in the quickstart. Legacy homepage hashes
+forward to the relevant documentation, preserving existing campaign links.
+
+After homepage or navigation changes, run `npm test`, `npm run build`, and
+`npm run check:site`. The last command checks every sitemap page, metadata,
+structured data, and crawlable reachability from the homepage. Keep Search Console
+indexing/performance outcomes separate from these technical checks.
 
 ### After a Selvedge release
 
 Use the source repository's `CHANGELOG.md` and published release as the source of
 truth. Update `src/content/docs/project/changelog.md` with the new release and
-refresh the current-version guidance in `src/content/docs/start/quickstart.md`.
+refresh the current-version guidance in `src/content/docs/start/quickstart.mdx`.
 Keep a feature's minimum supported version distinct from the current release.
 
 Run `npm run build`, deploy, and check both live pages. Preserve unrelated homepage

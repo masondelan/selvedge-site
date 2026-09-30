@@ -2,19 +2,23 @@
 import Terminal from './Terminal.astro';
 import { agents } from '../data/product.mjs';
 ---
-<div class="agent-setup" data-agent-setup>
-  <div class="agent-picker" role="group" aria-label="Choose your coding agent">
-    {agents.map((agent) => <button type="button" data-agent={agent.id} aria-pressed="false">{agent.label}</button>)}
+<div class="agent-setup" data-agent-setup id="choose-your-agent">
+  <div class="agent-picker">
+    <label for="setup-agent">Your coding agent</label>
+    <select id="setup-agent" data-agent-select>
+      <option value="">Choose your agent…</option>
+      {agents.map(agent => <option value={agent.id}>{agent.label}</option>)}
+    </select>
   </div>
   {agents.map((agent) => (
     <section data-agent-panel={agent.id} hidden aria-label={agent.label + ' setup'}>
-      <div class="setup-heading"><span class="session-label">1. RUN IN YOUR PROJECT FOLDER</span></div>
-      <Terminal title={"~/your-project — " + agent.label + " setup"} command={"uv tool install --upgrade selvedge &&\nselvedge setup --agent " + agent.id} copy kind="setup" />
-      <p class="setup-prerequisite">Requires <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a> and Python 3.10+. <a href="/start/quickstart/#install">Use pip instead →</a></p>
+      <Terminal title={"~/your-project — " + agent.label + " setup"} command={"selvedge setup --agent " + agent.id} copy kind="setup" />
+      <p><strong>Restart {agent.label}</strong> in this project. Enable Selvedge’s tools if prompted.</p>
+      <a class="setup-doc-link" href={agent.doc} data-launch-event="agent_docs">Full {agent.label} instructions →</a>
       <details class="setup-note"><summary>What setup changes</summary><p>{agent.note} Setup asks before changes and backs up modified files.</p></details>
       <details class="setup-note" data-measured-install>
         <summary>Help us measure installs (optional)</summary>
-        <p>This alternative command sends Selvedge one confirmation after installation or upgrade succeeds. It shares only your selected agent and campaign labels, using a one-use code that expires after seven days. No project data is sent and ongoing product telemetry stays off. <a href="/privacy/">Privacy details.</a></p>
+        <p>This optional command repeats installation or upgrade, then sends Selvedge one confirmation after it succeeds. It shares only your selected agent and campaign labels, using a one-use code that expires after seven days. No project data is sent and ongoing product telemetry stays off. <a href="/privacy/">Privacy details.</a></p>
         <p>For bash or zsh, with curl installed. The regular command above works without this confirmation.</p>
         <button type="button" class="setup-feedback" data-prepare-install={agent.id}>Prepare optional command</button>
         <p aria-live="polite" data-install-status></p>
@@ -25,44 +29,29 @@ import { agents } from '../data/product.mjs';
           <button type="button" class="setup-feedback" data-copy="" data-copy-kind="setup">Copy optional command</button>
         </div>
       </details>
-      <p><strong>2. Restart {agent.label}</strong> in this project. Enable Selvedge’s tools if prompted.</p>
-      <a class="setup-doc-link" href={agent.doc} data-launch-event="agent_docs">Full {agent.label} instructions →</a>
+
     </section>
   ))}
-  <p class="setup-placeholder" data-setup-placeholder>Choose an agent above to see its setup commands.</p>
-  <div class="first-win" data-first-win hidden>
-    <span class="session-label">3. ASK YOUR AGENT TO REMEMBER SOMETHING</span>
-    <Terminal title="paste into your agent" command="Use Selvedge to record one real approach we considered and rejected in this project. Include the entity, why we rejected it, and what would change our mind. Do not invent a decision; ask me if none is available. Then look it up with prior_attempts and show me the entity path." copy kind="prompt" />
-    <span class="session-label">4. OPEN A NEW SESSION IN THIS PROJECT</span>
-    <Terminal title="paste into a fresh agent session" command="Ask me for the entity path I saved in my previous session. Then use Selvedge prior_attempts to retrieve its decision. Show the recorded reason and outcome, and assess whether the original constraint still applies before proposing any edit." copy kind="prompt" />
-    <p>Compare the retrieved reason with what you saved. <a href="/guides/verify-first-decision/">Verify your first decision →</a> If the result is empty, run <code>selvedge doctor</code> and check that both sessions use the same database.</p>
-    <details><summary>Recalled it in a new session?</summary>
-      <p>You can voluntarily report this milestone. This is a self-report, not an automatic check of your project. No project contents or contact details are sent.</p>
-      <button type="button" class="setup-feedback" data-feedback>I recalled my decision in a new session</button>
-      <p aria-live="polite" data-feedback-status></p>
-    </details>
-  </div>
-  <p class="setup-fineprint">MCP and CLI work across these agents. Session-start reminders and the edit gate are currently Claude Code features. Agents must call Selvedge to record decisions.</p>
-  <noscript><p>JavaScript is off. Read the quickstart for setup commands for all supported agents. <a href="/start/quickstart/">Complete quickstart.</a></p></noscript>
+  <noscript><p>JavaScript is off. Use your agent’s setup guide:</p><ul>{agents.map(agent => <li><a href={agent.doc}>{agent.label}</a></li>)}</ul></noscript>
 </div>
 <script>
   import { track, getCampaign, getCreative } from '../lib/launch-events';
   import { measuredCommand } from '../lib/measurement.mjs';
   const root = document.querySelector<HTMLElement>('[data-agent-setup]');
   if (root) {
-    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-agent]'));
+    const picker = root.querySelector<HTMLSelectElement>('[data-agent-select]')!;
+    const agentIds = Array.from(picker.options).map(option => option.value).filter(Boolean);
     const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-agent-panel]'));
     function selectAgent(id: string, record = false) {
-      if (!buttons.some(button => button.dataset.agent === id)) return;
-      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.agent === id)));
+      if (id && !agentIds.includes(id)) return;
+      picker.value = id;
       panels.forEach(panel => { panel.hidden = panel.dataset.agentPanel !== id; });
-      root!.dataset.selectedAgent = id;
-      root!.querySelector<HTMLElement>('[data-setup-placeholder]')!.hidden = true;
-      root!.querySelector<HTMLElement>('[data-first-win]')!.hidden = false;
-      if (record) track('agent_select', id);
+      root!.dataset.selectedAgent = id || 'none';
+      if (record && id) track('agent_select', id);
     }
-    buttons.forEach(button => button.addEventListener('click', () => selectAgent(button.dataset.agent!, true)));
-    selectAgent(new URLSearchParams(location.search).get('agent') || '');
+    picker.addEventListener('change', () => selectAgent(picker.value, true));
+    const requestedAgent = new URLSearchParams(location.search).get('agent') || '';
+    selectAgent(requestedAgent);
     root.querySelectorAll<HTMLButtonElement>('[data-prepare-install]').forEach(button => button.addEventListener('click', async () => {
       const details = button.closest<HTMLElement>('[data-measured-install]')!;
       const status = details.querySelector<HTMLElement>('[data-install-status]')!;
@@ -90,12 +79,13 @@ import { agents } from '../data/product.mjs';
       }
     }));
     document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach(button => button.addEventListener('click', async () => {
-      const status = button.closest('.terminal-window')?.querySelector<HTMLElement>('[data-copy-status]');
+      const status = button.closest('.terminal-window')?.querySelector<HTMLElement>('[data-copy-status]')
+        ?? button.closest('[data-measured-install]')?.querySelector<HTMLElement>('[data-install-status]');
       try {
         await navigator.clipboard.writeText(button.dataset.copy || '');
         button.textContent = 'Copied';
         if (status) {
-          status.classList.add('sr-only');
+          if (status.hasAttribute('data-copy-status')) status.classList.add('sr-only');
           status.textContent = 'Copied to clipboard.';
         }
         track(button.dataset.copyKind === 'setup' ? 'setup_copy' : button.dataset.copyKind === 'prompt' ? 'prompt_copy' : 'install_copy', root.dataset.selectedAgent || 'none');
@@ -107,9 +97,9 @@ import { agents } from '../data/product.mjs';
         }
       }
     }));
-    root.querySelector<HTMLButtonElement>('[data-feedback]')?.addEventListener('click', async (event) => {
+    document.querySelector<HTMLButtonElement>('[data-feedback]')?.addEventListener('click', async (event) => {
       const button = event.currentTarget as HTMLButtonElement;
-      const status = root.querySelector<HTMLElement>('[data-feedback-status]')!;
+      const status = document.querySelector<HTMLElement>('[data-feedback-status]')!;
       button.disabled = true;
       const sent = await track('activation_reported', root.dataset.selectedAgent || 'none');
       status.textContent = sent ? 'Thank you — confirmation received.' : 'Could not send. Please try again.';
@@ -118,6 +108,5 @@ import { agents } from '../data/product.mjs';
     document.querySelectorAll<HTMLAnchorElement>('[data-launch-event]').forEach(link => link.addEventListener('click', () => {
       track(link.dataset.launchEvent!, root.dataset.selectedAgent || 'none');
     }));
-    if (getCampaign() !== 'organic') track('landing_view', root.dataset.selectedAgent || 'none');
   }
 </script>
