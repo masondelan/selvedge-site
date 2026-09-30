@@ -22,7 +22,7 @@
 .quickstart-page .sl-markdown-content details p { font-size: 14px; }
 .quickstart-page .quickstart-release, .quickstart-page .quickstart-note { font-size: 14px; color: var(--sl-color-gray-2); }
 .quickstart-page .agent-setup { margin: 20px 0; }
-.quickstart-page .setup-placeholder { margin: 8px 0 0; padding: 0; font-size: 13px; }
+.quickstart-page .setup-prerequisite { margin: 8px 0 0; padding: 0; font-size: 13px; }
 .quickstart-page [data-agent-panel] { margin-top: 16px; }
 .quickstart-page [data-agent-panel] > p { font-size: 15px; margin-block: 16px 8px; }
 .quickstart-page .setup-doc-link { font-size: 14px; display: inline-flex; min-height: 36px; align-items: center; }

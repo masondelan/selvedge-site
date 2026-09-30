@@ -10,6 +10,7 @@ import { agents } from '../data/product.mjs';
       {agents.map(agent => <option value={agent.id}>{agent.label}</option>)}
     </select>
   </div>
+  <p class="setup-prerequisite">Requires Selvedge. <a href="#install">Install →</a></p>
   {agents.map((agent) => (
     <section data-agent-panel={agent.id} hidden aria-label={agent.label + ' setup'}>
       <Terminal title={"~/your-project — " + agent.label + " setup"} command={"selvedge setup --agent " + agent.id} copy kind="setup" />
