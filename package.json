@@ -5,7 +5,7 @@
   "private": true,
   "description": "Marketing site and docs for Selvedge — selvedge.sh",
   "scripts": {
-    "test": "node --test scripts/measurement.test.mjs",
+    "test": "node --test scripts/*.test.mjs",
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
@@ -14,7 +14,8 @@
     "preview": "npm run build && wrangler dev",
     "astro": "astro",
     "deploy": "npm run build && wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "check:site": "node scripts/check-site.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "12",

@@ -1,0 +1,39 @@
+/* A short reading path inside the existing documentation shell. */
+.quickstart-page .sl-container { max-width: 40rem; margin-inline: auto; }
+.quickstart-page main > .content-panel:first-child { padding-top: 32px; padding-bottom: 0; }
+.quickstart-page main > .content-panel + .content-panel { padding-top: 0; border-top: 0; }
+.quickstart-page h1 { margin: 0; font-size: 34px; line-height: 1.2; font-weight: 500; letter-spacing: -.8px; }
+.quickstart-page .sl-markdown-content { font-size: 16px; line-height: 1.75; }
+.quickstart-page .sl-markdown-content .sl-heading-wrapper { margin-top: 48px; margin-bottom: 14px; }
+.quickstart-page .sl-markdown-content > .sl-heading-wrapper:first-child { margin-top: 28px; }
+.quickstart-page .sl-markdown-content h2 { font-size: 25px; line-height: 1.3; font-weight: 500; letter-spacing: -.4px; }
+.quickstart-page .sl-markdown-content .sl-heading-wrapper + p { margin-top: 0; }
+.quickstart-page .sl-markdown-content > p { margin-top: 16px; }
+.quickstart-page .sl-markdown-content details { border: 0; padding: 0; margin-top: 8px; }
+.quickstart-page .sl-markdown-content details + details { margin-top: 0; }
+.quickstart-page .sl-markdown-content summary {
+  display: flex; align-items: center; min-height: 44px; gap: 4px;
+  margin: 0; padding: 8px 0; font-size: 14px; font-weight: 400;
+  line-height: 1.5; color: var(--sl-color-gray-2);
+}
+.quickstart-page .sl-markdown-content summary::before { flex-shrink: 0; }
+.quickstart-page .sl-markdown-content details[open] { padding-bottom: 16px; }
+.quickstart-page .sl-markdown-content details[open] > summary { margin-bottom: 8px; }
+.quickstart-page .sl-markdown-content details p { font-size: 14px; }
+.quickstart-page .quickstart-release, .quickstart-page .quickstart-note { font-size: 14px; color: var(--sl-color-gray-2); }
+.quickstart-page .agent-setup { margin: 20px 0; }
+.quickstart-page .setup-prerequisite { margin: 8px 0 0; padding: 0; font-size: 13px; }
+.quickstart-page [data-agent-panel] { margin-top: 16px; }
+.quickstart-page [data-agent-panel] > p { font-size: 15px; margin-block: 16px 8px; }
+.quickstart-page .setup-doc-link { font-size: 14px; display: inline-flex; min-height: 36px; align-items: center; }
+.quickstart-page .setup-note { margin-block: 0; }
+.quickstart-page .terminal-window { box-shadow: none; margin-block: 16px; }
+.quickstart-page .terminal-window .terminal-command { font-size: 14px; line-height: 1.75; }
+.quickstart-page .terminal-copy { min-height: 44px; }
+.quickstart-page .setup-feedback { min-height: 44px; font-size: 14px; }
+@media (max-width: 600px) {
+  .quickstart-page main > .content-panel:first-child { padding-top: 28px; }
+  .quickstart-page h1 { font-size: 30px; }
+  .quickstart-page .sl-markdown-content h2 { font-size: 23px; }
+  .quickstart-page .sl-markdown-content .sl-heading-wrapper { margin-top: 40px; }
+}

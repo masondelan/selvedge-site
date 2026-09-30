@@ -1,0 +1,89 @@
+---
+import ThemeSelect from '@astrojs/starlight/components/ThemeSelect.astro';
+import { setupPrompt } from '../data/homepage.mjs';
+import '../styles/homepage.css';
+---
+<div class="home">
+  <header class="home-header">
+    <a class="home-wordmark" href="/" aria-label="Selvedge home">selvedge</a>
+  </header>
+
+  <main class="home-main" data-pagefind-body>
+    <h1 id="_top">Keep the why with your code.</h1>
+    <p class="home-intro">Selvedge helps your AI coding agent remember the decisions behind your code.</p>
+    <p class="home-intro">Save what you chose, what you ruled out, and why. Look it up in your next session.</p>
+    <p class="home-note">Free and open source. Stored locally.</p>
+
+    <div class="home-action">
+      <div class="home-action-row">
+        <button class="home-copy" type="button" data-home-copy hidden>Copy setup prompt <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="home-hint">Paste it into your coding agent to get started.</p>
+      <p class="home-status" role="status" data-home-status></p>
+      <details class="home-prompt" id="setup-prompt">
+        <summary>Setup prompt</summary>
+        <label for="setup-prompt-text">Read or copy this into your coding agent.</label>
+        <textarea id="setup-prompt-text" readonly rows="9" spellcheck="false">{setupPrompt}</textarea>
+      </details>
+    </div>
+
+    <p class="home-compatibility"><a href="/reference/compatibility/">Claude Code, Codex, Cursor, and more.</a></p>
+  </main>
+
+  <footer class="home-footer">
+    <nav aria-label="Explore Selvedge">
+      <span id="what-gets-remembered"><span id="a-small-tool-that-stays-with-your-project"><a href="/start/what-is-selvedge/">Documentation</a></span></span>
+      <span id="choose-your-agent"><span id="try-the-demo"><span id="find-selvedge"><a href="/start/quickstart/#install" data-home-start>CLI quickstart</a></span></span></span>
+      <a href="https://github.com/masondelan/selvedge">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+    <div class="home-colophon">
+      <span>© {new Date().getFullYear()} Selvedge</span>
+      <a href="/privacy/">Privacy</a>
+      <ThemeSelect />
+    </div>
+  </footer>
+</div>
+
+<script>
+  import { track, getCampaign, getCreative } from '../lib/launch-events';
+  import { legacyDestination } from '../data/homepage.mjs';
+
+  function followLegacyLink() {
+    const destination = legacyDestination(location.hash, location.search);
+    if (destination) location.replace(destination);
+    return Boolean(destination);
+  }
+  window.addEventListener('hashchange', followLegacyLink);
+
+  const copy = document.querySelector<HTMLButtonElement>('[data-home-copy]')!;
+  const prompt = document.querySelector<HTMLDetailsElement>('#setup-prompt')!;
+  const field = document.querySelector<HTMLTextAreaElement>('#setup-prompt-text')!;
+  const status = document.querySelector<HTMLElement>('[data-home-status]')!;
+  copy.hidden = false;
+  prompt.classList.add('home-prompt-enhanced');
+
+  copy.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(field.value);
+      status.textContent = 'Copied. Paste it into your coding agent.';
+      void track('prompt_copy', 'none');
+    } catch {
+      prompt.open = true;
+      field.focus();
+      field.select();
+      status.textContent = 'Select and copy the prompt below.';
+    }
+  });
+
+  // Carry recognized campaign labels to setup without cookies or persistent storage.
+  const start = document.querySelector<HTMLAnchorElement>('[data-home-start]')!;
+  if (getCampaign() !== 'organic') {
+    const url = new URL(start.href);
+    url.searchParams.set('utm_campaign', getCampaign());
+    if (getCreative() !== 'none') url.searchParams.set('utm_content', getCreative());
+    start.href = url.href;
+    void track('landing_view', 'none');
+  }
+  start.addEventListener('click', () => { void track('start_click', 'none'); });
+  followLegacyLink();
+</script>
