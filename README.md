@@ -1,7 +1,7 @@
 # selvedge-site
 
 Marketing site and documentation for [Selvedge](https://github.com/masondelan/selvedge),
-deployed to [selvedge.sh](https://selvedge.sh) via Cloudflare Pages.
+deployed to [selvedge.sh](https://selvedge.sh) via Cloudflare Workers.
 
 Built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.build).
 
@@ -19,7 +19,8 @@ npm run build      # writes to dist/
 npm run preview    # preview the production build locally
 ```
 
-Cloudflare Pages picks up the `dist/` directory automatically.
+The build writes static pages and the API worker to `dist/`. Run `npm run check:site`
+and `npm test` before deploying with `npm run deploy`.
 
 ## Project structure
 
@@ -88,14 +89,18 @@ Homepage interface:
 
 ## Deploy
 
-Cloudflare Pages, connected to this repo's `main` branch:
+The `wrangler.jsonc` configuration deploys the `selvedge-site` Worker with static
+assets from `dist/` and the existing `LAUNCH_METRICS` database binding.
 
-- **Build command:** `npm run build`
-- **Build output:** `dist`
-- **Node version:** 22 (set in Cloudflare Pages env)
+```bash
+npm run build
+npm run check:site
+npm test
+npx wrangler deploy
+```
 
-Custom domain: `selvedge.sh`. DNS is on Cloudflare (nameservers swapped from Porkbun
-to Cloudflare's pair). HTTPS via Cloudflare's universal SSL.
+Custom domain: [selvedge.sh](https://selvedge.sh/). Preserve the configured database
+binding and verify the live pages and redirects after deployment.
 
 ## Editing content
 

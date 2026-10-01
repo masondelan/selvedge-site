@@ -173,5 +173,5 @@ By design:
 
 ## Next
 
-[**CLI reference →**](/reference/cli/) — every flag, every subcommand.
-[**FAQ →**](/project/faq/) — common gotchas and "why does it work this way".
+- [**CLI reference →**](/reference/cli/) — every flag, every subcommand.
+- [**FAQ →**](/project/faq/) — common gotchas and "why does it work this way".

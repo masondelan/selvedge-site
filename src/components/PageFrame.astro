@@ -1,11 +1,12 @@
 ---
 import Default from '@astrojs/starlight/components/PageFrame.astro';
 import Homepage from './Homepage.astro';
+import '../styles/docs.css';
 import '../styles/quickstart.css';
 const isHome = Astro.url.pathname === '/';
 ---
 {isHome ? <Homepage /> : (
-  <div class:list={{ "quickstart-page": Astro.url.pathname === "/start/quickstart/" }}>
+  <div class:list={["docs-page", { "quickstart-page": Astro.url.pathname === "/start/quickstart/" }]}>
   <Default>
     <slot name="header" slot="header" />
     <slot name="sidebar" slot="sidebar" />

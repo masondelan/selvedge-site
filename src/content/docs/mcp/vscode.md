@@ -65,4 +65,4 @@ MCP tools only surface in the Chat view's **Agent** mode. The config runs the se
 
 - [Quickstart →](/start/quickstart/) — the three-command setup and what `selvedge setup` automates.
 - [MCP tools →](/reference/mcp-tools/) — the eight tools VS Code will be able to call.
-- [VS Code MCP docs →](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) — the upstream reference.
+- [VS Code MCP docs →](https://code.visualstudio.com/docs/agent-customization/mcp-servers) — the upstream reference.

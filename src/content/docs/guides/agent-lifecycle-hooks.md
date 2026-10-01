@@ -117,7 +117,7 @@ Checked September 24, 2026:
 - [Codex hooks](https://learn.chatgpt.com/docs/hooks)
 - [Cursor hooks](https://cursor.com/docs/hooks)
 - [Gemini CLI hook reference](https://geminicli.com/docs/hooks/reference/)
-- [VS Code hook selection](https://code.visualstudio.com/docs/copilot/customization/hooks)
+- [VS Code hook selection](https://code.visualstudio.com/docs/agent-customization/hooks)
   and [Local hook reference](https://code.visualstudio.com/docs/agents/reference/hooks-reference)
 - [VS Code Local file-tool schemas](https://github.com/microsoft/vscode-copilot-chat/tree/main/src/extension/tools/node)
 - [Cascade hooks](https://docs.devin.ai/desktop/cascade/hooks)

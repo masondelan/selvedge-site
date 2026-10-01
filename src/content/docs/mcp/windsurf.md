@@ -66,4 +66,4 @@ After editing `mcp_config.json`, **fully quit and reopen Windsurf** — closing 
 
 - [Quickstart →](/start/quickstart/) — the three-command setup and what `selvedge setup` automates.
 - [MCP tools →](/reference/mcp-tools/) — the eight tools Windsurf will be able to call.
-- [Windsurf MCP docs →](https://docs.windsurf.com/windsurf/cascade/mcp) — the upstream reference.
+- [Windsurf MCP docs →](https://docs.devin.ai/desktop/cascade/mcp) — the upstream reference.

@@ -124,6 +124,6 @@ not a live standard it tracks. See the [Agent Trace interop page](/compare/agent
 
 ## Next
 
-[**Agent Trace interop →**](/compare/agent-trace/)
-[**git blame vs. selvedge blame →**](/compare/git-blame/)
-[**Stop your agent repeating reverted mistakes →**](/prior-attempts/)
+- [**Agent Trace interop →**](/compare/agent-trace/)
+- [**git blame vs. selvedge blame →**](/compare/git-blame/)
+- [**Stop your agent repeating reverted mistakes →**](/prior-attempts/)

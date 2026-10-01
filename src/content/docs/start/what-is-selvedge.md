@@ -86,6 +86,6 @@ before relying on it in your workflow.
 
 ## Next
 
-[**Quickstart →**](/start/quickstart/) Install, connect your agent, and verify a decision.
-[**How it works →**](/start/how-it-works/) The MCP plumbing in plain prose.
-[**Comparison table →**](/compare/agent-tools/) Selvedge vs. AgentDiff, Origin, Git AI, BlamePrompt.
+- [**Quickstart →**](/start/quickstart/) Install, connect your agent, and verify a decision.
+- [**How it works →**](/start/how-it-works/) The MCP plumbing in plain prose.
+- [**Comparison table →**](/compare/agent-tools/) Selvedge vs. AgentDiff, Origin, Git AI, BlamePrompt.

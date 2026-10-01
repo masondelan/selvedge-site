@@ -66,4 +66,4 @@ These configs run the server with `uvx`, which ships with [uv](https://docs.astr
 
 - [Quickstart →](/start/quickstart/) — the three-command setup and what `selvedge setup` automates.
 - [MCP tools →](/reference/mcp-tools/) — the eight tools Cursor will be able to call.
-- [Cursor MCP docs →](https://cursor.com/docs/context/mcp) — the upstream reference.
+- [Cursor MCP docs →](https://cursor.com/docs/mcp) — the upstream reference.

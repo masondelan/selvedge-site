@@ -77,7 +77,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       "Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools. Or run `selvedge watch` in a terminal and make a change — the event prints within a second.",
     gotcha:
       "These configs run the server with `uvx`, which ships with [uv](https://docs.astral.sh/uv/) — so the one prerequisite is `uv` on the PATH Cursor launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install instead? `pip install selvedge` and set `command` to `selvedge-server`.",
-    docsUrl: "https://cursor.com/docs/context/mcp",
+    docsUrl: "https://cursor.com/docs/mcp",
   },
   {
     slug: "vscode",
@@ -104,7 +104,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       "Open the **Chat** view, switch to **Agent** mode, and open the tools picker — `selvedge` should be listed with its 8 tools. Or run **MCP: List Servers** from the Command Palette and confirm `selvedge` shows as *Running*.",
     gotcha:
       "MCP tools only surface in the Chat view's **Agent** mode. The config runs the server with `uvx` (which ships with [uv](https://docs.astral.sh/uv/)), so make sure `uv` is on the PATH VS Code launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install? `pip install selvedge` and set `command` to `selvedge-server`.",
-    docsUrl: "https://code.visualstudio.com/docs/copilot/chat/mcp-servers",
+    docsUrl: "https://code.visualstudio.com/docs/agent-customization/mcp-servers",
   },
   {
     slug: "claude-code",
@@ -167,7 +167,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       "Open Cline's **MCP Servers** panel — `selvedge` should appear with a green dot and its 8 tools listed. Then ask Cline to make a structural change and confirm it calls `log_change`.",
     gotcha:
       "Cline runs the command in your VS Code environment. If the server won't start, make sure `uv` is installed there (the config calls `uvx`, which ships with uv). Prefer a global install? `pip install selvedge` and set `command` to `selvedge-server`.",
-    docsUrl: "https://docs.cline.bot/mcp/configuring-mcp-servers",
+    docsUrl: "https://docs.cline.bot/mcp/mcp-overview",
   },
   {
     slug: "windsurf",
@@ -193,7 +193,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       "Back in the Cascade **MCPs** panel, refresh the server list — `selvedge` should connect and expose its 8 tools.",
     gotcha:
       "After editing `mcp_config.json`, **fully quit and reopen Windsurf** — closing the window alone doesn't reload MCP servers. The config calls `uvx`, so make sure `uv` is installed (or `pip install selvedge` and use `command: selvedge-server`).",
-    docsUrl: "https://docs.windsurf.com/windsurf/cascade/mcp",
+    docsUrl: "https://docs.devin.ai/desktop/cascade/mcp",
   },
   {
     slug: "continue",

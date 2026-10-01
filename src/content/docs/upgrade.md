@@ -67,7 +67,7 @@ pipx upgrade selvedge
 Smithery serves Selvedge as an MCPB bundle. The agent host (Claude Desktop, etc.)
 re-pulls the bundle on its own update cadence, so for most users this is automatic
 — but you can force it from the
-[Smithery listing](https://smithery.ai/server/masondelan/selvedge) by reinstalling
+[Smithery listing](https://smithery.ai/servers/masondelan/selvedge) by reinstalling
 the server in your client. The published bundle version matches the PyPI version.
 
 ### Glama
@@ -186,7 +186,7 @@ distribution story evolves.
 
 ## Next
 
-[**What's new →**](/project/changelog/) — every release, in order.
-[**Configuration →**](/reference/configuration/) — every environment variable,
+- [**What's new →**](/project/changelog/) — every release, in order.
+- [**Configuration →**](/reference/configuration/) — every environment variable,
 including the suppression flags above.
-[**FAQ →**](/project/faq/) — common gotchas and "why does it work this way".
+- [**FAQ →**](/project/faq/) — common gotchas and "why does it work this way".
