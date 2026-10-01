@@ -1,7 +1,7 @@
 ---
 title: Selvedge compatibility and capabilities
 description: Check Selvedge agent setup, MCP and CLI support, native lifecycle hooks, local storage, and the limits of recorded decision memory.
-lastUpdated: 2026-09-24
+lastUpdated: 2026-10-01
 ---
 import AgentCompatibility from '../../../components/AgentCompatibility.astro';
 import { product } from '../../../data/product.mjs';
@@ -19,6 +19,12 @@ All six setup targets can use the same eight MCP tools. The CLI also supports re
 All six targets have native hook adapters as of 0.3.15. Codex, Cursor, VS Code Copilot **Local** and Gemini CLI support startup context, a watched-edit gate, and advisory compaction notifications. Windsurf/Cascade provides edit and command checks. A notification does not inject model context or save a decision automatically.
 
 Read the [capabilities, activation and validation limits](/guides/agent-lifecycle-hooks/). The new adapters have contract and subprocess coverage; Codex's edit denial and retry were also observed in CLI 0.154.0-alpha.6.2. The other four new clients have not yet been tested end to end. Copilot CLI/cloud/Agent Host are not covered by the Local adapter. Other MCP clients can be configured manually through the [MCP reference](/reference/mcp-tools/).
+
+As of 0.3.16, `selvedge doctor --agent CLIENT` checks the selected client's project
+hook configuration and reports next steps. Activation still requires client review.
+`selvedge ledger` adds a read-only attributed history view; the optional
+[PR review Action](https://github.com/masondelan/selvedge/blob/v0.3.16/docs/review-context.md)
+surfaces publication-approved base history. Actor labels are self-reported.
 
 ## When Selvedge is useful
 

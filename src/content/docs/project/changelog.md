@@ -7,6 +7,34 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent releases for
 at-a-glance browsing.
 
+## v0.3.16 — 2026-10-01
+
+**Bring recorded decisions into code review.** `selvedge ledger` shows actor and
+session attribution, explicit revisions and snapshot chain verification. Actor
+labels are self-reported; multiple agents touching a file do not automatically
+mean disagreement.
+
+The optional [GitHub review Action](https://github.com/masondelan/selvedge/blob/v0.3.16/docs/review-context.md)
+shows reasons and rejected alternatives for touched files from a tracked database
+already approved for publication. It reads trusted base history and never
+executes PR-head code. It is opt-in; remote authenticated agent access remains
+separate work.
+
+`selvedge doctor --agent CLIENT` now checks project hook configuration for all six
+setup targets and gives next steps. Configuration checks do not prove client
+activation. The source-package hygiene test also includes the already-shipped
+agent hook guide.
+
+The [matched injection pilot](https://github.com/masondelan/selvedge/tree/v0.3.16/bench/decision_memory/results/2026-10-01)
+completed 24 synthetic trials. Still-valid rejected choices recurred in 4/6
+eligible no-memory trials and 0/6 with injected records; both conditions passed
+stale and unrelated controls. Two synthetic tasks do not establish general
+coding performance or superiority over maintained files. The earlier four-arm
+tie remains disclosed.
+
+No new runtime dependencies, migrations, MCP tools or default telemetry.
+See the [release notes](https://github.com/masondelan/selvedge/releases/tag/v0.3.16).
+
 ## v0.3.15 — 2026-09-25
 
 **Native lifecycle adapters for all six setup targets.** Setup now offers hooks
