@@ -15,7 +15,7 @@ selvedge setup                          Interactive first-run wizard
 selvedge prompt [--install FILE]        Print canonical agent-instructions block
 selvedge watch                          Live-tail new events
 selvedge status                         Recent activity summary
-selvedge doctor [--json]                Health check
+selvedge doctor [--agent CLIENT] [--json]                Health check
 selvedge verify [--strict] [--json]     Correctness checks against the store
 selvedge diff ENTITY [--limit N]        History for an entity / prefix
 selvedge blame ENTITY                   Most recent change + context
@@ -109,7 +109,7 @@ Recent activity summary. Surfaces:
 - MCP wiring detection — distinguishes "installed but agent hasn't reloaded" from
   "not installed anywhere" with config-path-aware diagnostics
 
-### `selvedge doctor [--json]`
+### `selvedge doctor [--agent CLIENT] [--json]`
 
 Single-command health check. Each row is `PASS` / `WARN` / `FAIL` / `INFO`:
 
@@ -122,6 +122,24 @@ Single-command health check. Each row is `PASS` / `WARN` / `FAIL` / `INFO`:
 - Whether `SELVEDGE_LOG_LEVEL` is set to a recognized value
 
 Exits 1 if any `FAIL` row is present so doctor can be wired into CI.
+
+Add `--agent claude-code|codex|cursor|copilot|gemini|windsurf` to inspect that
+client's project hook configuration, executable availability and bypass setting.
+Missing, malformed or customized entries include next steps. Configuration
+presence does not verify that the client has activated its hooks.
+
+### `selvedge ledger [--entity PATH] [--limit N] [--json]`
+
+Read a consistent snapshot of recorded decisions with actor/session attribution,
+explicit revision links, counts and chain verification. Repeat `--entity` for
+multiple paths; omit it for the whole store. The default limit is 100 events
+(maximum 1,000); counts cover all matching events. The command does not create or
+migrate a database. Actor labels are self-reported.
+
+See the [shared ledger and PR review guide](https://github.com/masondelan/selvedge/blob/v0.3.16/docs/review-context.md)
+for same-host sharing and the optional GitHub Action. Authenticated remote access
+is not included.
+
 
 ### `selvedge verify [--strict] [--json]`
 
