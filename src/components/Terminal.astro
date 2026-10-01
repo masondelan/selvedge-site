@@ -5,7 +5,7 @@ const { title = '', command = '', copy = false, kind = 'install' } = Astro.props
 <!-- Use the same renderer and theme as fenced blocks throughout the docs. -->
 <div class="terminal-window not-content" data-copy-command={copy ? command : undefined} data-copy-kind={kind}>
   {command ? (
-    <Code code={command} lang={kind === 'prompt' ? 'text' : 'bash'} frame={kind === 'prompt' ? 'none' : 'terminal'} title={title === 'terminal' ? undefined : title} wrap />
+    <Code code={command} lang={kind === 'prompt' ? 'text' : 'bash'} frame={kind === 'prompt' ? 'none' : 'terminal'} title={title && title !== 'terminal' ? title : undefined} wrap />
   ) : <slot />}
   {copy && <p class="terminal-copy-status sr-only" role="status" data-copy-status></p>}
 </div>

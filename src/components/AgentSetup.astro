@@ -67,6 +67,7 @@ import { agents } from '../data/product.mjs';
         if (!response.ok) throw new Error('Receipt unavailable');
         const { token } = await response.json();
         const command = measuredCommand(button.dataset.prepareInstall!, token);
+        // These selectors match the shared renderer's DOM; verify both copy paths when upgrading it.
         details.querySelector<HTMLElement>('[data-measured-command] .ec-line .code')!.textContent = command;
         details.querySelector<HTMLButtonElement>('[data-measured-command] .copy button')!.dataset.code = command.replaceAll('\n', '\u007f');
         details.querySelector<HTMLButtonElement>('[data-copy]')!.dataset.copy = command;
