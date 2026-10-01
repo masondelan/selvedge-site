@@ -44,7 +44,7 @@ function clientSteps(c) {
   return [
     {
       name: "Install Selvedge",
-      text: "Run pip install selvedge to put the selvedge-server MCP command and the selvedge CLI on your PATH.",
+      text: "Install uv, then run uv tool install --upgrade selvedge to put the selvedge-server MCP command and the selvedge CLI on your PATH.",
     },
     { name: `Add the MCP server to ${c.name}`, text: plain(add) },
     {
@@ -60,7 +60,7 @@ function clientPage(c) {
   const fm = [
     "---",
     BANNER,
-    `title: Add Selvedge to ${c.name}`,
+    `title: ${c.name} MCP setup`,
     `description: ${y(c.description)}`,
     "structuredData:",
     "  type: howto",
@@ -73,10 +73,10 @@ function clientPage(c) {
   body.push("", c.blurb, "");
   body.push("## Before you start", "");
   body.push(
-    "`pip install selvedge` gives you the `selvedge` CLI (`selvedge setup`, `selvedge blame`, and the `selvedge prompt` helper below):",
+    "Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then install the Selvedge CLI and MCP server:",
     "",
     "```bash",
-    "pip install selvedge",
+    "uv tool install --upgrade selvedge",
     "```",
     "",
     "The MCP config below launches the server with [`uvx`](https://docs.astral.sh/uv/) instead of a bare `selvedge-server`, so the package can be fetched on demand — the editor still needs to find [`uv`](https://docs.astral.sh/uv/getting-started/installation/) installed. Prefer the global binary? Swap `uvx --from selvedge selvedge-server` for `selvedge-server`.",
@@ -126,7 +126,8 @@ function clientPage(c) {
   body.push(
     "## Next",
     "",
-    `- [Quickstart →](/start/quickstart/) — the three-command setup and what \`selvedge setup\` automates.`,
+    `- [Quickstart →](/start/quickstart/) — installation, agent selection, and a first-session check.`,
+    `- [Verify a saved decision →](/guides/verify-first-decision/) — test retrieval in a fresh session.`,
     `- [MCP tools →](/reference/mcp-tools/) — the eight tools ${c.name} will be able to call.`,
     `- [${c.name} MCP docs →](${c.docsUrl}) — the upstream reference.`,
     "",

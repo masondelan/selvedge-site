@@ -12,6 +12,7 @@ const graph = new Map();
 const ids = new Map();
 const internalLinks = [];
 const titles = new Set();
+const descriptions = new Set();
 const attributes = tag => Object.fromEntries([...tag.matchAll(/([\w:-]+)="([^"]*)"/g)].map(m => [m[1], m[2]]));
 for (const url of urls) {
   const path = new URL(url).pathname;
@@ -22,6 +23,9 @@ for (const url of urls) {
   assert(title && !titles.has(title), `${url}: missing/duplicate title`);
   titles.add(title);
   assert.equal(meta.filter(m => m.name === 'description' && m.content).length, 1, `${url}: description`);
+  const description = meta.find(m => m.name === 'description').content;
+  assert(!descriptions.has(description), `${url}: duplicate description`);
+  descriptions.add(description);
   assert.equal(links.filter(l => l.rel === 'canonical').length, 1, `${url}: canonical count`);
   assert.equal(links.find(l => l.rel === 'canonical').href, url, `${url}: canonical target`);
   assert(!meta.some(m => /^(robots|googlebot)$/.test(m.name) && /noindex/i.test(m.content)), `${url}: noindex`);

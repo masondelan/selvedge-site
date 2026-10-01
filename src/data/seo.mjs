@@ -58,7 +58,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     name: "Cursor",
     // Short, page-specific meta description (<= ~155 chars ideal).
     description:
-      "Add Selvedge to Cursor as an MCP server so your agent logs why it changed code and checks prior reverted attempts before editing. One config file, or let selvedge setup write it.",
+      "Set up Selvedge decision memory in Cursor. Configure the local MCP server, install project instructions, and retrieve saved reasons in a new session.",
     blurb:
       "Cursor speaks MCP natively, so wiring in Selvedge takes one config file. Once it's connected, the agent can call `log_change` as it works and `prior_attempts` before it edits.",
     oneClick: null,
@@ -83,7 +83,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     slug: "vscode",
     name: "VS Code",
     description:
-      "Add Selvedge to VS Code as an MCP server so Copilot's agent logs why it changed code and checks prior reverted attempts before editing. Just one config file.",
+      "Set up Selvedge with GitHub Copilot in VS Code. Add the local MCP server, install project instructions, and verify saved decision memory.",
     blurb:
       "VS Code supports MCP servers natively, so wiring in Selvedge takes one config file. Once it's connected, Copilot's agent mode can call `log_change` as it works and `prior_attempts` before it edits.",
     oneClick: null,
@@ -110,7 +110,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     slug: "claude-code",
     name: "Claude Code",
     description:
-      "Add Selvedge to Claude Code via the plugin (two commands, no prior pip install — it bootstraps the server) or a single claude mcp add, so the agent logs why each change happened and checks prior attempts first.",
+      "Give Claude Code persistent decision memory with Selvedge. Set up the plugin or local MCP server, then verify a saved decision in a new session.",
     blurb:
       "Two ways in: the **plugin** (`/plugin install`, no prior `pip install` — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.",
     oneClick: null,
@@ -148,7 +148,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     slug: "cline",
     name: "Cline",
     description:
-      "Add Selvedge to Cline (the VS Code agent) as an MCP server so it logs why it changed code and checks whether a change was tried and reverted before repeating it.",
+      "Connect Cline to Selvedge for local decision memory. Configure MCP, install project instructions, and check recorded approaches before editing.",
     blurb:
       "Cline is the open-source autonomous agent for VS Code. It reads MCP servers from its own settings file, so Selvedge drops in with a small JSON block.",
     oneClick: null,
@@ -173,7 +173,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     slug: "windsurf",
     name: "Windsurf",
     description:
-      "Add Selvedge to Windsurf (Cascade) as an MCP server so your agent records the why behind every change and can check prior reverted attempts before editing.",
+      "Set up Selvedge decision memory in Windsurf Cascade. Add the local MCP server, install project instructions, and verify the connection.",
     blurb:
       "Windsurf's Cascade agent loads MCP servers from a single JSON config. Add Selvedge there and Cascade gains the `log_change` / `prior_attempts` tools.",
     oneClick: null,
@@ -199,7 +199,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     slug: "continue",
     name: "Continue",
     description:
-      "Add Selvedge to Continue (the open-source VS Code / JetBrains assistant) as an MCP server so it logs why code changed and checks prior attempts before editing.",
+      "Connect Continue to Selvedge with YAML MCP configuration. Save coding decisions locally and retrieve recorded reasons in later sessions.",
     blurb:
       "Continue configures MCP servers in YAML. Add a `selvedge` entry under `mcpServers` and the assistant can call Selvedge's tools in agent mode.",
     oneClick: null,

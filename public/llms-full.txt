@@ -10,8 +10,10 @@ Keep the same database available across sessions, use consistent entity paths, a
 
 ## Install and setup
 
+With uv installed (https://docs.astral.sh/uv/getting-started/installation/):
+
 ```bash
-pip install selvedge
+uv tool install --upgrade selvedge
 cd your-project
 selvedge setup
 ```

@@ -11,6 +11,8 @@ If you are looking for a **codebase-memory-mcp alternative**, Selvedge fits the 
 
 We maintain Selvedge. This is a documentation-based comparison, reviewed September 24, 2026, with [versioned sources below](#sources-and-scope). It is not a benchmark of the other tools.
 
+For a hands-on Selvedge evaluation, start with [Claude Code setup](/mcp/claude-code/), then [verify a real decision in a fresh session](/guides/verify-first-decision/).
+
 ## The four jobs
 
 | Job | The question it answers | Starting points |
@@ -59,8 +61,10 @@ This tests your configuration and workflow. It does not establish that the agent
 
 Selvedge is a local MCP server and CLI for recorded code decisions. `log_change` saves the stated reason; `prior_attempts` retrieves recorded attempts and outcomes by entity. An explicit `reject` or `revert` can report `confidence: "exact"`, which describes the recorded evidence, not whether the decision is correct.
 
+With [uv installed](https://docs.astral.sh/uv/getting-started/installation/):
+
 ```bash
-pip install selvedge
+uv tool install --upgrade selvedge
 selvedge setup --agent claude-code
 ```
 
