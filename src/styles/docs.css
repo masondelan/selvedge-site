@@ -1,5 +1,5 @@
 /* The same calm reading rhythm as the quickstart, throughout the docs. */
-.docs-page .sl-container { max-width: 44rem; margin-inline: auto; }
+.docs-page main .sl-container { max-width: 44rem; margin-inline: auto; }
 .docs-page main > .content-panel:first-child { padding-top: 2rem; padding-bottom: 0; }
 .docs-page main > .content-panel + .content-panel { padding-top: 1.25rem; border-top: 0; }
 .docs-page h1 {
