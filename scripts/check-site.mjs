@@ -23,7 +23,7 @@ for (const url of urls) {
   assert(title && !titles.has(title), `${url}: missing/duplicate title`);
   titles.add(title);
   assert.equal(meta.filter(m => m.name === 'description' && m.content).length, 1, `${url}: description`);
-  const description = meta.find(m => m.name === 'description').content;
+  const description = meta.find(m => m.name === 'description' && m.content).content;
   assert(!descriptions.has(description), `${url}: duplicate description`);
   descriptions.add(description);
   assert.equal(links.filter(l => l.rel === 'canonical').length, 1, `${url}: canonical count`);

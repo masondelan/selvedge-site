@@ -15,7 +15,7 @@ structuredData:
       text: "Run /mcp inside Claude Code (or claude mcp list in a terminal). selvedge should show as connected with its 8 tools."
 ---
 
-Two ways in: the **plugin** (`/plugin install`, no prior `pip install` — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.
+Two ways in: the **plugin** (`/plugin install`, no separate Selvedge install — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.
 
 ## Before you start
 
@@ -52,14 +52,14 @@ That writes the equivalent MCP config to `~/.claude.json` (local/user scope) or 
 
 Prefer not to touch config files? `selvedge setup` detects Claude Code and writes this for you (with a `.bak` first).
 
-### Install as a Claude Code plugin (no prior pip install)
+### Install as a Claude Code plugin (no separate Selvedge install)
 
 ```text
 /plugin marketplace add masondelan/selvedge
 /plugin install selvedge@selvedge
 ```
 
-Two commands — the plugin bootstraps the server via `uvx`/`pipx`, so no prior `pip install` is needed. One install brings the MCP server, a skill that tells the agent when to use it, the PreToolUse enforcement hook, and the `/selvedge:status`, `blame`, `history`, and `prior-attempts` slash commands. Prefer a pinned install? `pip install selvedge` and the launcher uses it instead of uvx.
+Two commands — the plugin bootstraps the server via `uvx`/`pipx`, so no separate Selvedge install is needed. One install brings the MCP server, a skill that tells the agent when to use it, the PreToolUse enforcement hook, and the `/selvedge:status`, `blame`, `history`, and `prior-attempts` slash commands. Prefer a pinned install? `pip install selvedge` and the launcher uses it instead of uvx.
 
 ## Tell your agent when to call it
 

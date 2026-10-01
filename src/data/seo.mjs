@@ -112,7 +112,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     description:
       "Give Claude Code persistent decision memory with Selvedge. Set up the plugin or local MCP server, then verify a saved decision in a new session.",
     blurb:
-      "Two ways in: the **plugin** (`/plugin install`, no prior `pip install` — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.",
+      "Two ways in: the **plugin** (`/plugin install`, no separate Selvedge install — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.",
     oneClick: null,
     command: {
       intro: "The fastest path — register the stdio server with one command:",
@@ -121,11 +121,11 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       note: "Add `--scope user` to make it available across all your projects, or `--scope project` to write a shared `.mcp.json` you can commit so the whole team gets it. Local scope (the default) keeps it to you in the current project.",
     },
     altInstall: {
-      title: "Install as a Claude Code plugin (no prior pip install)",
+      title: "Install as a Claude Code plugin (no separate Selvedge install)",
       lang: "text",
       snippet: `/plugin marketplace add masondelan/selvedge
 /plugin install selvedge@selvedge`,
-      note: "Two commands — the plugin bootstraps the server via `uvx`/`pipx`, so no prior `pip install` is needed. One install brings the MCP server, a skill that tells the agent when to use it, the PreToolUse enforcement hook, and the `/selvedge:status`, `blame`, `history`, and `prior-attempts` slash commands. Prefer a pinned install? `pip install selvedge` and the launcher uses it instead of uvx.",
+      note: "Two commands — the plugin bootstraps the server via `uvx`/`pipx`, so no separate Selvedge install is needed. One install brings the MCP server, a skill that tells the agent when to use it, the PreToolUse enforcement hook, and the `/selvedge:status`, `blame`, `history`, and `prior-attempts` slash commands. Prefer a pinned install? `pip install selvedge` and the launcher uses it instead of uvx.",
     },
     configPath: "`~/.claude.json` (local/user scope) or `.mcp.json` at the project root (project scope)",
     configLang: "json",
