@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { legacyDestinations } from '../src/data/homepage.mjs';
 
 const site = 'https://selvedge.sh';
@@ -10,7 +10,9 @@ const urls = (await Promise.all(indexes.map(async url => locs(await read(new URL
 assert(urls.length >= 50, 'Existing documentation pages must remain in the sitemap');
 const graph = new Map();
 const ids = new Map();
+const internalLinks = [];
 const titles = new Set();
+const descriptions = new Set();
 const attributes = tag => Object.fromEntries([...tag.matchAll(/([\w:-]+)="([^"]*)"/g)].map(m => [m[1], m[2]]));
 for (const url of urls) {
   const path = new URL(url).pathname;
@@ -21,6 +23,9 @@ for (const url of urls) {
   assert(title && !titles.has(title), `${url}: missing/duplicate title`);
   titles.add(title);
   assert.equal(meta.filter(m => m.name === 'description' && m.content).length, 1, `${url}: description`);
+  const description = meta.find(m => m.name === 'description' && m.content).content;
+  assert(!descriptions.has(description), `${url}: duplicate description`);
+  descriptions.add(description);
   assert.equal(links.filter(l => l.rel === 'canonical').length, 1, `${url}: canonical count`);
   assert.equal(links.find(l => l.rel === 'canonical').href, url, `${url}: canonical target`);
   assert(!meta.some(m => /^(robots|googlebot)$/.test(m.name) && /noindex/i.test(m.content)), `${url}: noindex`);
@@ -35,8 +40,20 @@ for (const url of urls) {
   assert(json.length, `${url}: structured data missing`);
   json.forEach(m => JSON.parse(m[1]));
   const anchors = [...html.matchAll(/<a\b[^>]*href="([^"]*)"[^>]*>/g)].map(m => new URL(m[1].replaceAll('&amp;', '&'), url));
+  internalLinks.push(...anchors.filter(a => a.origin === site).map(target => ({ source: url, target })));
   graph.set(url, new Set(anchors.filter(a => a.origin === site).map(a => site + a.pathname)));
   ids.set(url, new Set([...html.matchAll(/\bid="([^"]*)"/g)].map(m => m[1])));
+}
+// Check each destination and fragment, not just reachability from the homepage.
+for (const { source, target } of internalLinks) {
+  const path = target.pathname.endsWith('/') ? target.pathname : target.pathname + '/';
+  const pageIds = ids.get(site + path);
+  if (pageIds) {
+    if (target.hash) assert(pageIds.has(decodeURIComponent(target.hash.slice(1))), `${source}: missing anchor ${target.href}`);
+  } else {
+    const asset = await stat(new URL('../dist/' + target.pathname.slice(1), import.meta.url)).catch(() => null);
+    assert(asset?.isFile(), `${source}: missing destination ${target.href}`);
+  }
 }
 const visited = new Set();
 const pending = [site + '/'];
@@ -54,4 +71,4 @@ for (const [hash, target] of Object.entries(legacyDestinations)) {
   if (url.hash) assert(ids.get(site + url.pathname).has(url.hash.slice(1)), `Missing fragment: ${target}`);
 }
 assert((await read('robots.txt')).includes('Sitemap: ' + site + '/sitemap-index.xml'));
-console.log(`PASS: ${urls.length} sitemap pages, unique titles, descriptions, canonical/social metadata, JSON-LD, homepage reachability, and legacy destinations.`);
+console.log(`PASS: ${urls.length} sitemap pages, ${internalLinks.length} internal links and fragments, unique titles, descriptions, canonical/social metadata, JSON-LD, homepage reachability, and legacy destinations.`);

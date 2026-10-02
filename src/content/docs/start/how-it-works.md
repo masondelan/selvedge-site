@@ -132,6 +132,6 @@ the same data with exactly the same semantics.
 
 ## Next
 
-[**CLI reference →**](/reference/cli/)
-[**MCP tool reference →**](/reference/mcp-tools/)
-[**Configuration →**](/reference/configuration/)
+- [**CLI reference →**](/reference/cli/)
+- [**MCP tool reference →**](/reference/mcp-tools/)
+- [**Configuration →**](/reference/configuration/)

@@ -20,9 +20,15 @@ The workaround you kept or the approach you rejected may only be explained in an
 older conversation. Selvedge gives those decisions a place in the project, so
 you and your agents can retrieve them when the same question comes up again.
 
+## Find the right workflow
+
+- [Carry decision memory between sessions](/agent-memory/) when a new agent needs the reason behind an earlier choice.
+- [Stop repeating rejected approaches](/prior-attempts/) with a project rule and a worked example.
+- [Compare codebase memory MCP servers](/compare/codebase-memory-mcp-servers/) when choosing between code navigation, session context, and decision history.
+
 ## What Selvedge captures
 
-Each event records:
+An event associates a change with an entity and timestamp. You or your agent can also record:
 
 - **What** changed — entity path, change type, diff
 - **When** — UTC timestamp
@@ -32,8 +38,7 @@ Each event records:
 
 ## What "entity" means here
 
-Most attribution tools work at the line level. Selvedge attributes *things you actually
-search for*:
+Selvedge associates history with a named part of your project:
 
 ```text
 users.email           DB column (table.column)
@@ -48,8 +53,9 @@ env/STRIPE_SECRET_KEY Environment variable
 The first question after `git blame` is usually *"what's the history of this column?"*,
 not *"what's the history of lines 40–48 of users.py?"* — so Selvedge meets you there.
 
-Prefix queries work everywhere. Searching `users` returns `users`, `users.email`,
-`users.created_at`, and any other entity under the `users.` namespace.
+Use `blame` for an exact entity. Prefix-capable queries such as `diff` and filtered
+`history` can retrieve a broader area, including a table and its columns.
+The [MCP tool reference](/reference/mcp-tools/) lists each query’s matching rules.
 
 ## What "changeset" means here
 
@@ -68,8 +74,8 @@ Selvedge is **not**:
   LangSmith and Helicone.
 - A code-host AI assistant — GitHub Copilot's PR summaries answer a different question.
 
-It's the layer that records *why* — the thing those tools can point at but don't
-capture themselves.
+Use it alongside those tools when you need queryable reasons and outcomes tied to
+specific parts of your project.
 
 ## How that's different from "ask an LLM about the diff"
 
@@ -86,6 +92,6 @@ before relying on it in your workflow.
 
 ## Next
 
-[**Quickstart →**](/start/quickstart/) Install, connect your agent, and verify a decision.
-[**How it works →**](/start/how-it-works/) The MCP plumbing in plain prose.
-[**Comparison table →**](/compare/agent-tools/) Selvedge vs. AgentDiff, Origin, Git AI, BlamePrompt.
+- [**Quickstart →**](/start/quickstart/) Install, connect your agent, and verify a decision.
+- [**How it works →**](/start/how-it-works/) The MCP plumbing in plain prose.
+- [**Comparison table →**](/compare/agent-tools/) Selvedge vs. AgentDiff, Origin, Git AI, BlamePrompt.

@@ -60,14 +60,22 @@ Selvedge adds structured, queryable events for individual entities and explicit 
 
 ## Set up and verify a later-session lookup
 
+With [uv installed](https://docs.astral.sh/uv/getting-started/installation/):
+
 ```bash
-pip install selvedge
+uv tool install --upgrade selvedge
 selvedge setup
 ```
 
-Follow the [quickstart](/start/quickstart/) or your [editor's setup guide](/mcp/claude-code/). Record a real decision, start a new session in the same project, and query the same entity. Confirm that the reason and outcome are present before relying on the workflow.
+Choose the setup guide for [Claude Code](/mcp/claude-code/), [Codex](/mcp/codex/), [Cursor](/mcp/cursor/), or [another supported agent](/start/quickstart/#choose-your-agent). Record a real decision, start a new session in the same project, and query the same entity. Confirm that the reason and outcome are present before relying on the workflow.
 
 Selvedge stores records in a SQLite file under `.selvedge/`. Its MCP client can include retrieved records in the model's context, so that client's data handling also applies. Keep private records in a private destination, and preserve or back up the database for as long as you need the history.
+
+## Compare memory approaches
+
+Use the [codebase memory MCP comparison](/compare/codebase-memory-mcp-servers/) to distinguish decision history from code navigation and general memory. If you already use a memory server, check whether it can preserve and retrieve the reasons you need before adding another.
+
+Then [verify your first decision across two sessions](/guides/verify-first-decision/) or [share the same decision history between agents](/guides/share-memory-between-agents/).
 
 ## FAQ
 

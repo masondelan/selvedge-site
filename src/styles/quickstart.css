@@ -27,9 +27,6 @@
 .quickstart-page [data-agent-panel] > p { font-size: 15px; margin-block: 16px 8px; }
 .quickstart-page .setup-doc-link { font-size: 14px; display: inline-flex; min-height: 36px; align-items: center; }
 .quickstart-page .setup-note { margin-block: 0; }
-.quickstart-page .terminal-window { box-shadow: none; margin-block: 16px; }
-.quickstart-page .terminal-window .terminal-command { font-size: 14px; line-height: 1.75; }
-.quickstart-page .terminal-copy { min-height: 44px; }
 .quickstart-page .setup-feedback { min-height: 44px; font-size: 14px; }
 @media (max-width: 600px) {
   .quickstart-page main > .content-panel:first-child { padding-top: 28px; }

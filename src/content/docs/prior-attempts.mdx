@@ -89,8 +89,10 @@ These approaches can complement each other. The [instructions and ADR comparison
 
 Selvedge is a local MCP server and CLI backed by SQLite. It stores the reasons and outcomes that agents or people explicitly record. The default lookup uses deterministic rules, with no LLM required; an optional fuzzy lookup ranks candidates with a local embeddings model.
 
+With [uv installed](https://docs.astral.sh/uv/getting-started/installation/):
+
 ```bash
-pip install selvedge
+uv tool install --upgrade selvedge
 selvedge setup
 ```
 
@@ -99,6 +101,10 @@ Follow the [quickstart](/start/quickstart/) for your client. Verify that one sav
 ## If you're trying to name this category
 
 This workflow is part of [agent memory across sessions](/agent-memory/) and a [decision audit trail](/audit-trail/). It preserves the stated reason for a choice, including an approach that was considered and rejected without changing code.
+
+## Verify it in your project
+
+Follow the [first-decision verification guide](/guides/verify-first-decision/) to test recording, retrieval in a fresh session, and use of the record separately. For supported edit checks and startup context, see [agent lifecycle hooks](/guides/agent-lifecycle-hooks/).
 
 ## FAQ
 

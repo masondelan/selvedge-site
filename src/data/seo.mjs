@@ -58,7 +58,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     name: "Cursor",
     // Short, page-specific meta description (<= ~155 chars ideal).
     description:
-      "Add Selvedge to Cursor as an MCP server so your agent logs why it changed code and checks prior reverted attempts before editing. One config file, or let selvedge setup write it.",
+      "Set up Selvedge decision memory in Cursor. Configure the local MCP server, install project instructions, and retrieve saved reasons in a new session.",
     blurb:
       "Cursor speaks MCP natively, so wiring in Selvedge takes one config file. Once it's connected, the agent can call `log_change` as it works and `prior_attempts` before it edits.",
     oneClick: null,
@@ -77,13 +77,13 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       "Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools. Or run `selvedge watch` in a terminal and make a change — the event prints within a second.",
     gotcha:
       "These configs run the server with `uvx`, which ships with [uv](https://docs.astral.sh/uv/) — so the one prerequisite is `uv` on the PATH Cursor launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install instead? `pip install selvedge` and set `command` to `selvedge-server`.",
-    docsUrl: "https://cursor.com/docs/context/mcp",
+    docsUrl: "https://cursor.com/docs/mcp",
   },
   {
     slug: "vscode",
     name: "VS Code",
     description:
-      "Add Selvedge to VS Code as an MCP server so Copilot's agent logs why it changed code and checks prior reverted attempts before editing. Just one config file.",
+      "Set up Selvedge with GitHub Copilot in VS Code. Add the local MCP server, install project instructions, and verify saved decision memory.",
     blurb:
       "VS Code supports MCP servers natively, so wiring in Selvedge takes one config file. Once it's connected, Copilot's agent mode can call `log_change` as it works and `prior_attempts` before it edits.",
     oneClick: null,
@@ -104,15 +104,15 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       "Open the **Chat** view, switch to **Agent** mode, and open the tools picker — `selvedge` should be listed with its 8 tools. Or run **MCP: List Servers** from the Command Palette and confirm `selvedge` shows as *Running*.",
     gotcha:
       "MCP tools only surface in the Chat view's **Agent** mode. The config runs the server with `uvx` (which ships with [uv](https://docs.astral.sh/uv/)), so make sure `uv` is on the PATH VS Code launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install? `pip install selvedge` and set `command` to `selvedge-server`.",
-    docsUrl: "https://code.visualstudio.com/docs/copilot/chat/mcp-servers",
+    docsUrl: "https://code.visualstudio.com/docs/agent-customization/mcp-servers",
   },
   {
     slug: "claude-code",
     name: "Claude Code",
     description:
-      "Add Selvedge to Claude Code via the plugin (two commands, no prior pip install — it bootstraps the server) or a single claude mcp add, so the agent logs why each change happened and checks prior attempts first.",
+      "Give Claude Code persistent decision memory with Selvedge. Set up the plugin or local MCP server, then verify a saved decision in a new session.",
     blurb:
-      "Two ways in: the **plugin** (`/plugin install`, no prior `pip install` — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.",
+      "Two ways in: the **plugin** (`/plugin install`, no separate Selvedge install — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.",
     oneClick: null,
     command: {
       intro: "The fastest path — register the stdio server with one command:",
@@ -121,11 +121,11 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       note: "Add `--scope user` to make it available across all your projects, or `--scope project` to write a shared `.mcp.json` you can commit so the whole team gets it. Local scope (the default) keeps it to you in the current project.",
     },
     altInstall: {
-      title: "Install as a Claude Code plugin (no prior pip install)",
+      title: "Install as a Claude Code plugin (no separate Selvedge install)",
       lang: "text",
       snippet: `/plugin marketplace add masondelan/selvedge
 /plugin install selvedge@selvedge`,
-      note: "Two commands — the plugin bootstraps the server via `uvx`/`pipx`, so no prior `pip install` is needed. One install brings the MCP server, a skill that tells the agent when to use it, the PreToolUse enforcement hook, and the `/selvedge:status`, `blame`, `history`, and `prior-attempts` slash commands. Prefer a pinned install? `pip install selvedge` and the launcher uses it instead of uvx.",
+      note: "Two commands — the plugin bootstraps the server via `uvx`/`pipx`, so no separate Selvedge install is needed. One install brings the MCP server, a skill that tells the agent when to use it, the PreToolUse enforcement hook, and the `/selvedge:status`, `blame`, `history`, and `prior-attempts` slash commands. Prefer a pinned install? `pip install selvedge` and the launcher uses it instead of uvx.",
     },
     configPath: "`~/.claude.json` (local/user scope) or `.mcp.json` at the project root (project scope)",
     configLang: "json",
@@ -148,7 +148,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
     slug: "cline",
     name: "Cline",
     description:
-      "Add Selvedge to Cline (the VS Code agent) as an MCP server so it logs why it changed code and checks whether a change was tried and reverted before repeating it.",
+      "Connect Cline to Selvedge for local decision memory. Configure MCP, install project instructions, and check recorded approaches before editing.",
     blurb:
       "Cline is the open-source autonomous agent for VS Code. It reads MCP servers from its own settings file, so Selvedge drops in with a small JSON block.",
     oneClick: null,
@@ -167,13 +167,13 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       "Open Cline's **MCP Servers** panel — `selvedge` should appear with a green dot and its 8 tools listed. Then ask Cline to make a structural change and confirm it calls `log_change`.",
     gotcha:
       "Cline runs the command in your VS Code environment. If the server won't start, make sure `uv` is installed there (the config calls `uvx`, which ships with uv). Prefer a global install? `pip install selvedge` and set `command` to `selvedge-server`.",
-    docsUrl: "https://docs.cline.bot/mcp/configuring-mcp-servers",
+    docsUrl: "https://docs.cline.bot/mcp/mcp-overview",
   },
   {
     slug: "windsurf",
     name: "Windsurf",
     description:
-      "Add Selvedge to Windsurf (Cascade) as an MCP server so your agent records the why behind every change and can check prior reverted attempts before editing.",
+      "Set up Selvedge decision memory in Windsurf Cascade. Add the local MCP server, install project instructions, and verify the connection.",
     blurb:
       "Windsurf's Cascade agent loads MCP servers from a single JSON config. Add Selvedge there and Cascade gains the `log_change` / `prior_attempts` tools.",
     oneClick: null,
@@ -193,13 +193,13 @@ args = ["--from", "selvedge", "selvedge-server"]`,
       "Back in the Cascade **MCPs** panel, refresh the server list — `selvedge` should connect and expose its 8 tools.",
     gotcha:
       "After editing `mcp_config.json`, **fully quit and reopen Windsurf** — closing the window alone doesn't reload MCP servers. The config calls `uvx`, so make sure `uv` is installed (or `pip install selvedge` and use `command: selvedge-server`).",
-    docsUrl: "https://docs.windsurf.com/windsurf/cascade/mcp",
+    docsUrl: "https://docs.devin.ai/desktop/cascade/mcp",
   },
   {
     slug: "continue",
     name: "Continue",
     description:
-      "Add Selvedge to Continue (the open-source VS Code / JetBrains assistant) as an MCP server so it logs why code changed and checks prior attempts before editing.",
+      "Connect Continue to Selvedge with YAML MCP configuration. Save coding decisions locally and retrieve recorded reasons in later sessions.",
     blurb:
       "Continue configures MCP servers in YAML. Add a `selvedge` entry under `mcpServers` and the assistant can call Selvedge's tools in agent mode.",
     oneClick: null,
