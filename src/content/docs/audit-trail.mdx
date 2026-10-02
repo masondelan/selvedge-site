@@ -1,6 +1,6 @@
 ---
-title: "How do I capture an AI coding agent\u2019s reasoning or decision audit trail in a codebase?"
-description: "Use Selvedge to record stated reasoning, decisions, and outcomes as queryable local events. Understand the limits of capture, coverage, and integrity checks."
+title: "AI coding decision audit trail"
+description: "Record AI coding decisions, rejected approaches, and linked commits with Selvedge. Query local history and bring recorded reasons into code review."
 structuredData:
   type: techarticle
   faq:
@@ -41,6 +41,18 @@ These queries return recorded events within their filters. They cannot account f
 
 `selvedge stats` reports observed tool calls and reasoning-quality signals, including per-agent logging counts. Its logging ratio is a share of recorded tool calls, not a measurement of every edit in the repository. Deterministic checks can flag empty or generic explanations; they cannot establish that the explanation is true.
 
+## Bring recorded decisions into code review
+
+Read a snapshot of the decision ledger for a file:
+
+```bash
+selvedge ledger --entity src/cache.py --json
+```
+
+The [ledger command](/reference/cli/#selvedge-ledger---entity-path---limit-n---json) includes actor and session labels, explicit revisions, and chain verification. Actor labels are self-reported. Inspect the recorded reason and any linked commit alongside the actual patch and tests.
+
+For GitHub pull requests, the optional [decision-context Action](https://github.com/masondelan/selvedge/blob/v0.3.16/docs/review-context.md) summarizes recorded reasons and rejected approaches for touched files. It reads trusted base history from a tracked database already approved for publication. Decisions first logged in the pull request appear only after merging; missing history remains unknown. Follow the guide's dry-run setup before enabling comments.
+
 ## Store and share the trail deliberately
 
 The database lives under `.selvedge/` by default. Selvedge does not require a hosted backend for local history queries. If an MCP client sends tool results to a model provider, the retrieved records enter that client's context and data handling. Publishing the database in a repository also publishes its contents.
@@ -69,8 +81,10 @@ This helps detect casual or accidental modification. It is not proof against a m
 
 These records can complement each other. The [instruction files and ADR comparison](/compare/instructions-and-adrs/) helps choose an appropriate workflow.
 
+With [uv installed](https://docs.astral.sh/uv/getting-started/installation/):
+
 ```bash
-pip install selvedge
+uv tool install --upgrade selvedge
 selvedge setup
 ```
 
