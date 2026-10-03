@@ -1,18 +1,22 @@
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import { legacyDestinations } from '../src/data/homepage.mjs';
+import { contentPages } from './site-content.mjs';
 
 const site = 'https://selvedge.sh';
 const read = path => readFile(new URL('../dist/' + path, import.meta.url), 'utf8');
 const locs = xml => [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1]);
 const indexes = locs(await read('sitemap-index.xml'));
 const urls = (await Promise.all(indexes.map(async url => locs(await read(new URL(url).pathname.slice(1)))))).flat();
-assert(urls.length >= 50, 'Existing documentation pages must remain in the sitemap');
+const expectedUrls = (await contentPages()).map(page => site + page.path);
+assert.deepEqual([...urls].sort(), expectedUrls.sort(), 'Every documentation route must appear exactly once in the sitemap');
 const graph = new Map();
 const ids = new Map();
 const internalLinks = [];
 const titles = new Set();
 const descriptions = new Set();
+const terms = new Map();
+let termSet;
 const attributes = tag => Object.fromEntries([...tag.matchAll(/([\w:-]+)="([^"]*)"/g)].map(m => [m[1], m[2]]));
 for (const url of urls) {
   const path = new URL(url).pathname;
@@ -38,11 +42,22 @@ for (const url of urls) {
   }
   const json = [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)];
   assert(json.length, `${url}: structured data missing`);
-  json.forEach(m => JSON.parse(m[1]));
+  json.forEach(m => {
+    const data = JSON.parse(m[1]);
+    if (data['@type'] === 'DefinedTerm') {
+      const { '@context': context, ...term } = data;
+      terms.set(term['@id'], term);
+    }
+    if (data['@type'] === 'DefinedTermSet') termSet = data;
+  });
   const anchors = [...html.matchAll(/<a\b[^>]*href="([^"]*)"[^>]*>/g)].map(m => new URL(m[1].replaceAll('&amp;', '&'), url));
   internalLinks.push(...anchors.filter(a => a.origin === site).map(target => ({ source: url, target })));
   graph.set(url, new Set(anchors.filter(a => a.origin === site).map(a => site + a.pathname)));
   ids.set(url, new Set([...html.matchAll(/\bid="([^"]*)"/g)].map(m => m[1])));
+}
+assert(termSet?.hasDefinedTerm?.length === terms.size && terms.size > 0, 'Concept index must describe every concept page');
+for (const term of termSet.hasDefinedTerm) {
+  assert.deepEqual(term, terms.get(term['@id']), `Concept definition drift: ${term['@id']}`);
 }
 // Check each destination and fragment, not just reachability from the homepage.
 for (const { source, target } of internalLinks) {

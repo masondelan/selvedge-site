@@ -19,7 +19,7 @@ head:
             "@id": "https://selvedge.sh/concepts/ai-code-provenance/#term",
             "url": "https://selvedge.sh/concepts/ai-code-provenance/",
             "name": "AI code provenance",
-            "description": "AI code provenance is the recorded origin and history of an AI-assisted code change: the affected code, the people or tools involved, and the evidence linking them to the change. Decision provenance adds the stated reason, alternatives, constraints, and outcome. A provenance record supports inspection; it does not by itself prove that the code or its explanation is correct.",
+            "description": "Code provenance is the recorded origin and history of a code change: what changed, who or what contributed, and which evidence links them to the change. AI code provenance applies this to code produced with an AI coding agent. Decision provenance adds the stated reason, alternatives, constraints, and outcome. A record supports inspection; it does not by itself prove that the code or its explanation is correct.",
             "inDefinedTermSet": {
               "@id": "https://selvedge.sh/concepts/#terms"
             }
