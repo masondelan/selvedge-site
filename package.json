@@ -8,14 +8,15 @@
     "test": "node --test scripts/*.test.mjs",
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/sync-llms.mjs --check && astro build && node scripts/update-sitemap.mjs",
+    "sync:llms": "node scripts/sync-llms.mjs",
     "gen:og": "node scripts/gen-og.mjs",
     "gen:icons": "node scripts/gen-favicons.mjs",
     "preview": "npm run build && wrangler dev",
     "astro": "astro",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "check:site": "node scripts/check-site.mjs"
+    "check:site": "node scripts/sync-llms.mjs --check && node scripts/check-site.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "12",

@@ -128,6 +128,17 @@ After homepage or navigation changes, run `npm test`, `npm run build`, and
 structured data, and crawlable reachability from the homepage. Keep Search Console
 indexing/performance outcomes separate from these technical checks.
 
+The sitemap includes the same last-updated dates displayed on documentation pages;
+rebuilding does not assign today's date to every URL. The undated homepage stays
+undated. Maintain explicit `lastUpdated` values when changing a page that sets one.
+
+After editing concepts, run `npm run sync:llms` to refresh their summaries and full
+text in `public/llms.txt` and `public/llms-full.txt`. The curated introduction remains
+hand-maintained. Builds and `check:site` fail if generated concepts are stale.
+These files help clients that read them; they do not guarantee search rankings or
+assistant recommendations. The checker also compares all documentation routes
+with the sitemap and detects inconsistent concept definitions in structured data.
+
 ### After a Selvedge release
 
 Use the source repository's `CHANGELOG.md` and published release as the source of
