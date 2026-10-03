@@ -55,7 +55,8 @@ for (const url of urls) {
   graph.set(url, new Set(anchors.filter(a => a.origin === site).map(a => site + a.pathname)));
   ids.set(url, new Set([...html.matchAll(/\bid="([^"]*)"/g)].map(m => m[1])));
 }
-assert(termSet?.hasDefinedTerm?.length === terms.size && terms.size > 0, 'Concept index must describe every concept page');
+assert(termSet, 'Concept index must include a DefinedTermSet');
+assert(termSet.hasDefinedTerm?.length === terms.size && terms.size > 0, 'Concept index must describe every concept page');
 for (const term of termSet.hasDefinedTerm) {
   assert.deepEqual(term, terms.get(term['@id']), `Concept definition drift: ${term['@id']}`);
 }

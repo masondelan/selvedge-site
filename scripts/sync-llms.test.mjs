@@ -36,6 +36,15 @@ test('concept changes update both exports without changing curated text; check n
   assert.equal(afterIndex.split('\n## Reference\n')[1], beforeIndex.split('\n## Reference\n')[1]);
   assert.equal(afterFull.split('<!-- BEGIN GENERATED CONCEPTS:')[0], beforeFull.split('<!-- BEGIN GENERATED CONCEPTS:')[0]);
   assert.deepEqual(await syncLlms({ root, check: true }), []);
+
+  await writeFile(join(root, 'src/content/docs/concepts/new-concept.md'),
+    '---\ntitle: "New concept"\ndescription: "A newly documented concept."\n---\n\nNew visible definition.\n');
+  assert.deepEqual(await syncLlms({ root, check: true }), ['public/llms.txt', 'public/llms-full.txt']);
+  await syncLlms({ root });
+  assert.match(await read('public/llms.txt'), /\[New concept\]\(https:\/\/selvedge\.sh\/concepts\/new-concept\/\)/);
+  assert.match(await read('public/llms-full.txt'), /New visible definition\./);
+  await writeFile(join(root, 'src/content/docs/concepts/component.mdx'), 'import Component from "./example";');
+  await assert.rejects(syncLlms({ root }), /add rendered MDX support/);
 });
 
 test('standalone Markdown resolves internal links while preserving code and external URLs', () => {

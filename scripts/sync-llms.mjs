@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Keep the existing concepts exports synchronized with their canonical pages.
 // The rest of each llms file is curated and is preserved byte for byte.
-import { readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,7 +9,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://selvedge.sh';
 const BEGIN = '<!-- BEGIN GENERATED CONCEPTS: scripts/sync-llms.mjs -->';
 const END = '<!-- END GENERATED CONCEPTS -->';
-const CONCEPTS = [
+const CONCEPT_ORDER = [
   'index', 'ai-code-provenance', 'agent-memory', 'prior-attempt',
   'entity-level-tracking', 'changeset', 'stale-decision', 'captured-live-vs-inferred',
 ];
@@ -80,7 +80,14 @@ function replaceFullConcepts(source, pages) {
 }
 
 export async function syncLlms({ root = ROOT, check = false } = {}) {
-  const pages = await Promise.all(CONCEPTS.map(async slug => conceptPage(
+  const files = await readdir(join(root, 'src/content/docs/concepts'));
+  if (files.some(file => file.endsWith('.mdx'))) {
+    throw new Error('Concept exports support Markdown only; add rendered MDX support before using .mdx concepts.');
+  }
+  const slugs = files.filter(file => file.endsWith('.md')).map(file => file.slice(0, -3));
+  const order = slug => CONCEPT_ORDER.includes(slug) ? CONCEPT_ORDER.indexOf(slug) : CONCEPT_ORDER.length;
+  slugs.sort((a, b) => order(a) - order(b) || a.localeCompare(b));
+  const pages = await Promise.all(slugs.map(async slug => conceptPage(
     await readFile(join(root, `src/content/docs/concepts/${slug}.md`), 'utf8'), slug,
   )));
   const outputs = [
