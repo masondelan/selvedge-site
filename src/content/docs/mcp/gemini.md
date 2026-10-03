@@ -15,6 +15,8 @@ structuredData:
       text: "Restart Gemini CLI in the project. Run /mcp and confirm Selvedge's tools are available. Ask the agent to save a real rejected approach using log_change and retrieve it using prior_attempts in a new session."
 ---
 
+Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.
+
 Run `selvedge setup --agent gemini` (0.3.12+) to write the MCP entry and GEMINI.md instructions. Selvedge stores the reasoning Gemini CLI records and makes it available to subsequent sessions.
 
 ## Before you start

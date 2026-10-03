@@ -1,17 +1,17 @@
 ---
-title: Codebase memory MCP servers for Claude Code, compared
+title: Codebase memory MCP servers, compared
 description: Compare codebase-memory-mcp, OpenLore, Memory Keeper, mem0 and Selvedge by code navigation, session recall, decision history and local setup.
 structuredData:
   type: techarticle
 ---
 
-For **codebase memory in Claude Code**, start with the information you need to retrieve. A code index answers where a function is used; a session store helps resume a task; a decision record explains why an approach was chosen or rejected. Some servers cover more than one of these jobs.
+For **codebase memory in a compatible agent**, start with the information you need to retrieve. A code index answers where a function is used; a session store helps resume a task; a decision record explains why an approach was chosen or rejected. Some servers cover more than one of these jobs.
 
 If you are looking for a **codebase-memory-mcp alternative**, Selvedge fits the decision-history part of the problem. It does not replace a code structure index or call graph. You can also keep codebase-memory-mcp and add Selvedge for recorded reasons and outcomes.
 
 We maintain Selvedge. This is a documentation-based comparison, reviewed September 24, 2026, with [versioned sources below](#sources-and-scope). It is not a benchmark of the other tools.
 
-For a hands-on Selvedge evaluation, start with [Claude Code setup](/mcp/claude-code/), then [verify a real decision in a fresh session](/guides/verify-first-decision/).
+For a hands-on Selvedge evaluation, start with the [agent-neutral quickstart](/start/quickstart/), then [verify a real decision in a fresh session](/guides/verify-first-decision/).
 
 ## The four jobs
 
@@ -41,7 +41,7 @@ A local memory server does not make the whole coding workflow offline: the conne
 ## Which one to pick
 
 - **Need code navigation or impact analysis?** Start with codebase-memory-mcp or OpenLore. Check language coverage and the queries you need on your own repository.
-- **Need to resume an interrupted Claude Code session?** Start with Memory Keeper's save/checkpoint/restore workflow.
+- **Need to resume an interrupted agent session?** Start with Memory Keeper's save/checkpoint/restore workflow.
 - **Need facts or preferences across an application?** Compare mem0's extraction and retrieval approach with a simpler explicitly maintained knowledge graph.
 - **Need the reason an approach was rejected?** Try Selvedge's entity-keyed `prior_attempts`, or maintain an indexed set of [instructions and ADRs](/compare/instructions-and-adrs/). Other servers also store decisions; compare their retrieval and revision behavior before choosing.
 
@@ -65,14 +65,14 @@ With [uv installed](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```bash
 uv tool install --upgrade selvedge
-selvedge setup --agent claude-code
+selvedge setup
 ```
 
-Follow the [Claude Code setup guide](/mcp/claude-code/), then the [record-and-retrieve walkthrough](/guides/revisit-a-rejected-approach/). For other clients, use the [quickstart](/start/quickstart/). Claude Code hooks do not automatically apply to other agents.
+Follow the [quickstart for your agent](/start/quickstart/), then the [record-and-retrieve walkthrough](/guides/revisit-a-rejected-approach/). Native lifecycle hooks are optional; their capabilities and activation vary by client.
 
 ## FAQ
 
-**What is the best MCP server for codebase memory with Claude Code?**
+**What is the best MCP server for codebase memory?**
 
 There is no single choice for every workflow. Match code navigation, session context, general memory or decision history to the task, then verify a later-session retrieval in your repository.
 

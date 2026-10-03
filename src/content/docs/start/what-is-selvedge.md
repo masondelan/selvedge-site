@@ -3,15 +3,16 @@ title: What is Selvedge?
 description: Local decision history for AI coding agents. Save the reasons, rejected approaches and conditions for revisiting them across sessions.
 ---
 
-Selvedge is a local MCP server and CLI that gives AI coding agents persistent
+Selvedge is a local MCP server and CLI that gives compatible AI agents persistent
 decision memory. It saves project decisions and rejected approaches in a SQLite
 file under `.selvedge/`, next to your code. Your next coding session can look up what
 you decided, why, and what would make it worth revisiting.
 
-Connect it to Claude Code, Codex, Copilot, Cursor, Gemini CLI or Windsurf through
-MCP, the protocol agents use to call tools. Selvedge records what you or your
-agent explicitly save; the installed instructions help the agent know when to
-use it. [Choose your agent and set it up](/start/quickstart/#choose-your-agent).
+Selvedge is for anyone using a compatible agent, regardless of brand or model
+provider. Connect through local stdio MCP, the protocol agents use to call
+tools, or through the CLI if your agent has shell access. Selvedge records what
+you or your agent explicitly save; project instructions help the agent know
+when to use it. [Connect your agent](/start/quickstart/#connect-your-agent).
 
 ## The problem it solves
 

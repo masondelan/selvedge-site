@@ -35,7 +35,7 @@ Review dates and supported expiry or stale-condition checks can surface a record
 
 Connecting Selvedge's MCP server does not log every decision. An agent must call its tools, or someone must record the event through the CLI. Installed instructions guide that behavior without guaranteeing complete coverage.
 
-Later sessions must access the same database and query the relevant history. Claude Code's SessionStart hook can deliver a digest, and its PreToolUse gate can require a lookup before selected schema or migration edits. Those hooks do not automatically apply to other clients, which use their supported MCP tools and instructions.
+Later sessions must access the same database and query the relevant history. Optional native lifecycle adapters can deliver startup context or require a lookup before watched edits where the client supports those events. [Capabilities and activation vary by client](/guides/agent-lifecycle-hooks/); MCP and CLI access do not require a hook adapter.
 
 An empty query result does not establish that an approach was never tried. A retrieved explanation also needs a relevance check and a check against present conditions. Neither files nor Selvedge guarantee that an agent follows the evidence or makes a correct change.
 

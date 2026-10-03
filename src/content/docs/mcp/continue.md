@@ -15,6 +15,8 @@ structuredData:
       text: "Switch Continue to Agent mode and open its tools list — the selvedge tools should be available. (MCP tools are only callable in agent/chat-with-tools mode.)"
 ---
 
+Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.
+
 Continue configures MCP servers in YAML. Add a `selvedge` entry under `mcpServers` and the assistant can call Selvedge's tools in agent mode.
 
 ## Before you start

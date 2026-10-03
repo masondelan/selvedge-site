@@ -1,12 +1,12 @@
 ---
 title: Selvedge project instructions for AI coding agents
-description: Install or copy project instructions for Claude Code, Codex and Cursor. Ask your agent to check prior decisions before edits, then verify a later-session lookup.
+description: Install or copy project instructions for any compatible agent. Ask your agent to check prior decisions before edits, then verify a later-session lookup.
 ---
 
 Use project instructions to ask your coding agent to **check prior decisions before editing**, **record why it changed code**, and **save rejected approaches with their reasons**. Selvedge supplies the tools and this instruction block; a connected server or a saved instruction does not guarantee that the agent follows it.
 
 :::tip[Install for your editor]
-Run `selvedge setup --agent claude-code`, `selvedge setup --agent codex`, or `selvedge setup --agent cursor` from your project after [installing Selvedge](/start/quickstart/). Setup offers the relevant MCP configuration and instruction files. For an existing configuration, `selvedge prompt` prints the current block, and `selvedge prompt --install CLAUDE.md` updates it in a chosen file. See the [client guides](/start/quickstart/) for other agents.
+Run `selvedge setup` from your project after [installing Selvedge](/start/quickstart/) to detect supported setup presets. For any compatible agent, `selvedge prompt` prints the block to add to its project instructions. `selvedge prompt --install PATH` updates the actual instruction file your client reads. See [manual MCP or CLI setup](/start/quickstart/#other-compatible-agents) when your agent has no preset.
 :::
 
 ## Copy this
@@ -29,8 +29,7 @@ You have access to Selvedge (MCP server: `selvedge`) for change tracking.
   empty, very short, or generic values like "user request" or "done".
   Good example: "User asked to add 2FA — needs phone number to send
   SMS verification codes."
-- Set `agent` to the tool you're using, e.g. "claude-code", "cursor",
-  or "codex".
+- Set `agent` to a stable name for the agent or tool making the change.
 - Set `session_id` if you have access to the current session/conversation ID.
 - Set `git_commit` to the commit hash once you know it.
 - For multi-entity changes (e.g. adding a whole feature), set a shared
@@ -40,9 +39,9 @@ You have access to Selvedge (MCP server: `selvedge`) for change tracking.
 - Before editing an entity, call `selvedge.prior_attempts` on it — if the
   same change was tried before and reverted, you'll see the prior
   reasoning and why it was rejected, and can change your plan instead of
-  repeating a rejected approach. (If the Selvedge PreToolUse hook is
-  installed, this check is enforced: schema/migration edits are blocked
-  until prior_attempts has been consulted this session.)
+  repeating a rejected approach. Where a compatible edit-gate hook is
+  installed and active, watched edits require this lookup. Hook capabilities
+  and activation depend on the client.
 - A reverted decision is not a permanent ban. If the constraint that
   killed it no longer holds, re-open it explicitly with
   `change_type="supersede"` (never re-apply a reverted change without
@@ -99,6 +98,6 @@ These are the requested behaviors to verify:
 2. End that session and start a new one in the same project, using the same database.
 3. Ask it to retrieve the decision before editing that entity. Inspect both the tool result and the agent's plan.
 
-If the record is missing, check the database location, entity path and whether logging actually happened. If it is found but ignored, review the agent's instructions and tool use. Applicable Claude Code hooks can gate selected edits; the instruction block alone does not enforce them in every client. The [agent memory guide](/agent-memory/) explains persistence and retrieval, and the [concepts hub](/concepts/) defines the terms used here.
+If the record is missing, check the database location, entity path and whether logging actually happened. If it is found but ignored, review the agent's instructions and tool use. Applicable native lifecycle hooks can gate selected edits; the instruction block alone does not enforce them in every client. The [agent memory guide](/agent-memory/) explains persistence and retrieval, and the [concepts hub](/concepts/) defines the terms used here.
 
 Full docs: [selvedge.sh](https://selvedge.sh) · `pip install selvedge` · [GitHub](https://github.com/masondelan/selvedge)

@@ -15,6 +15,8 @@ structuredData:
       text: "Open Cline's MCP Servers panel — selvedge should appear with a green dot and its 8 tools listed. Then ask Cline to make a structural change and confirm it calls log_change."
 ---
 
+Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.
+
 Cline is the open-source autonomous agent for VS Code. It reads MCP servers from its own settings file, so Selvedge drops in with a small JSON block.
 
 ## Before you start

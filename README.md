@@ -8,7 +8,7 @@ Built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.
 ## Local development
 
 ```bash
-npm install
+npm ci
 npm run dev    # http://localhost:4321
 ```
 
@@ -103,6 +103,14 @@ Custom domain: [selvedge.sh](https://selvedge.sh/). Preserve the configured data
 binding and verify the live pages and redirects after deployment.
 
 ## Editing content
+
+Preserve Selvedge's core values: **easy to use, robust, and developer focused**.
+The shared [engineering standards](https://github.com/masondelan/selvedge/blob/main/docs/engineering-standards.md)
+apply to site code, docs, examples, accessibility, dependencies, reviews and
+deployments. Keep the lockfile current, use an upstream-supported Node.js LTS
+release and review relevant official guidance when dependencies or practices change.
+
+**Standing product standard: Selvedge is agent-agnostic.** It is for anyone using any compatible agent. Lead product copy with decision memory and interface requirements, not a particular agent or provider. Names belong in useful examples, commands, compatibility tables and optional integration guides. Setup presets are not an exhaustive compatibility list. Keep the general MCP/CLI connection path visible, and distinguish core compatibility from client-specific hook support. Preserve this standard in future site and documentation changes.
 
 All content is Markdown / MDX under `src/content/docs/`. Sidebar order is hardcoded in
 `astro.config.mjs` — add a new page by:

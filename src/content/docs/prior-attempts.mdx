@@ -32,7 +32,7 @@ If no record is found, say so; do not assume the approach was never tried.
 
 Use a stable [entity path](/reference/entity-paths/), such as `src/cache.py::load_profile` or `payments.amount`. A [prior attempt](/concepts/prior-attempt/) can be an implemented approach or a proposal considered and declined. Record that distinction.
 
-The [full agent prompt block](/prompt-block/) includes logging, changesets and CLI fallbacks. Instructions request this behavior; they do not guarantee compliance. Applicable installed Claude Code hooks can gate selected edits, but other clients do not inherit those hooks.
+The [full agent prompt block](/prompt-block/) includes logging, changesets and CLI fallbacks. Instructions request this behavior; they do not guarantee compliance. Optional native lifecycle hooks can gate watched edits where supported; their capabilities and activation vary by client.
 
 ## The failure, concretely
 
@@ -120,6 +120,6 @@ No. The relevant event must have been recorded, the query must find it, and the 
 
 You can explicitly record a known past decision or import supported history. Distinguish a retrospective explanation from a reason captured at the time. An import cannot recover reasoning absent from its source.
 
-**Does it work with Claude Code, Codex, Cursor and Copilot?**
+**Does it work with my agent?**
 
-Selvedge supports these clients through MCP and project instructions, and also provides a CLI. Use the client-specific setup guide. Claude Code lifecycle hooks do not automatically apply to other clients.
+Selvedge works with any agent that can use local stdio MCP tools or invoke the CLI. Use a setup preset or [connect another compatible agent](/start/quickstart/#other-compatible-agents). Native lifecycle hooks are optional and vary by client.
