@@ -257,7 +257,7 @@ const graph: Record<string, unknown> = {
           name: "What if I'm using a different AI tool?",
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Selvedge exposes standard MCP tools and a CLI. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf; see the editor-specific setup guides for configuration and instruction files. Other MCP clients can be configured manually. Without MCP, an agent or human with shell access can record and retrieve decisions through the CLI. Native lifecycle adapters exist for all six setup targets; capabilities and activation differ. Copilot hooks target VS Code Local. Windsurf provides edit and command checks without startup or compaction hooks.",
+            text: "Selvedge is for anyone using a compatible agent. Connect through local stdio MCP, or use the CLI with shell access. Setup presets are conveniences, not a compatibility limit; other compatible clients can be configured manually. See connection requirements and setup options. Native lifecycle hooks are optional and vary by client.",
           },
         },
         // The repeated-mistake answer remains visible on the FAQ page and links

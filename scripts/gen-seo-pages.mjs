@@ -70,7 +70,7 @@ function clientPage(c) {
   ].join("\n");
 
   const body = [];
-  body.push("", c.blurb, "");
+  body.push("", "Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.", "", c.blurb, "");
   body.push("## Before you start", "");
   body.push(
     "Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then install the Selvedge CLI and MCP server:",

@@ -27,9 +27,9 @@ Back up the database consistently before sharing it, and plan how collaborators 
 
 ## What if I'm using a different AI tool?
 
-Selvedge exposes standard MCP tools and a CLI. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf; see the editor-specific setup guides for configuration and instruction files. Other MCP clients can be configured manually.
+Selvedge is for anyone using a compatible agent. Connect through local stdio MCP, or use the CLI with shell access. Setup presets are conveniences, not a compatibility limit; other compatible clients can be configured manually.
 
-Without MCP, an agent or human with shell access can record and retrieve decisions through the CLI. Claude Code lifecycle hooks do not automatically apply to other clients.
+See [connection requirements and setup options](/reference/compatibility/). Native lifecycle hooks are optional and vary by client.
 
 ## How do I stop my agent repeating a mistake it already made and reverted?
 

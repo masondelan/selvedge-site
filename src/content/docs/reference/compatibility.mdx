@@ -1,7 +1,7 @@
 ---
 title: Selvedge compatibility and capabilities
 description: Check Selvedge agent setup, MCP and CLI support, native lifecycle hooks, local storage, and the limits of recorded decision memory.
-lastUpdated: 2026-10-01
+lastUpdated: 2026-10-02
 ---
 import AgentCompatibility from '../../../components/AgentCompatibility.astro';
 import { product } from '../../../data/product.mjs';
@@ -10,9 +10,24 @@ import { product } from '../../../data/product.mjs';
 
 These facts describe Selvedge **{product.version}**. The package's <a href={`https://github.com/masondelan/selvedge/tree/v${product.version}`}>released source</a> is the authority for shipped behavior. Client permissions and instruction support also affect actual use.
 
-## Agent support
+## Connection requirements
 
-All six setup targets can use the same eight MCP tools. The CLI also supports recording and retrieving decisions. Setup installs the configuration and instruction files below; paths without `~/` are relative to the project.
+Selvedge is for anyone using a compatible agent. Agent names and model providers
+do not select different storage or history behavior. Compatibility is about the
+interface available in your agent environment:
+
+- **Local stdio MCP:** the client can launch `selvedge-server` and call its tools.
+- **CLI:** the agent can run `selvedge` commands with shell access.
+
+A remote-HTTP-only MCP client cannot connect directly to the stdio server.
+Both supported interfaces use the same project database. See [manual setup for
+other compatible agents](/start/quickstart/#other-compatible-agents).
+
+## Optional setup presets
+
+These six presets automate configuration and project instructions. They are not
+a complete list of compatible agents. All use the same eight MCP tools; paths
+without `~/` are relative to the project.
 
 <AgentCompatibility />
 

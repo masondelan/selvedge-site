@@ -11,12 +11,11 @@ prose.
 1. **You install the package.** `pip install selvedge` puts two binaries on your
    `PATH`: `selvedge` (the CLI you use) and `selvedge-server` (the MCP subprocess your
    agent talks to).
-2. **`selvedge setup` wires your AI tools.** It writes
-   `{"mcpServers": {"selvedge": {"command": "selvedge-server"}}}` into each tool's
-   config (Claude Code, Cursor, Copilot). The tool launches `selvedge-server` as a
-   subprocess on first use and speaks JSON-RPC over stdio.
-3. **The agent calls Selvedge tools as it works.** When Claude Code (or whichever
-   agent) makes a change to your code, it calls `log_change` with the entity that
+2. **Connect your agent.** `selvedge setup` offers presets for supported clients.
+   Any other compatible client can register `selvedge-server` in its own MCP
+   settings. The client launches the server locally and speaks JSON-RPC over
+   stdio. Agents with shell access can use the CLI instead.
+3. **The agent calls Selvedge tools as it works.** When your agent makes a change to your code, it calls `log_change` with the entity that
    changed, the change type, the diff, and the **reasoning** — the why, written from
    the same context window that produced the change.
 4. **Selvedge writes to SQLite.** `.selvedge/selvedge.db` next to your code. WAL mode
@@ -53,9 +52,9 @@ upgrades are safe across versions and partial-failure scenarios roll back atomic
 
 A few reasons:
 
-- **Already-on-your-machine tools speak MCP.** Claude Code, Cursor, Copilot all support
-  it. Adding a single line to a config file gives you tool-call access from inside the
-  agent loop. No SDK install, no API key, no auth flow.
+- **A shared interface across agents.** Any compatible local stdio MCP client can
+  expose the same Selvedge tools to its agent. Configure the server once for that
+  client; no Selvedge API key or model-provider account is required.
 - **Zero network attack surface.** The server only listens on stdio of a subprocess your
   agent launched. No port, no keys, no inbound anything. If your laptop's offline,
   Selvedge still works.

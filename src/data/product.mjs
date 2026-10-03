@@ -5,9 +5,9 @@ export const product = {
   name: 'Selvedge',
   version: '0.3.16',
   changelogUrl: '/project/changelog/#v0316--2026-10-01',
-  category: 'Persistent decision memory for AI coding agents',
-  description: 'Selvedge records why code changed, which approaches were rejected, and when decisions deserve another look, so future sessions can retrieve that context before editing.',
-  shortDescription: 'Persistent decision memory for AI coding agents. Save stated rationale and rejected approaches locally, then retrieve them before the next edit.',
+  category: 'Persistent decision memory for AI agents',
+  description: 'Selvedge works with any compatible agent through local stdio MCP or the CLI. Save why code changed and which approaches were rejected, then retrieve that context in later sessions.',
+  shortDescription: 'Persistent decision memory for AI agents. Save stated rationale and rejected approaches locally, then retrieve them before the next edit.',
   python: '3.10+',
 };
 

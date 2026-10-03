@@ -15,6 +15,8 @@ structuredData:
       text: "Open the Chat view, switch to Agent mode, and open the tools picker — selvedge should be listed with its 8 tools. Or run MCP: List Servers from the Command Palette and confirm selvedge shows as *Running*."
 ---
 
+Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.
+
 VS Code supports MCP servers natively, so wiring in Selvedge takes one config file. Once it's connected, Copilot's agent mode can call `log_change` as it works and `prior_attempts` before it edits.
 
 ## Before you start

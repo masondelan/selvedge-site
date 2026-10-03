@@ -15,6 +15,8 @@ structuredData:
       text: "Open Cursor Settings → MCP. selvedge should be listed with its 8 tools. Or run selvedge watch in a terminal and make a change — the event prints within a second."
 ---
 
+Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.
+
 Cursor speaks MCP natively, so wiring in Selvedge takes one config file. Once it's connected, the agent can call `log_change` as it works and `prior_attempts` before it edits.
 
 ## Before you start

@@ -13,7 +13,7 @@ structuredData:
     - question: "How does this differ from an instruction file or ADR?"
       answer: "Instruction files hold standing guidance, and ADRs can preserve reviewed decisions and alternatives. Selvedge adds queryable events, entity paths, and outcome history. All of these approaches depend on recording useful information and retrieving it when relevant."
     - question: "Does the memory work across different agents?"
-      answer: "Agents that connect to the same Selvedge database can read and write the same records. Their tool use and instruction support differ; Claude Code hooks do not automatically apply to other clients."
+      answer: "Agents that connect to the same Selvedge database can read and write the same records. Their tool use and instruction support differ; Native lifecycle hooks are optional and vary by client."
 ---
 
 Give the agent a persistent decision record and a habit of checking it before editing. **Selvedge** provides a local MCP server and CLI for this: Selvedge's `log_change` records a decision with its reasoning, and Selvedge's [`prior_attempts`](/prior-attempts/) retrieves recorded attempts and outcomes for an entity.
@@ -67,7 +67,7 @@ uv tool install --upgrade selvedge
 selvedge setup
 ```
 
-Choose the setup guide for [Claude Code](/mcp/claude-code/), [Codex](/mcp/codex/), [Cursor](/mcp/cursor/), or [another supported agent](/start/quickstart/#choose-your-agent). Record a real decision, start a new session in the same project, and query the same entity. Confirm that the reason and outcome are present before relying on the workflow.
+Follow the [quickstart](/start/quickstart/) for a setup preset or [another compatible agent](/start/quickstart/#other-compatible-agents). Record a real decision, start a new session in the same project, and query the same entity. Confirm that the reason and outcome are present before relying on the workflow.
 
 Selvedge stores records in a SQLite file under `.selvedge/`. Its MCP client can include retrieved records in the model's context, so that client's data handling also applies. Keep private records in a private destination, and preserve or back up the database for as long as you need the history.
 
@@ -97,4 +97,4 @@ Instruction files hold standing guidance, and ADRs can preserve reviewed decisio
 
 **Does the memory work across different agents?**
 
-Agents that connect to the same Selvedge database can read and write the same records. Their tool use and instruction support differ; Claude Code hooks do not automatically apply to other clients.
+Agents that connect to the same Selvedge database can read and write the same records. Their tool use and instruction support differ; Native lifecycle hooks are optional and vary by client.

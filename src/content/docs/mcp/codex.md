@@ -15,6 +15,8 @@ structuredData:
       text: "Restart Codex in the trusted project. Enable the Selvedge MCP server in Settings → MCP servers if needed. Ask Codex to record a real rejected approach with log_change, then retrieve it with prior_attempts. Start a new session and query the same entity."
 ---
 
+Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.
+
 Selvedge gives Codex a local store for project decisions and rejected approaches. Run `selvedge setup --agent codex` (0.3.12+) to install project MCP configuration and instructions together.
 
 ## Before you start

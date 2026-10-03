@@ -10,7 +10,7 @@ import { product } from "../../../data/product.mjs";
 
 ## Install
 
-Run in your terminal. Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) and Python 3.10+.
+Run in your terminal. Requires [uv](https://docs.astral.sh/uv/getting-started/installation/). Use an upstream-supported Python release (3.11–3.14). The package still accepts Python 3.10 for compatibility, but [upstream security support has ended](https://devguide.python.org/versions/).
 
 <Terminal title="terminal" command={"uv tool install --upgrade selvedge\nselvedge --version"} copy kind="install" />
 
@@ -44,11 +44,27 @@ The demo saves a rejected approach and retrieves it through a fresh connection t
 
 ## Connect your agent
 
-In your project folder, run the command for your agent.
+Selvedge works with any agent that can call a local stdio MCP server or invoke
+its CLI. No particular brand or model provider is required. The presets below
+automate setup for some clients; they are not the compatibility limit.
 
 <AgentSetup />
 
 [Check compatibility and lifecycle hooks →](/reference/compatibility/)
+
+### Other compatible agents
+
+For a client with **local stdio MCP support**:
+
+1. Run `selvedge init` from your project folder.
+2. Register a server named `selvedge` with command `selvedge-server`, using your client's MCP settings format. Use the executable's absolute path if it is not on the client's PATH.
+3. Set the server's `SELVEDGE_DB` environment variable to the absolute path of your project's `.selvedge/selvedge.db` if the client starts outside the project.
+4. Run `selvedge prompt` and add its output to the instructions your agent reads. Restart the client and approve its tool permissions if needed.
+
+Clients that only accept remote HTTP endpoints cannot connect directly to this local stdio server. If your agent has **shell access**, it can instead call `selvedge log`, `selvedge prior-attempts` and the other [CLI commands](/reference/cli/). Both interfaces use the same local store.
+
+Native lifecycle hooks are optional integrations and vary by client. A custom agent can use the MCP tools or CLI without one of the bundled hook adapters.
+
 
 <span id="save-and-recall-your-first-decision"></span>
 
@@ -75,7 +91,7 @@ Only decisions explicitly saved to Selvedge can be recalled.
 4. Confirm both sessions use the [same project database](/reference/configuration/#db-path-resolution).
 5. Ask the agent explicitly to use `log_change`, then look up the saved entity with `prior_attempts`.
 
-Native lifecycle adapters are available for all six agents; capabilities and activation differ. [Activate and verify your agent’s hooks](/guides/agent-lifecycle-hooks/).
+Native lifecycle adapters are available for the six setup presets; capabilities and activation differ. [Activate and verify your agent’s hooks](/guides/agent-lifecycle-hooks/).
 
 </details>
 

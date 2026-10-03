@@ -4,12 +4,13 @@ import { agents } from '../data/product.mjs';
 ---
 <div class="agent-setup" data-agent-setup id="choose-your-agent">
   <div class="agent-picker">
-    <label for="setup-agent">Your coding agent</label>
+    <label for="setup-agent">Optional setup preset</label>
     <select id="setup-agent" data-agent-select>
-      <option value="">Choose your agent…</option>
+      <option value="">Choose a setup preset…</option>
       {agents.map(agent => <option value={agent.id}>{agent.label}</option>)}
     </select>
   </div>
+  <p>Agent not listed? <a href="#other-compatible-agents">Connect another compatible agent with MCP or the CLI.</a></p>
   <p class="setup-prerequisite">Requires Selvedge. <a href="#install">Install →</a></p>
   {agents.map((agent) => (
     <section data-agent-panel={agent.id} hidden aria-label={agent.label + ' setup'}>

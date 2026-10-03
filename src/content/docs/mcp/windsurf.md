@@ -15,6 +15,8 @@ structuredData:
       text: "Back in the Cascade MCPs panel, refresh the server list — selvedge should connect and expose its 8 tools."
 ---
 
+Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.
+
 Windsurf's Cascade agent loads MCP servers from a single JSON config. Add Selvedge there and Cascade gains the `log_change` / `prior_attempts` tools.
 
 ## Before you start

@@ -15,6 +15,8 @@ structuredData:
       text: "Run /mcp inside Claude Code (or claude mcp list in a terminal). selvedge should show as connected with its 8 tools."
 ---
 
+Selvedge works with any compatible agent. This page covers one optional client integration; see [general MCP and CLI setup](/start/quickstart/#other-compatible-agents) for other agents.
+
 Two ways in: the **plugin** (`/plugin install`, no separate Selvedge install — it bootstraps the server and ships a skill, the PreToolUse enforcement hook, and slash commands), or a single `claude mcp add` for just the MCP server. The auto-detecting `selvedge setup` wizard works too.
 
 ## Before you start

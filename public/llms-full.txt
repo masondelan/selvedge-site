@@ -1,5 +1,7 @@
 # Selvedge — full reference for AI agents
 
+Selvedge is for anyone using a compatible agent, regardless of brand or model provider. Connect through local stdio MCP or invoke the CLI with shell access. Setup presets and native lifecycle adapters are optional conveniences, not an exhaustive list of compatible agents. Remote-HTTP-only clients cannot connect directly to the stdio server.
+
 Selvedge is a local MCP server and CLI for recording code decisions, stated reasoning, and rejected approaches. Selvedge's log_change writes structured events; Selvedge's prior_attempts retrieves recorded attempts and outcomes before editing. The package is MIT licensed, uses SQLite, and requires no LLM in the core. It has runtime dependencies including the MCP SDK, Click, and Rich.
 
 ## Capture and retrieval
@@ -18,7 +20,7 @@ cd your-project
 selvedge setup
 ```
 
-Use https://selvedge.sh/start/quickstart/ and the client-specific guides. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf. Claude Code lifecycle hooks do not apply automatically to other clients. A manual MCP connection and project instructions are separate parts of setup.
+Use https://selvedge.sh/start/quickstart/ and the client-specific guides. The setup wizard supports Claude Code, Cursor, Copilot, Codex, Gemini CLI, and Windsurf. Native lifecycle hooks are optional and vary by client. A manual MCP connection and project instructions are separate parts of setup.
 
 Claude Code plugin alternative:
 
@@ -75,8 +77,7 @@ You have access to Selvedge (MCP server: `selvedge`) for change tracking.
   empty, very short, or generic values like "user request" or "done".
   Good example: "User asked to add 2FA — needs phone number to send
   SMS verification codes."
-- Set `agent` to the tool you're using, e.g. "claude-code", "cursor",
-  or "codex".
+- Set `agent` to a stable name for the agent or tool making the change.
 - Set `session_id` if you have access to the current session/conversation ID.
 - Set `git_commit` to the commit hash once you know it.
 - For multi-entity changes (e.g. adding a whole feature), set a shared
@@ -86,9 +87,9 @@ You have access to Selvedge (MCP server: `selvedge`) for change tracking.
 - Before editing an entity, call `selvedge.prior_attempts` on it — if the
   same change was tried before and reverted, you'll see the prior
   reasoning and why it was rejected, and can change your plan instead of
-  repeating a rejected approach. (If the Selvedge PreToolUse hook is
-  installed, this check is enforced: schema/migration edits are blocked
-  until prior_attempts has been consulted this session.)
+  repeating a rejected approach. Where a compatible edit-gate hook is
+  installed and active, watched edits require this lookup. Hook capabilities
+  and activation depend on the client.
 - A reverted decision is not a permanent ban. If the constraint that
   killed it no longer holds, re-open it explicitly with
   `change_type="supersede"` (never re-apply a reverted change without
