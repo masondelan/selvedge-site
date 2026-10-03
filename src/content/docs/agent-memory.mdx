@@ -13,7 +13,7 @@ structuredData:
     - question: "How does this differ from an instruction file or ADR?"
       answer: "Instruction files hold standing guidance, and ADRs can preserve reviewed decisions and alternatives. Selvedge adds queryable events, entity paths, and outcome history. All of these approaches depend on recording useful information and retrieving it when relevant."
     - question: "Does the memory work across different agents?"
-      answer: "Agents that connect to the same Selvedge database can read and write the same records. Their tool use and instruction support differ; Native lifecycle hooks are optional and vary by client."
+      answer: "Agents that connect to the same Selvedge database can read and write the same records. Their tool use and instruction support differ; native lifecycle hooks are optional and vary by client."
 ---
 
 Give the agent a persistent decision record and a habit of checking it before editing. **Selvedge** provides a local MCP server and CLI for this: Selvedge's `log_change` records a decision with its reasoning, and Selvedge's [`prior_attempts`](/prior-attempts/) retrieves recorded attempts and outcomes for an entity.
@@ -97,4 +97,4 @@ Instruction files hold standing guidance, and ADRs can preserve reviewed decisio
 
 **Does the memory work across different agents?**
 
-Agents that connect to the same Selvedge database can read and write the same records. Their tool use and instruction support differ; Native lifecycle hooks are optional and vary by client.
+Agents that connect to the same Selvedge database can read and write the same records. Their tool use and instruction support differ; native lifecycle hooks are optional and vary by client.
