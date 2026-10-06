@@ -27,6 +27,15 @@
 .home h1 { margin: 0 0 27px; font: 500 32px/1.2 var(--__sl-font); letter-spacing: -.9px; text-wrap: balance; }
 .home-intro { margin: 0 0 18px; font-size: 20px; line-height: 1.5; letter-spacing: -.2px; }
 .home-note { margin: 25px 0 0; color: var(--sl-color-gray-3); font-size: 14px; line-height: 1.6; }
+.home-launch { margin: 19px 0 0; font-size: 13px; line-height: 1.5; }
+.home-launch a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 7px 11px;
+  border: 1px solid var(--sl-color-hairline); color: var(--sl-color-gray-2);
+  text-decoration: none; transition: border-color 0.16s ease, color 0.16s ease;
+}
+.home-launch a:hover { border-color: var(--sl-color-text-accent); color: var(--sl-color-text); text-decoration: none; }
+.home-launch a span { margin-left: 4px; color: var(--sl-color-gray-3); }
+.home-launch a:focus-visible { text-decoration: none; }
 .home-action { margin-top: 37px; }
 .home-action-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; }
 .home-copy {
@@ -67,3 +76,6 @@
   .home-footer { padding-top: 65px; }
   .home-footer nav { gap: 0 20px; }
 }
+:root[data-theme="dark"] .home-launch a { color: var(--sl-color-gray-1); }
+:root[data-theme="dark"] .home-launch a span { color: var(--sl-color-gray-2); }
+@media (prefers-reduced-motion: reduce) { .home-launch a { transition: none; } }
