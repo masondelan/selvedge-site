@@ -3,9 +3,11 @@ title: Website privacy
 description: Anonymous website counts and optional install confirmations.
 ---
 
-The website records anonymous interaction events: visits from our campaign, setup and demo clicks, selected agent, copied setup prompts and commands, documentation clicks, and optional “saved and recalled a decision” confirmations.
+The website records anonymous interaction events: page views from recognized campaign or placement links, setup and demo clicks, selected agent, copied setup prompts and commands, documentation clicks, and optional “saved and recalled a decision” confirmations.
 
 Each interaction event contains only its type, the selected agent, and fixed campaign and creative labels. Daily counts use no cookies, persistent visitor IDs, advertising pixels or browser fingerprinting. They contain no project files, decisions, chat contents, email addresses or contact details. Browsers sending Do Not Track are excluded.
+
+Recognized labels in a link's `utm_campaign` and `utm_content` parameters can carry through same-origin documentation links. We do not infer a placement from referrers or record referrers. For the new placement labels, each tagged page load can count once; visiting another page or reloading can count again. Older launch campaigns count homepage views only. These are page-view events, not unique visitors or person-level conversion rates. A tagged link can be shared elsewhere, so its label is not proof of where a visitor found it. Untagged visits cannot be assigned to an earlier directory submission.
 
 Daily aggregate counts are stored in Cloudflare D1. We do not store request headers or IP addresses in these counts. Cloudflare also processes normal website requests and operational logs to serve and protect the site. See [Cloudflare’s privacy policy](https://www.cloudflare.com/privacypolicy/).
 

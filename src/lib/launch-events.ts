@@ -1,12 +1,10 @@
 // No cookies or visitor identifiers. Funnel events are not verified installs.
-import { campaigns, creatives } from './measurement.mjs';
+import { campaignLabels } from './campaigns.mjs';
 export function getCampaign(): string {
-  const value = new URLSearchParams(location.search).get('utm_campaign') || '';
-  return campaigns.has(value) ? value : 'organic';
+  return campaignLabels(location.search).campaign;
 }
 export function getCreative(): string {
-  const value = new URLSearchParams(location.search).get('utm_content') || '';
-  return creatives.has(value) ? value : 'none';
+  return campaignLabels(location.search).creative;
 }
 export async function track(event: string, agent: string): Promise<boolean> {
   if (navigator.doNotTrack === '1') return false;
