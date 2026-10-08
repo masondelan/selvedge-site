@@ -118,7 +118,7 @@ homepage-only `landing_view` behavior.
 Read aggregate counts privately through an authenticated Wrangler session:
 
 ```bash
-npx wrangler d1 execute selvedge-launch-metrics --remote --command "$(cat scripts/placement-metrics.sql)" --json
+npx wrangler d1 execute selvedge-launch-metrics --remote --command="$(cat scripts/placement-metrics.sql)" --json
 ```
 
 This report only executes `SELECT`. Keep the observation window and deployment date
