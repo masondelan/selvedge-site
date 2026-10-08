@@ -9,6 +9,8 @@ Each interaction event contains only its type, the selected agent, and fixed cam
 
 Recognized labels in a link's `utm_campaign` and `utm_content` parameters can carry through same-origin documentation links. We do not infer a placement from referrers or record referrers. For the new placement labels, each tagged page load can count once; visiting another page or reloading can count again. Older launch campaigns count homepage views only. These are page-view events, not unique visitors or person-level conversion rates. A tagged link can be shared elsewhere, so its label is not proof of where a visitor found it. Untagged visits cannot be assigned to an earlier directory submission.
 
+The older DevHunt URL label `launch_2026_10_06` is recognized as `placement-devhunt` for new placement events. This does not reassign stored historical counts.
+
 Daily aggregate counts are stored in Cloudflare D1. We do not store request headers or IP addresses in these counts. Cloudflare also processes normal website requests and operational logs to serve and protect the site. See [Cloudflare’s privacy policy](https://www.cloudflare.com/privacypolicy/).
 
 Copied prompts and commands are expressions of interest, not confirmed installations. Copying the homepage prompt does not send it to an AI service; you choose where to paste it. The optional success button is a self-reported outcome; it does not inspect your machine.

@@ -26,7 +26,9 @@ export const creatives = new Set(['next-agent', 'revisit', 'why-column', 'argume
 
 export function campaignLabels(search) {
   const query = new URLSearchParams(search);
-  const campaign = query.get('utm_campaign');
+  const value = query.get('utm_campaign');
+  // This fixed alias is still published on DevHunt. Normalize future browser events only.
+  const campaign = value === 'launch_2026_10_06' ? 'placement-devhunt' : value;
   const creative = query.get('utm_content');
   return {
     campaign: campaigns.has(campaign) ? campaign : 'organic',

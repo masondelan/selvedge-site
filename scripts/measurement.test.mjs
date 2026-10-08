@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { browserEvent, confirmInstall, measuredCommand } from '../src/lib/measurement.mjs';
-import { placementCampaigns } from '../src/lib/campaigns.mjs';
+import { campaignLabels, placementCampaigns } from '../src/lib/campaigns.mjs';
 
 function database() {
   const sql = new DatabaseSync(':memory:');
@@ -74,6 +74,23 @@ test('August labels work and storage failure does not report success', async () 
   assert.equal((await browserEvent(request({ ...labels, campaign: 'aug26_test', creative: 'argument', event: 'landing_view' }), db)).status, 204);
   const broken = { prepare() { throw new Error('unavailable'); } };
   assert.equal((await browserEvent(request({ ...labels, event: 'activation_reported' }), broken)).status, 503);
+  sql.close();
+});
+
+test('DevHunt browser alias sends only the canonical label to event and optional receipt endpoints', async () => {
+  const { db, sql } = database();
+  const canonical = { agent: 'codex', ...campaignLabels('?utm_campaign=launch_2026_10_06') };
+  assert.equal((await browserEvent(request({ ...canonical, event: 'landing_view' }), db)).status, 204);
+  assert.equal((await browserEvent(request({ ...canonical, consent: false }), db, true)).status, 400);
+  const issued = await browserEvent(request({ ...canonical, consent: true }), db, true);
+  assert.equal(issued.status, 200);
+  const { token } = await issued.json();
+  assert.equal((await confirmInstall(request({ token }, false), db)).status, 204);
+  assert.deepEqual(sql.prepare('SELECT DISTINCT campaign FROM daily_events').all().map(row => row.campaign), ['placement-devhunt']);
+  assert.equal(sql.prepare('SELECT campaign FROM install_receipts').get().campaign, 'placement-devhunt');
+  // Raw endpoint clients cannot create a second label for the same alias.
+  assert.equal((await browserEvent(request({ ...canonical, campaign: 'launch_2026_10_06', event: 'landing_view' }), db)).status, 400);
+  assert.equal((await browserEvent(request({ ...canonical, campaign: 'launch_2026_10_06', consent: true }), db, true)).status, 400);
   sql.close();
 });
 
