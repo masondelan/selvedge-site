@@ -47,7 +47,8 @@ import '../styles/homepage.css';
 </div>
 
 <script>
-  import { track, getCampaign, getCreative } from '../lib/launch-events';
+  import { track } from '../lib/launch-events';
+  import { initializeCampaignPage } from '../lib/campaign-navigation.mjs';
   import { legacyDestination } from '../data/homepage.mjs';
 
   function followLegacyLink() {
@@ -77,15 +78,9 @@ import '../styles/homepage.css';
     }
   });
 
-  // Carry recognized campaign labels to setup without cookies or persistent storage.
   const start = document.querySelector<HTMLAnchorElement>('[data-home-start]')!;
-  if (getCampaign() !== 'organic') {
-    const url = new URL(start.href);
-    url.searchParams.set('utm_campaign', getCampaign());
-    if (getCreative() !== 'none') url.searchParams.set('utm_content', getCreative());
-    start.href = url.href;
-    void track('landing_view', 'none');
-  }
   start.addEventListener('click', () => { void track('start_click', 'none'); });
+  // Initialize before redirects; PageFrame's shared call is deduplicated per document.
+  initializeCampaignPage(document, location.href, navigator.doNotTrack, track);
   followLegacyLink();
 </script>

@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { browserEvent, confirmInstall, measuredCommand } from '../src/lib/measurement.mjs';
+import { placementCampaigns } from '../src/lib/campaigns.mjs';
 
 function database() {
   const sql = new DatabaseSync(':memory:');
@@ -73,6 +74,55 @@ test('August labels work and storage failure does not report success', async () 
   assert.equal((await browserEvent(request({ ...labels, campaign: 'aug26_test', creative: 'argument', event: 'landing_view' }), db)).status, 204);
   const broken = { prepare() { throw new Error('unavailable'); } };
   assert.equal((await browserEvent(request({ ...labels, event: 'activation_reported' }), broken)).status, 503);
+  sql.close();
+});
+
+test('all fixed placements retain attribution across optional confirmation and separate recall reports', async () => {
+  const { db, sql } = database();
+  for (const campaign of Object.keys(placementCampaigns)) {
+    const placement = { ...labels, campaign };
+    assert.equal((await browserEvent(request({ ...placement, event: 'landing_view', agent: 'none' }), db)).status, 204);
+    for (const consent of [undefined, false]) {
+      assert.equal((await browserEvent(request({ ...placement, consent }), db, true)).status, 400);
+    }
+    assert.equal((await browserEvent(request({ ...placement, consent: true }, true, { DNT: '1' }), db, true)).status, 403);
+    const issued = await browserEvent(request({ ...placement, consent: true }), db, true);
+    assert.equal(issued.status, 200);
+    const { token } = await issued.json();
+    assert.equal(sql.prepare("SELECT COUNT(*) AS n FROM daily_events WHERE campaign=? AND event='install_completed'").get(campaign).n, 0);
+    assert.equal((await confirmInstall(request({ token }, false, { DNT: '1' }), db)).status, 403);
+    for (let i = 0; i < 2; i++) assert.equal((await confirmInstall(request({ token }, false), db)).status, 204);
+    assert.equal((await browserEvent(request({ ...placement, event: 'activation_reported' }), db)).status, 204);
+    assert.deepEqual(sql.prepare('SELECT event, agent, count FROM daily_events WHERE campaign=? ORDER BY event').all(campaign).map(row => ({ ...row })), [
+      { event: 'activation_reported', agent: 'codex', count: 1 },
+      { event: 'install_completed', agent: 'codex', count: 1 },
+      { event: 'landing_view', agent: 'none', count: 1 },
+    ]);
+  }
+  const before = sql.prepare('SELECT COUNT(*) AS n FROM install_receipts').get().n;
+  assert.equal((await browserEvent(request({ ...labels, campaign: 'placement-unlisted', consent: true }), db, true)).status, 400);
+  assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM install_receipts').get().n, before);
+  sql.close();
+});
+
+test('placement report reads event totals without changing data or attributing historical campaigns', () => {
+  const { sql } = database();
+  const insert = sql.prepare('INSERT INTO daily_events (day,event,agent,campaign,creative,count) VALUES (?,?,?,?,?,?)');
+  for (const [event, agent, campaign, creative, count] of [
+    ['landing_view', 'none', 'placement-tensorblock', 'none', 5],
+    ['landing_view', 'none', 'placement-tensorblock', 'revisit', 2],
+    ['install_completed', 'codex', 'placement-tensorblock', 'none', 3],
+    ['activation_reported', 'codex', 'placement-tensorblock', 'none', 1],
+    ['landing_view', 'none', 'agents-sep26', 'none', 9],
+    ['landing_view', 'none', 'organic', 'none', 4],
+  ]) insert.run('2026-10-08', event, agent, campaign, creative, count);
+  const before = sql.prepare('SELECT total_changes() AS n').get().n;
+  const report = sql.prepare(readFileSync(new URL('./placement-metrics.sql', import.meta.url), 'utf8')).all().map(row => ({ ...row }));
+  assert.deepEqual(report, [
+    { day: '2026-10-08', placement_campaign: 'placement-tensorblock', agent: 'codex', tagged_page_view_events: 0, prompt_copy_events: 0, setup_copy_events: 0, install_or_upgrade_confirmations: 3, recalled_decision_self_reports: 1 },
+    { day: '2026-10-08', placement_campaign: 'placement-tensorblock', agent: 'none', tagged_page_view_events: 7, prompt_copy_events: 0, setup_copy_events: 0, install_or_upgrade_confirmations: 0, recalled_decision_self_reports: 0 },
+  ]);
+  assert.equal(sql.prepare('SELECT total_changes() AS n').get().n, before);
   sql.close();
 });
 

@@ -14,3 +14,8 @@ const isHome = Astro.url.pathname === '/';
   </Default>
   </div>
 )}
+<script>
+  import { initializeCampaignPage } from '../lib/campaign-navigation.mjs';
+  import { track } from '../lib/launch-events';
+  initializeCampaignPage(document, location.href, navigator.doNotTrack, track);
+</script>

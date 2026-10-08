@@ -1,6 +1,6 @@
 // Fixed labels only. No request headers, client addresses, URLs or project data.
-export const campaigns = new Set(['agents-sep26', 'aug26_test', 'organic']);
-export const creatives = new Set(['next-agent', 'revisit', 'why-column', 'argument', 'wordmark', 'none']);
+import { campaigns, creatives } from './campaigns.mjs';
+export { campaigns, creatives } from './campaigns.mjs';
 export const agents = new Set(['none', 'codex', 'claude-code', 'cursor', 'copilot', 'gemini', 'windsurf']);
 export const events = new Set(['landing_view', 'start_click', 'demo_click', 'agent_select', 'install_copy', 'setup_copy', 'prompt_copy', 'agent_docs', 'activation_reported']);
 const headers = { 'Cache-Control': 'no-store' };

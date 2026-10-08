@@ -104,6 +104,44 @@ binding and verify the live pages and redirects after deployment.
 
 ## Editing content
 
+### Reading placement measurement
+
+Fixed public placement labels live in `src/lib/campaigns.mjs`. Use
+`https://selvedge.sh/?utm_campaign=placement-tensorblock` or the same label on
+`/start/quickstart/`. Recognized labels carry through same-origin documentation
+links without cookies or persistent browser storage. A tagged document load counts
+one page-view event for the new `placement-*` campaigns, including a direct
+quickstart visit; navigating or reloading counts another. Their legacy homepage
+redirects count only the destination. Existing launch campaigns retain their
+homepage-only `landing_view` behavior.
+
+Read aggregate counts privately through an authenticated Wrangler session:
+
+```bash
+npx wrangler d1 execute selvedge-launch-metrics --remote --command "$(cat scripts/placement-metrics.sql)" --json
+```
+
+This report only executes `SELECT`. Keep the observation window and deployment date
+with the result. Days are UTC, and a current day is incomplete. Tagged page views,
+optional install/upgrade confirmations, and voluntary recalled-decision reports
+are separate event totals, not unique people or a conversion rate. Normal installs
+send no confirmation. In particular, someone can copy the homepage setup prompt
+and complete installation through their agent without visiting the optional
+confirmation flow. Zero confirmations does not mean zero installs. A confirmation
+precedes agent setup and does not prove it succeeded. New links cannot attribute
+historical submissions, and labels can be
+shared outside their named placement. There is no bot or internal-test dimension;
+do not subtract presumed test traffic without a separate, exact test record.
+The older `scripts/launch-metrics.sql` report retains historical campaign counts.
+
+Voluntary pilot notes remain separate from anonymous counts. Use only an explicit,
+consented placement name supplied by a participant to categorize their report;
+do not infer it from identity, timestamps, or receipt tokens. Follow the existing
+pilot's consent terms before storing supplied notes. Count interest, reported
+installation, and successful recall as distinct observations.
+
+### Content standards
+
 Preserve Selvedge's core values: **easy to use, robust, and developer focused**.
 The shared [engineering standards](https://github.com/masondelan/selvedge/blob/main/docs/engineering-standards.md)
 apply to site code, docs, examples, accessibility, dependencies, reviews and
