@@ -63,6 +63,25 @@ test('same-origin setup and verification links retain target state and only carr
   assert.equal(campaignLink('/start/quickstart/', `${origin}/?utm_campaign=placement-cline&utm_content=untrusted`), '/start/quickstart/?utm_campaign=placement-cline');
 });
 
+test('the published DevHunt alias becomes a canonical placement on home and direct quickstart visits', () => {
+  const events = [];
+  for (const pathname of ['/', '/start/quickstart/']) {
+    const url = `${origin}${pathname}?utm_campaign=launch_2026_10_06&utm_content=revisit`;
+    const page = documentWithLinks(['/start/quickstart/?agent=codex#install', '/guides/verify-first-decision/']);
+    const track = (event, agent) => events.push({ event, agent, ...campaignLabels(new URL(url).search) });
+    initializeCampaignPage(page, url, '0', track);
+    initializeCampaignPage(page, url, '0', track);
+    assert.equal(page.links[0].getAttribute('href'), '/start/quickstart/?agent=codex&utm_campaign=placement-devhunt&utm_content=revisit#install');
+    assert.equal(page.links[1].getAttribute('href'), '/guides/verify-first-decision/?utm_campaign=placement-devhunt&utm_content=revisit');
+  }
+  assert.deepEqual(events, Array.from({ length: 2 }, () => ({ event: 'landing_view', agent: 'none', campaign: 'placement-devhunt', creative: 'revisit' })));
+  assert.equal(campaigns.has('launch_2026_10_06'), false);
+  for (const campaign of ['launch_2026_10_07', 'LAUNCH_2026_10_06', 'launch_2026_10_06-extra']) {
+    assert.equal(campaignLabels(`?utm_campaign=${campaign}`).campaign, 'organic');
+  }
+  initializeCampaignPage(documentWithLinks([]), `${origin}/?utm_campaign=launch_2026_10_06`, '1', () => assert.fail('DNT must suppress alias events'));
+});
+
 test('external, fragment, API, download and non-navigation links stay untouched', () => {
   for (const href of ['', '#install', ' #install', 'https://github.com/masondelan/selvedge', '//other.example/start/', 'mailto:hello@example.com', 'javascript:void(0)', 'data:text/plain,hello', '/api/install-receipt', '/api', '/llms.txt', '/sitemap-index.xml', '/image.svg', 'https://user:password@selvedge.sh/start/quickstart/']) {
     assert.equal(campaignLink(href, tagged), href);

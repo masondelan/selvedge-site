@@ -115,6 +115,11 @@ quickstart visit; navigating or reloading counts another. Their legacy homepage
 redirects count only the destination. Existing launch campaigns retain their
 homepage-only `landing_view` behavior.
 
+The known DevHunt URL label `launch_2026_10_06` is a fixed browser alias for
+`placement-devhunt`, so new visits through that published link use placement
+measurement. This does not reassign stored historical counts; other unknown
+labels remain `organic`.
+
 Read aggregate counts privately through an authenticated Wrangler session:
 
 ```bash
