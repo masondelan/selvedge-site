@@ -28,5 +28,10 @@
   },
   "devDependencies": {
     "wrangler": "^4.151.0"
+  },
+  "overrides": {
+    "@astrojs/cloudflare": {
+      "undici": "^7.29.1"
+    }
   }
 }
