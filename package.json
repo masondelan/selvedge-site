@@ -27,6 +27,6 @@
     "sharp": "^0.33.5"
   },
   "devDependencies": {
-    "wrangler": "^4.105.0"
+    "wrangler": "^4.151.0"
   }
 }
