@@ -25,11 +25,12 @@ prose.
    reading the same SQLite file. The MCP server queries the same file too, so agents
    can ask their own history when they need context.
 
-There is no network hop on the data path, no account, no cloud anything. The only
-thing crossing a process boundary is the JSON-RPC stdio between your AI tool and
-`selvedge-server`. (Selvedge can make two requests unrelated to your data: an opt-in
-usage heartbeat, off unless you enable it, and a PyPI version check. Neither sends
-code, paths, diffs, or reasoning.)
+Selvedge's storage and history queries run locally, without an account or hosted
+backend. Your AI tool talks to `selvedge-server` over JSON-RPC stdio and may send
+retrieved records to its model provider. Separately, Selvedge has an opt-in usage
+heartbeat, off by default, and a CLI PyPI version check. Neither request sends
+code, paths, diffs, or reasoning. See the [configuration reference](/reference/configuration/#whats-not-configurable)
+for controls and the client-sharing boundary.
 
 ## What lives in the SQLite file
 
@@ -41,9 +42,10 @@ canonical `Z` suffix), `entity_path`, `entity_type`, `change_type`, `diff`,
 all the things you'd query: `entity_path` (with prefix-LIKE support),
 `(timestamp, project)`, `changeset_id`.
 
-**`tool_calls`** — local-only telemetry of every MCP tool invocation. Powers
-`selvedge stats` and the coverage script. Never networked. The schema includes the
-calling agent's name (added in v0.3.2's `agent` column) so per-agent breakdowns work.
+**`tool_calls`** — local records written by the MCP tools and CLI. Powers
+`selvedge stats` and the coverage script. The table is not sent by the usage
+heartbeat. Its `agent` column holds a caller-supplied label for breakdowns;
+that label alone does not prove which client ran a command.
 
 A `schema_migrations` table records every migration version + applied timestamp, so DB
 upgrades are safe across versions and partial-failure scenarios roll back atomically.
