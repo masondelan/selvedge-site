@@ -29,6 +29,12 @@ If the team implements the cache and later rolls it back after finding stale rea
 
 In Selvedge, `reject` and `revert` are explicit event types supplied through `log_change` or the CLI. A reason should say which constraint mattered and point to available evidence. A [revisit condition](/concepts/stale-decision/) makes it possible to reconsider the approach when circumstances change.
 
+Since 0.3.17, human-readable `blame` labels explicit rejections as "rejected", and
+Markdown exports separate **Considered and rejected** from **Tried and reverted**.
+A later `supersede` reopens either kind while preserving the original record.
+JSON `status` and trail `phase` retain the existing `reverted` negative-verdict
+category; use `change_type: "reject"` to distinguish a rejection.
+
 ## How Selvedge retrieves an earlier approach
 
 Selvedge's `prior_attempts` tool examines recorded attempts and outcomes for an entity. The CLI equivalent is:
