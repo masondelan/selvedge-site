@@ -7,6 +7,39 @@ The canonical changelog is [`CHANGELOG.md`](https://github.com/masondelan/selved
 in the source repo. This page mirrors the most recent releases for
 at-a-glance browsing.
 
+## v0.3.17 — 2026-10-15
+
+**Check the installed MCP server and keep review digests current.**
+`selvedge demo --mcp` saves a synthetic rejected approach through local stdio MCP,
+restarts the server, and verifies the same record ID and content. Add `--json` for
+the checked IDs and versions. The check has a deadline and cleans up its temporary
+database and server processes. Both demo modes skip background update and telemetry
+checks. Client configuration, activation and hooks still need separate verification.
+
+`selvedge export --format markdown -o DECISIONS.md --check` compares an existing
+digest with the current history without rewriting it or initializing/migrating the
+store. It exits 0 silently for matching UTF-8 bytes, 1 with a unified diff for a
+stale or missing file (or guidance for a read error), and 2 for invalid arguments.
+Markdown files use deterministic UTF-8/LF output. Check mode skips background
+update and telemetry checks. Publishing a digest is optional; review private
+information before sharing it or exposing a diff in CI logs.
+
+Human-readable `blame` labels explicit rejections as **rejected**. Markdown exports
+put them under **Considered and rejected**, separately from **Tried and reverted**.
+Reopening either preserves the original history. JSON status/phase values, stored
+events and supersession behavior are unchanged. Terminal rendering also preserves
+markup-like user text literally, fixing `log` failures that happened after a
+successful save and crashes in `changeset` output.
+
+General setup guidance leads with compatible MCP and CLI access. Documentation
+clarifies local storage, MCP clients' model-provider data handling, optional usage
+telemetry and the separate PyPI version check. Python 3.14 joins CI; the package
+retains Python 3.10 compatibility, while installation guidance recommends an
+upstream-supported release. No new runtime dependencies, migrations or MCP tools.
+
+See the [CLI reference](/reference/cli/) and
+[release notes](https://github.com/masondelan/selvedge/releases/tag/v0.3.17).
+
 ## v0.3.16 — 2026-10-01
 
 **Bring recorded decisions into code review.** `selvedge ledger` shows actor and

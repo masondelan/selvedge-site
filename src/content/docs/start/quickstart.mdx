@@ -38,7 +38,16 @@ On Windows, activate with `.venv\Scripts\Activate.ps1` in PowerShell. If your sy
 selvedge demo
 ```
 
-The demo saves a rejected approach and retrieves it through a fresh connection to a temporary database. It does not write to your project. The demo requires Selvedge 0.3.12 or newer.
+The demo saves a rejected approach and retrieves it through a fresh connection to a temporary database. It does not write to your project. The basic demo requires Selvedge 0.3.12 or newer.
+
+With Selvedge 0.3.17 or newer, check the installed MCP server too:
+
+```bash
+selvedge demo --mcp
+selvedge demo --mcp --json
+```
+
+This saves through a local stdio MCP server, restarts the server, and checks that the same record ID and content can be retrieved. JSON includes the checked IDs and versions. Both demo modes use disposable data and skip background update and telemetry checks. A successful demo checks this Python installation; your agent's configuration, activation and hooks still need the separate verification below.
 
 </details>
 
