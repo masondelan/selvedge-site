@@ -13,6 +13,9 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "selvedge",
+      // One explicit 404 route preserves the branded page without adding it
+      // to Starlight's catch-all documentation routes.
+      disable404Route: true,
       description: product.shortDescription,
       logo: {
         light: "./src/assets/wordmark.svg",
