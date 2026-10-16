@@ -162,14 +162,22 @@ precedence step produced each effective setting.
 
 By design:
 
-- **No remote backends in v0.3.x.** Postgres is on the v0.4.0 roadmap. Until then,
-  Selvedge is local-only. This keeps the install footprint to three deps and the
-  attack surface to zero network.
+- **Local storage in v0.3.x.** Selvedge reads and writes a local SQLite database;
+  a hosted storage backend is not required. The Python package declares four
+  direct runtime dependencies; those packages can have their own dependencies.
 - **No LLM hops in core.** The reasoning quality validator is regex-and-length-based,
   not LLM-based. This is a hard rule; PRs that try to add LLM calls inside core get
   rejected.
-- **No telemetry that leaves your machine.** The `tool_calls` table is local-only.
-  There's no opt-in or opt-out — the data simply doesn't go anywhere.
+- **Local tool-call records.** The `tool_calls` table stays in the local database.
+  It is separate from the optional usage heartbeat, which is off by default and
+  can be disabled with `SELVEDGE_TELEMETRY=0`. The heartbeat and the CLI's PyPI
+  version check do not send code, entity paths, diffs, or reasoning. Set
+  `SELVEDGE_NO_UPDATE_CHECK=1` to disable the version check. See the
+  [product telemetry documentation](https://github.com/masondelan/selvedge/blob/main/docs/telemetry.md)
+  for the exact fields and controls.
+
+An MCP client can send retrieved records to its model provider. Local storage
+does not change that client's data policy; see the [FAQ](/project/faq/#where-does-my-data-live).
 
 ## Next
 
