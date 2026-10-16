@@ -1,5 +1,6 @@
 ---
-import { Code } from '@astrojs/starlight/components';
+// Import only the renderer; Starlight's barrel also loads native-parser components.
+import { Code } from 'astro-expressive-code/components';
 const { title = '', command = '', copy = false, kind = 'install' } = Astro.props;
 ---
 <!-- Use the same renderer and theme as fenced blocks throughout the docs. -->

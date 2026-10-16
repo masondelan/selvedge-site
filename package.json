@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "Marketing site and docs for Selvedge — selvedge.sh",
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "scripts": {
     "test": "node --test scripts/*.test.mjs",
     "dev": "astro dev",
@@ -17,22 +20,19 @@
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "check:site": "node scripts/sync-llms.mjs --check && node scripts/check-site.mjs",
-    "check:not-found": "node scripts/check-not-found.mjs"
+    "check:not-found": "node scripts/check-not-found.mjs",
+    "check:measurement": "node scripts/check-measurement.mjs"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "12",
-    "@astrojs/starlight": "^0.35.2",
+    "@astrojs/cloudflare": "14",
+    "@astrojs/starlight": "^0.42.6",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
-    "astro": "^5.18.1",
-    "sharp": "^0.33.5"
+    "astro": "^7.4.0",
+    "astro-expressive-code": "^0.44.2",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "wrangler": "^4.151.0"
-  },
-  "overrides": {
-    "@astrojs/cloudflare": {
-      "undici": "^7.29.1"
-    }
   }
 }
