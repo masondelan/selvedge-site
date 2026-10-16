@@ -14,7 +14,7 @@ export function withLastModified(entry, html) {
 }
 
 /** Enrich Astro's sitemap after the static HTML and sitemap have been built. */
-export async function updateSitemap(dist = new URL('../dist/', import.meta.url)) {
+export async function updateSitemap(dist = new URL('../dist/client/', import.meta.url)) {
   const index = await readFile(new URL('sitemap-index.xml', dist), 'utf8');
   let dated = 0;
   for (const match of index.matchAll(/<loc>(.*?)<\/loc>/g)) {

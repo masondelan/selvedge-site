@@ -4,7 +4,7 @@ import { legacyDestinations } from '../src/data/homepage.mjs';
 import { contentPages } from './site-content.mjs';
 
 const site = 'https://selvedge.sh';
-const read = path => readFile(new URL('../dist/' + path, import.meta.url), 'utf8');
+const read = path => readFile(new URL('../dist/client/' + path, import.meta.url), 'utf8');
 const locs = xml => [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1]);
 const indexes = locs(await read('sitemap-index.xml'));
 const urls = (await Promise.all(indexes.map(async url => locs(await read(new URL(url).pathname.slice(1)))))).flat();
@@ -67,7 +67,7 @@ for (const { source, target } of internalLinks) {
   if (pageIds) {
     if (target.hash) assert(pageIds.has(decodeURIComponent(target.hash.slice(1))), `${source}: missing anchor ${target.href}`);
   } else {
-    const asset = await stat(new URL('../dist/' + target.pathname.slice(1), import.meta.url)).catch(() => null);
+    const asset = await stat(new URL('../dist/client/' + target.pathname.slice(1), import.meta.url)).catch(() => null);
     assert(asset?.isFile(), `${source}: missing destination ${target.href}`);
   }
 }

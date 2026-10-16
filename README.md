@@ -7,6 +7,9 @@ Built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.
 
 ## Local development
 
+Use Node.js 22.22.2 (the version in `.nvmrc`) or a newer supported LTS release.
+Astro 7 requires Node.js 22.22.0 or newer.
+
 ```bash
 npm ci
 npm run dev    # http://localhost:4321
@@ -19,8 +22,11 @@ npm run build      # writes to dist/
 npm run preview    # preview the production build locally
 ```
 
-The build writes static pages and the API worker to `dist/`. Run `npm run check:site`
-and `npm test` before deploying with `npm run deploy`.
+The build writes static pages to `dist/client/` and the API worker to `dist/server/`.
+Documentation prerenders in Node so its syntax highlighter can use WebAssembly;
+API routes and the branded 404 page run in Workers. Images optimize at build time
+and server sessions are disabled because the site does not use them.
+Run `npm run check:site` and `npm test` before deploying with `npm run deploy`.
 
 ## Project structure
 
@@ -89,8 +95,10 @@ Homepage interface:
 
 ## Deploy
 
-The `wrangler.jsonc` configuration deploys the `selvedge-site` Worker with static
-assets from `dist/` and the existing `LAUNCH_METRICS` database binding.
+The `wrangler.jsonc` configuration preserves the `selvedge-site` Worker and existing
+`LAUNCH_METRICS` database binding. Its `main` points to the adapter entrypoint;
+after building, Wrangler follows `.wrangler/deploy/config.json` to the generated
+`dist/server/wrangler.json`, which serves static assets from `dist/client/`.
 
 ```bash
 npm run build
@@ -101,6 +109,25 @@ npx wrangler deploy
 
 Custom domain: [selvedge.sh](https://selvedge.sh/). Preserve the configured database
 binding and verify the live pages and redirects after deployment.
+
+Before deployment, initialize only the local measurement database and start the
+built Worker. Keep `--local` on the migration command:
+
+```bash
+npx wrangler d1 migrations apply selvedge-launch-metrics --local
+npm run preview
+```
+
+In another terminal, verify the HTTP routes against that local preview:
+
+```bash
+npm run check:not-found -- http://127.0.0.1:8787
+npm run check:measurement -- http://127.0.0.1:8787
+```
+
+The measurement check sends synthetic events only to a loopback preview and
+checks all three API routes, including consent, DNT, and receipt redemption.
+Its data remains in Wrangler's local database; do not run it against production.
 
 ## Editing content
 

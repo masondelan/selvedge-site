@@ -9,6 +9,10 @@ import cloudflare from "@astrojs/cloudflare";
 // https://astro.build/config
 export default defineConfig({
   site: "https://selvedge.sh",
+  // Preserve spaces between inline elements across the Astro 7 compiler change.
+  compressHTML: true,
+  // This site has no server sessions; avoid provisioning an unused KV namespace.
+  session: false,
 
   integrations: [
     starlight({
@@ -141,5 +145,8 @@ export default defineConfig({
     }),
   ],
 
-  adapter: cloudflare()
+  // Documentation's syntax highlighter uses Node/WASM during prerendering.
+  // API routes and the 404 page still run in Workers. Optimize images at build
+  // time so production needs no Images binding.
+  adapter: cloudflare({ imageService: "compile", prerenderEnvironment: "node" })
 });
