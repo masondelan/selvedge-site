@@ -3,8 +3,8 @@
  */
 export const product = {
   name: 'Selvedge',
-  version: '0.3.16',
-  changelogUrl: '/project/changelog/#v0316--2026-10-01',
+  version: '0.3.17',
+  changelogUrl: '/project/changelog/#v0317--2026-10-15',
   category: 'Persistent decision memory for AI agents',
   description: 'Selvedge works with any compatible agent through local stdio MCP or the CLI. Save why code changed and which approaches were rejected, then retrieve that context in later sessions.',
   shortDescription: 'Persistent decision memory for AI agents. Save stated rationale and rejected approaches locally, then retrieve them before the next edit.',

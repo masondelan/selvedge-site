@@ -10,6 +10,7 @@ The `selvedge` binary is your interface to the SQLite store. Every read command 
 ## Commands at a glance
 
 ```text
+selvedge demo [--mcp] [--json]          Try a saved decision with disposable data
 selvedge init [--path PATH]             Initialize Selvedge in a project
 selvedge setup                          Interactive first-run wizard
 selvedge prompt [--install FILE]        Print canonical agent-instructions block
@@ -42,6 +43,22 @@ selvedge prune --include-events         Destructive events prune, double-gated (
 ---
 
 ## Lifecycle
+
+### `selvedge demo [--mcp] [--json]`
+
+Run a synthetic save-and-retrieve example without configuring an agent. The basic
+mode (since 0.3.12) uses a fresh connection to a temporary database.
+
+`--mcp` (since 0.3.17) saves a rejection through the installed local stdio MCP
+server, stops it, starts another server process and checks the retrieved record's
+ID and content. The check has a deadline and cleans up its processes and temporary
+state. `--json` reports the result, including the Selvedge package version and
+separate MCP handshake version; the handshake may identify the SDK version.
+
+Both modes leave your project and real database untouched and skip background
+update and telemetry checks. A passing MCP demo verifies this Python installation's local
+server; your agent client's configuration, activation and hooks remain unverified. Follow
+[the first-decision guide](/guides/verify-first-decision/) for those checks.
 
 ### `selvedge init [--path PATH]`
 
@@ -462,9 +479,36 @@ that (and provenance-based trust tiers) is on the roadmap.
 Dump change history to JSON or CSV with full filter support.
 
 **`--format markdown`** (since v0.3.10) renders the store as a deterministic,
-human-readable digest — grouped by entity, reverted decisions first — designed to be
-committed next to `.selvedge/` so captured intent is reviewable in a pull request.
-Regenerating with no new events produces a zero-line diff.
+human-readable digest grouped by entity, with rejected and reverted decisions
+first. Publishing the digest is optional; review its reasoning and metadata before
+committing or sharing it. Regenerating unchanged history produces a zero-line diff.
+
+Since 0.3.17, explicit `reject` events appear under **Considered and rejected**,
+separate from **Tried and reverted**. The latest event determines the section;
+`supersede` moves either kind to **Re-opened** while retaining the full history.
+Human-readable `blame` also labels explicit rejections as "rejected". JSON `status`
+and trail `phase` keep the existing `reverted` negative-verdict category for
+compatibility; `change_type: "reject"` identifies a rejection.
+
+To check a digest in a hook or CI without rewriting it (since 0.3.17), use the same
+filters and output file as the original export:
+
+```bash
+selvedge export --format markdown -o .selvedge/DECISIONS.md
+selvedge export --format markdown -o .selvedge/DECISIONS.md --check
+```
+
+`--check` exits **0** silently when the UTF-8 bytes match, **1** with a unified diff
+when the file is stale or missing (or guidance if a read fails), and **2** for
+invalid arguments. It requires Markdown and an explicit output file; stdout and
+other formats are rejected. Generated Markdown files use UTF-8 and LF line endings.
+
+The check reads an existing initialized store through the normal database
+resolution or `SELVEDGE_DB`. It does not initialize or migrate the store, change
+records, rewrite the digest or start background update and telemetry checks.
+SQLite may maintain its normal WAL locking files while reading. Regenerate without
+`--check` to update the digest. A generated diff can expose recorded information in
+CI logs, so choose its destination with the same care as the digest itself.
 
 **`--format agent-trace`** (since v0.3.9) emits [Agent Trace](https://agent-trace.dev/)
 **v0.1.0** records — one per change event by default, wrapped in a self-describing

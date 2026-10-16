@@ -1,7 +1,7 @@
 ---
 title: Verify your first decision in a new coding session
 description: Confirm Selvedge setup, save a real rejected approach, retrieve it after a fresh session, and distinguish a successful lookup from correct use.
-lastUpdated: 2026-09-24
+lastUpdated: 2026-10-15
 ---
 
 The first useful milestone is a decision you can retrieve after the conversation that produced it has ended. This check works with the [six supported setup targets](/reference/compatibility/). Start with the [quickstart](/start/quickstart/) if Selvedge is not connected yet.
@@ -16,6 +16,12 @@ selvedge doctor
 ```
 
 Confirm the reported database path belongs to this project. Review any configuration or executable-path warning before continuing. The agent should have access to Selvedge's eight MCP tools. A healthy database alone does not prove that the agent has connected.
+
+If you need to isolate an installation problem, run `selvedge demo --mcp` (0.3.17+).
+It saves and retrieves a synthetic record through two local MCP server processes
+using a temporary database. Add `--json` for the checked IDs and versions. A pass
+checks the installed server; it does not prove this agent has connected or activated
+its hooks. Continue with a real decision below.
 
 ## 2. Save one real decision
 

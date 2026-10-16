@@ -30,6 +30,16 @@ Save a decision while the context is available, then retrieve the recorded reaso
 
 An empty query result means no qualifying record was found, not that the approach was never tried. MCP clients may send retrieved records to their model providers. Keep private records in a private destination.
 
+## Current release: 0.3.17
+
+`selvedge demo --mcp` checks save/retrieval across two local MCP server processes
+with disposable data; client activation and hooks remain separate checks.
+`selvedge export --format markdown -o DECISIONS.md --check` checks an optional
+review digest against existing history without rewriting it. Human-readable
+rejections and reversions have distinct labels; JSON status/phase values remain
+compatible. See [release notes](https://selvedge.sh/project/changelog/#v0317--2026-10-15)
+and the [CLI reference](https://selvedge.sh/reference/cli/).
+
 ## MCP tools (8, over stdio)
 - `log_change`: record a change event with entity, diff, and reasoning (pass `rename_from` with `change_type="rename"` for renames).
 - `prior_attempts`: prior change attempts on an entity + outcome — was it tried and reverted, or considered and rejected? Stated outcomes (explicit `revert`/`reject` events) report `confidence: "exact"`; proximity inference is the tiebreaker. Call it *before* editing.
