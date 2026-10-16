@@ -16,7 +16,8 @@
     "astro": "astro",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "check:site": "node scripts/sync-llms.mjs --check && node scripts/check-site.mjs"
+    "check:site": "node scripts/sync-llms.mjs --check && node scripts/check-site.mjs",
+    "check:not-found": "node scripts/check-not-found.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "12",

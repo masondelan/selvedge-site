@@ -171,6 +171,13 @@ After homepage or navigation changes, run `npm test`, `npm run build`, and
 structured data, and crawlable reachability from the homepage. Keep Search Console
 indexing/performance outcomes separate from these technical checks.
 
+The branded error page lives in `src/pages/404.astro`, using Starlight's page
+component with its automatic 404 route disabled. Keep it out of the docs
+collection so the catch-all route cannot generate a second `/404`. The Worker
+renders it with HTTP 404 for both direct and missing-page requests. After changing
+error routing, start `npm run preview` and run
+`npm run check:not-found -- http://127.0.0.1:8787` against that local preview.
+
 The sitemap includes the same last-updated dates displayed on documentation pages;
 rebuilding does not assign today's date to every URL. The undated homepage stays
 undated. Maintain explicit `lastUpdated` values when changing a page that sets one.

@@ -1,0 +1,23 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+// Render missing pages through the Worker so /404 itself also returns 404.
+export const prerender = false;
+Astro.response.status = 404;
+---
+
+<StarlightPage frontmatter={{
+  title: 'Page not found',
+  template: 'splash',
+  editUrl: false,
+  pagefind: false,
+  head: [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex' } }],
+}}>
+  <p>The selvedge is the edge that <em>doesn't</em> fray. This one did — there's nothing here.</p>
+  <p>Head back to one that holds:</p>
+  <p>
+    <a href="/">Home</a> &nbsp;·&nbsp;
+    <a href="/start/quickstart/">Quickstart</a> &nbsp;·&nbsp;
+    <a href="/reference/cli/">CLI reference</a>
+  </p>
+</StarlightPage>
