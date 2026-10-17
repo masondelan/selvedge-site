@@ -42,7 +42,7 @@ Run `npm run check:site` and `npm test` before deploying with `npm run deploy`.
 │   ├── assets/
 │   │   └── wordmark.svg             Logo — lowercase mono with red selvedge stripe
 │   ├── components/
-│   │   ├── Homepage.astro           Minimal introduction and copyable setup prompt
+│   │   ├── Homepage.astro           Product introduction and interactive memory example
 │   │   └── PageFrame.astro          Homepage frame; standard Starlight for docs
 │   ├── content/
 │   │   └── docs/
@@ -77,13 +77,16 @@ denim.
 
 Homepage interface:
 
-- The homepage is a narrow, left-aligned introduction with one underlined setup-prompt action.
+- The homepage pairs a large editorial introduction with a compact, light decision-memory example.
+  Preserve the ecru/indigo/red palette, live monospace wordmark and red selvedge thread.
   Keep documentation, CLI quickstart, source and privacy links visible.
 - Homepage spacing lives in `homepage.css` and uses the shared palette from `selvedge.css`.
   The prompt remains readable without JavaScript; copying must report actual clipboard success.
 - Use medium-weight Inter, modest corner radii, and deliberate spacing. Reserve
   JetBrains Mono for the wordmark, code, and technical labels, and red for small accents.
-- Keep interactions quiet: color changes without lifting buttons, gradients, or decorative shadows.
+- Use restrained color transitions and short panel entrances; respect reduced-motion preferences.
+  The example is explicitly fictional, switches only on user input and makes no live product calls.
+  All three example panels and the setup prompt remain readable without JavaScript.
 - Keep custom terminal UI inside Starlight's `not-content` boundary so prose
   sibling margins cannot displace its controls. Lights stay on one baseline;
   titles shrink before controls, and clipboard errors appear below the command.
