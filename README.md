@@ -77,8 +77,9 @@ denim.
 
 Homepage interface:
 
-- The homepage is a narrow, left-aligned introduction with one underlined setup-prompt action.
-  Keep documentation, CLI quickstart, source and privacy links visible.
+- The homepage is a narrow, left-aligned introduction with one setup-prompt action and a short product description.
+  Keep documentation and source visible; secondary setup, compatibility, comparison and privacy links
+  live in the native More disclosure. Avoid decorative rules, badges or additional hero panels.
 - Homepage spacing lives in `homepage.css` and uses the shared palette from `selvedge.css`.
   The prompt remains readable without JavaScript; copying must report actual clipboard success.
 - Use medium-weight Inter, modest corner radii, and deliberate spacing. Reserve
