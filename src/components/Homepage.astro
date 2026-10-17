@@ -4,99 +4,44 @@ import { setupPrompt } from '../data/homepage.mjs';
 import '../styles/homepage.css';
 ---
 <div class="home">
-  <header class="home-header home-container">
-    <a class="home-wordmark" href="/" aria-label="Selvedge home">selvedge<span class="home-wordmark-dot" aria-hidden="true">.</span></a>
-    <nav class="home-nav" aria-label="Main navigation">
-      <a href="/start/what-is-selvedge/">Documentation</a>
-      <a href="https://github.com/masondelan/selvedge">GitHub <span aria-hidden="true">↗</span></a>
-      <a class="home-nav-start" href="/start/quickstart/" data-home-start>Get started <span aria-hidden="true">↗</span></a>
-    </nav>
+  <header class="home-header">
+    <a class="home-wordmark" href="/" aria-label="Selvedge home">selvedge</a>
   </header>
 
   <main class="home-main" data-pagefind-body>
-    <section class="home-hero home-container" aria-labelledby="_top">
-      <div class="home-hero-copy">
-        <p class="home-eyebrow"><span class="home-thread-mark" aria-hidden="true"></span> Local memory for AI agents</p>
-        <h1 id="_top">Keep the why<br />with your <span>code.</span></h1>
-        <p class="home-intro">Good code has a backstory.<br /> Give your next session the context.</p>
-        <p class="home-description">Local decision memory for your coding agent. Save what you chose, what you ruled out, and why.</p>
-        <div class="home-action">
-          <div class="home-action-row">
-            <button class="home-copy" type="button" data-home-copy hidden>Copy setup prompt <span aria-hidden="true">↗</span></button>
-            <a class="home-text-link" href="/start/quickstart/#install" data-home-start>CLI quickstart <span aria-hidden="true">→</span></a>
-          </div>
-          <p class="home-hint">Paste it into your coding agent. Start with one real decision.</p>
-          <p class="home-status" role="status" data-home-status></p>
-          <details class="home-prompt" id="setup-prompt">
-            <summary>Read the setup prompt</summary>
-            <label for="setup-prompt-text">Read or copy this into your coding agent.</label>
-            <textarea id="setup-prompt-text" readonly rows="9" spellcheck="false">{setupPrompt}</textarea>
-          </details>
-        </div>
-        <div class="home-assurances" aria-label="Project details">
-          <span>Open source</span><span>Local SQLite</span><span>Agent-agnostic</span>
-        </div>
-      </div>
+    <h1 id="_top">Keep the why with your code.</h1>
+    <p class="home-intro">Local decision memory for your coding agent.</p>
 
-      <div class="memory-stage" aria-label="Interactive decision memory example">
-        <div class="memory-caption"><span>One thread. Across sessions.</span><span aria-hidden="true">01 — 03</span></div>
-        <div class="memory-window">
-          <div class="memory-toolbar"><span class="memory-project">project / profile-service</span><span class="memory-example-label">Illustrative example</span></div>
-          <div class="memory-selector" role="group" aria-label="Explore the example" hidden>
-            <button type="button" data-memory-step="0" aria-pressed="true" aria-controls="memory-decision">01 <span>Decision</span></button>
-            <button type="button" data-memory-step="1" aria-pressed="false" aria-controls="memory-rejected">02 <span>Rejected</span></button>
-            <button type="button" data-memory-step="2" aria-pressed="false" aria-controls="memory-recall">03 <span>Recall</span></button>
-          </div>
-          <div class="memory-content">
-            <section class="memory-panel" id="memory-decision" data-memory-panel aria-labelledby="decision-heading">
-              <div class="memory-record">
-                <div class="memory-record-meta"><span class="memory-badge">Decision recorded</span><span class="memory-id">#001</span></div>
-                <h2 id="decision-heading">Fresh data over a local cache.</h2>
-                <code>src/cache.py::load_profile</code>
-                <dl><div><dt>Decision</dt><dd>Read profiles from the database.</dd></div><div><dt>Why</dt><dd>Every worker needs to see profile updates.</dd></div></dl>
-              </div>
-            </section>
-            <section class="memory-panel" id="memory-rejected" data-memory-panel aria-labelledby="rejected-heading">
-              <div class="memory-record memory-record-rejected">
-                <div class="memory-record-meta"><span class="memory-badge">Approach rejected</span><span class="memory-id">#002</span></div>
-                <h2 id="rejected-heading">A cache in each worker.</h2>
-                <code>src/cache.py::load_profile</code>
-                <dl><div><dt>Risk</dt><dd>One worker can serve an old profile after another updates it.</dd></div><div><dt>Revisit when</dt><dd>Shared invalidation is implemented and tested.</dd></div></dl>
-              </div>
-            </section>
-            <section class="memory-panel" id="memory-recall" data-memory-panel aria-labelledby="recall-heading">
-              <div class="memory-record">
-                <div class="memory-record-meta"><span class="memory-badge">Prior context retrieved</span><span class="memory-id">#001–002</span></div>
-                <h2 id="recall-heading">New session. Same reasoning.</h2>
-                <code>src/cache.py::load_profile</code>
-                <dl><div><dt>Remembered</dt><dd>Local caches could serve stale profiles across workers.</dd></div><div><dt>Next question</dt><dd>Is shared invalidation implemented and tested yet?</dd></div></dl>
-              </div>
-            </section>
-          </div>
-        </div>
-        <p class="memory-footnote">Illustrative workflow. Decisions are saved and retrieved when instructed.</p>
+    <div class="home-action">
+      <div class="home-action-row">
+        <button class="home-copy" type="button" data-home-copy hidden>Copy setup prompt <span aria-hidden="true">→</span></button>
       </div>
-    </section>
-
-    <div class="home-foundation home-container">
-      <span class="home-eyebrow">Built to fit your workflow</span>
-      <p>Works with compatible agents through <strong>MCP or the CLI.</strong></p>
-      <a class="home-text-link" href="/reference/compatibility/">Check compatibility <span aria-hidden="true">↗</span></a>
+      <p class="home-hint">Paste into your coding agent.</p>
+      <p class="home-status" role="status" data-home-status></p>
+      <details class="home-prompt" id="setup-prompt">
+        <summary>Setup prompt</summary>
+        <label for="setup-prompt-text">Read or copy this into your coding agent.</label>
+        <textarea id="setup-prompt-text" readonly rows="9" spellcheck="false">{setupPrompt}</textarea>
+      </details>
     </div>
 
   </main>
 
-  <footer class="home-footer home-container">
-    <div class="home-footer-bottom">
-      <nav aria-label="Explore Selvedge">
-        <span id="what-gets-remembered"><span id="a-small-tool-that-stays-with-your-project"><a href="/start/what-is-selvedge/">Documentation</a></span></span>
-        <span id="choose-your-agent"><span id="try-the-demo"><span id="find-selvedge"><a href="/start/quickstart/#install" data-home-start>CLI quickstart</a></span></span></span>
-        <a href="/compare/codebase-memory-mcp-servers/">Compare memory tools</a>
-        <a href="https://github.com/masondelan/selvedge">GitHub <span aria-hidden="true">↗</span></a>
-        <a href="/privacy/">Privacy</a>
-      </nav>
-      <div class="home-colophon"><span>© {new Date().getFullYear()} Selvedge</span><ThemeSelect /></div>
-    </div>
+  <footer class="home-footer">
+    <nav class="home-footer-links" aria-label="Explore Selvedge">
+      <span id="what-gets-remembered"><span id="a-small-tool-that-stays-with-your-project"><a href="/start/what-is-selvedge/">Documentation</a></span></span>
+      <a href="https://github.com/masondelan/selvedge">GitHub</a>
+      <details class="home-more">
+        <summary>More</summary>
+        <div class="home-more-links">
+          <span id="choose-your-agent"><span id="try-the-demo"><span id="find-selvedge"><a href="/start/quickstart/#install" data-home-start>CLI quickstart</a></span></span></span>
+          <a href="/reference/compatibility/">Compatible agents</a>
+          <a href="/compare/codebase-memory-mcp-servers/">Compare memory tools</a>
+          <a href="/privacy/">Privacy</a>
+        </div>
+      </details>
+    </nav>
+    <ThemeSelect />
   </footer>
 </div>
 
@@ -117,6 +62,7 @@ import '../styles/homepage.css';
   const field = document.querySelector<HTMLTextAreaElement>('#setup-prompt-text')!;
   const status = document.querySelector<HTMLElement>('[data-home-status]')!;
   copy.hidden = false;
+  prompt.classList.add('home-prompt-enhanced');
 
   copy.addEventListener('click', async () => {
     try {
@@ -131,20 +77,8 @@ import '../styles/homepage.css';
     }
   });
 
-  const selector = document.querySelector<HTMLElement>('.memory-selector')!;
-  const steps = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-memory-step]'));
-  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-memory-panel]'));
-  function selectStep(index: number) {
-    steps.forEach((step, i) => step.setAttribute('aria-pressed', String(i === index)));
-    panels.forEach((panel, i) => { panel.hidden = i !== index; });
-  }
-  steps.forEach((step, index) => step.addEventListener('click', () => selectStep(index)));
-  selectStep(0);
-  selector.hidden = false;
-
-  document.querySelectorAll<HTMLAnchorElement>('[data-home-start]').forEach((start) => {
-    start.addEventListener('click', () => { void track('start_click', 'none'); });
-  });
+  const start = document.querySelector<HTMLAnchorElement>('[data-home-start]')!;
+  start.addEventListener('click', () => { void track('start_click', 'none'); });
   // Initialize before redirects; PageFrame's shared call is deduplicated per document.
   initializeCampaignPage(document, location.href, navigator.doNotTrack, track);
   followLegacyLink();
