@@ -49,40 +49,30 @@ import '../styles/homepage.css';
           </div>
           <div class="memory-content">
             <section class="memory-panel" id="memory-decision" data-memory-panel aria-labelledby="decision-heading">
-              <div class="memory-session"><span>Session 01</span><span>Capture the intent</span></div>
-              <div class="memory-question"><span class="memory-speaker">You</span><p>Keep database reads for now. Profile updates need to be visible across workers.</p></div>
               <div class="memory-record">
                 <div class="memory-record-meta"><span class="memory-badge">Decision recorded</span><span class="memory-id">#001</span></div>
                 <h2 id="decision-heading">Fresh data over a local cache.</h2>
                 <code>src/cache.py::load_profile</code>
                 <dl><div><dt>Decision</dt><dd>Read profiles from the database.</dd></div><div><dt>Why</dt><dd>Every worker needs to see profile updates.</dd></div></dl>
-                <div class="memory-record-footer"><span class="memory-dot" aria-hidden="true"></span>The reasoning stays with the project.</div>
               </div>
             </section>
             <section class="memory-panel" id="memory-rejected" data-memory-panel aria-labelledby="rejected-heading">
-              <div class="memory-session"><span>Session 01</span><span>Keep the alternative, too</span></div>
-              <div class="memory-question"><span class="memory-speaker">You</span><p>Record why we ruled out a process-local cache, so we can revisit it with context.</p></div>
               <div class="memory-record memory-record-rejected">
                 <div class="memory-record-meta"><span class="memory-badge">Approach rejected</span><span class="memory-id">#002</span></div>
                 <h2 id="rejected-heading">A cache in each worker.</h2>
                 <code>src/cache.py::load_profile</code>
                 <dl><div><dt>Risk</dt><dd>One worker can serve an old profile after another updates it.</dd></div><div><dt>Revisit when</dt><dd>Shared invalidation is implemented and tested.</dd></div></dl>
-                <div class="memory-record-footer"><span class="memory-dot" aria-hidden="true"></span>Keep the constraint. Leave room to reconsider.</div>
               </div>
             </section>
             <section class="memory-panel" id="memory-recall" data-memory-panel aria-labelledby="recall-heading">
-              <div class="memory-session"><span>Session 02</span><span>Pick up the thread</span></div>
-              <div class="memory-question"><span class="memory-speaker">You</span><p>Before changing profile loading, look up why we avoided a local cache.</p></div>
               <div class="memory-record">
                 <div class="memory-record-meta"><span class="memory-badge">Prior context retrieved</span><span class="memory-id">#001–002</span></div>
                 <h2 id="recall-heading">New session. Same reasoning.</h2>
                 <code>src/cache.py::load_profile</code>
                 <dl><div><dt>Remembered</dt><dd>Local caches could serve stale profiles across workers.</dd></div><div><dt>Next question</dt><dd>Is shared invalidation implemented and tested yet?</dd></div></dl>
-                <div class="memory-record-footer"><span class="memory-dot" aria-hidden="true"></span>Retrieve the decision before making the next one.</div>
               </div>
             </section>
           </div>
-          <div class="memory-bottom"><span><span class="memory-dot" aria-hidden="true"></span>Stored in your project</span><span>MCP / CLI</span></div>
         </div>
         <p class="memory-footnote">Illustrative workflow. Decisions are saved and retrieved when instructed.</p>
       </div>
