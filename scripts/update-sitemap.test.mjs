@@ -11,6 +11,8 @@ test('sitemap dates come from the visible content date and are stable on rebuild
 });
 test('undated pages get no invented build date; invalid dates fail', () => {
   assert.equal(withLastModified(entry, '<h1>Home</h1>'), entry);
+  const stale = entry.replace('</url>', '<lastmod>2026-10-17T16:26:03.000Z</lastmod></url>');
+  assert.equal(withLastModified(stale, '<h1>Undated content</h1>'), entry);
   assert.equal(withLastModified(entry, '<article><time datetime="2026-01-01">Example event</time></article>'), entry);
   assert.throws(() => withLastModified(entry, 'Last updated: <time datetime="invalid">Invalid</time>'), /Invalid page update date/);
 });
