@@ -55,6 +55,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
   },
   {
     slug: "cursor",
+    lastUpdated: "2026-10-22",
     name: "Cursor",
     // Short, page-specific meta description (<= ~155 chars ideal).
     description:
@@ -74,7 +75,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
 }`,
     autoDetect: true,
     verify:
-      "Open **Cursor Settings → MCP**. `selvedge` should be listed with its 8 tools. Or run `selvedge watch` in a terminal and make a change — the event prints within a second.",
+      "Confirm Selvedge is enabled in Cursor’s MCP settings. Ask the agent to record one real rejected approach with `log_change`, including its entity and reason. Start a new session in the same project and ask it to retrieve that entity with `prior_attempts`. Check the returned reason against what you saved. `selvedge watch` displays recorded events; editing a file alone does not create a decision record.",
     gotcha:
       "These configs run the server with `uvx`, which ships with [uv](https://docs.astral.sh/uv/) — so the one prerequisite is `uv` on the PATH Cursor launches with (`curl -LsSf https://astral.sh/uv/install.sh | sh`). Prefer a global install instead? `pip install selvedge` and set `command` to `selvedge-server`.",
     docsUrl: "https://cursor.com/docs/mcp",
@@ -303,27 +304,28 @@ export const comparisons = [
   {
     slug: "git-ai",
     tool: "Git AI",
+    lastUpdated: "2026-10-22",
     description:
-      "Selvedge vs. Git AI: a live capture + query layer vs. git-notes attribution metadata. Selvedge adds reasoning, a query layer, and changesets, and emits the Agent Trace v0.1.0 format.",
+      "Compare Git AI's line attribution and CLI queries with Selvedge's recorded decisions, rejected approaches and entity history. See sources and verification steps.",
     summary:
-      "Git AI stores attribution metadata in git notes under its own Git AI standard. Selvedge is complementary: it adds live reasoning capture, a query layer, and changesets, and can also emit the Agent Trace v0.1.0 record format.",
+      "Git AI tracks AI-assisted code by line and commit; Selvedge stores the decisions an agent or person explicitly records about project entities. Both provide queries. We maintain Selvedge. This documentation-based comparison was reviewed October 22, 2026 against the [Git AI README snapshot](https://github.com/git-ai-project/git-ai/blob/8a6184a3a8fc4e997ccfff3b16d79688e4255af4/README.md); it is not a comparative runtime benchmark.",
     them: {
-      reasoning: "Attribution metadata",
-      granularity: "Line",
-      mechanism: "Agent-invoked checkpoint \u2192 Git notes at commit",
-      grouping: "None",
-      priorAttempts: "None",
-      storage: "Git notes",
+      reasoning: "Line attribution linked to agent, model and prompts",
+      granularity: "Line and commit",
+      mechanism: "Agent integrations and attribution attached to commits",
+      grouping: "Commits and commit ranges",
+      priorAttempts: "Evaluate the recorded prompt context for your use case",
+      storage: "Attribution in Git notes; prompt sessions stored separately",
     },
     differences: [
-      "**Reasoning, not just attribution.** Git AI records *who/what* touched a line. Selvedge records *why*, in the agent's own words, captured live.",
-      "**A query layer.** `selvedge blame`, `diff`, `history`, `changeset`, and `search` are first-class. Git-notes attribution has no equivalent CLI you can pipe.",
-      "**Continuous vs. cooperative.** Git AI's own README states it does *not* rely on git hooks: the agent calls `git-ai checkpoint`, and attribution lands in git notes at commit time. That is cooperative snapshotting \u2014 it records what the agent chose to check point, when it chose to. Selvedge captures at the moment of each change.",
-      "**Agent Trace interop.** Selvedge also emits [Agent Trace](https://agent-trace.dev/) v0.1.0 records — see the [Agent Trace interop page](/compare/agent-trace/). (Git AI itself has since moved to its own Git AI standard rather than Agent Trace.)",
-      "**Entity-level + changesets** for querying the history of a column or a whole feature, not a line.",
+      "**Choose the question you need answered.** Git AI documents `git ai blame` for line attribution and `git ai stats --json` for aggregate attribution queries. Selvedge's `blame`, `history`, `changeset`, and `prior_attempts` query explicitly recorded entity decisions and outcomes.",
+      "**Check the evidence behind a reason.** A linked prompt can provide useful context. Selvedge stores a stated explanation alongside a decision; neither a prompt nor an explanation proves the decision was correct. An empty Selvedge query means no matching recorded evidence was found, not that an approach has never been tried.",
+      "**Verify capture in your environment.** Git AI's README describes automatic attribution through its integrations without per-repository Git hooks. Selvedge depends on explicit logging by the agent or user; project instructions and optional client hooks support that workflow. Test the configured client before relying on either record.",
+      "**Query an entity or a feature.** Selvedge can retrieve recorded history for a function, column, route or dependency, and group related records with a named changeset. Try the [rejection-and-revisit walkthrough](/guides/revisit-a-rejected-approach/) and [fresh-session verification](/guides/verify-first-decision/).",
+      "**Inspect interchange scope.** Git AI defines its own attribution standard. Selvedge supports an [Agent Trace interchange path](/compare/agent-trace/); this does not establish lossless compatibility with Git AI's format.",
     ],
     whenThem:
-      "If all you need is line-level attribution metadata living in git notes under Git AI's own standard — and you don't need captured reasoning or a query layer — Git AI is a focused fit.",
+      "Evaluate Git AI when you need line-level attribution and attribution statistics tied to commits. Evaluate Selvedge when you need explicitly recorded reasons, rejected approaches and revisit conditions keyed to project entities. Inspect what each integration captures, what later queries return, and which records are shared with collaborators or model providers. They can serve complementary needs.",
   },
   {
     slug: "blameprompt",

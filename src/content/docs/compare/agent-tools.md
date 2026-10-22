@@ -1,129 +1,97 @@
 ---
-title: How Selvedge compares to other AI-attribution tools
-description: A fast-growing "git blame for AI agents" category is emerging — AgentDiff, Origin, Git AI, and more. Here's where Selvedge fits across the category, and where it deliberately doesn't.
+title: AI code attribution and decision memory compared
+description: Choose between line attribution, prompt context and recorded decision history. Compare the questions each answers and verify what survives a new agent session.
+lastUpdated: 2026-10-22
 ---
 
-A fast-growing category is emerging around "git blame for AI agents." What sets Selvedge
-apart: it captures reasoning **live**, by the agent in the same context that produced the
-change — not inferred post-hoc from a diff. Here's where it fits across the category, and
-where it deliberately doesn't.
+AI code attribution and decision memory answer related questions. Attribution helps
+trace a line or commit to its contributors. Decision history preserves a stated
+reason, a rejected approach, or a condition for revisiting a choice. Prompt context
+can help explain either, but a record still needs to be checked against the code
+and supporting evidence.
 
-Agent Trace is the wire format. Selvedge is the live capture + query layer that emits it.
+We maintain Selvedge. This guide explains how to choose and evaluate these workflows;
+it is not a reliability benchmark or a claim that another tool lacks a feature.
+For a source-based comparison of code indexes, session stores and decision memory,
+see [codebase memory MCP servers, compared](/compare/codebase-memory-mcp-servers/).
 
 ## The comparison table
 
-|  | Reasoning source | Granularity | Mechanism | Grouping | Prior attempts | Storage |
-|---|---|---|---|---|---|---|
-| **Selvedge** | **Captured live**, by the agent in the same context that produced the change | **Entity** — DB column, table, env var, dep, API route, function | **MCP server** — agent calls it as work happens | **Changesets** — named feature/task slugs across many entities | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | SQLite |
-| AgentDiff | **Inferred post-hoc** by Claude Haiku from the diff at session end | Line | Git pre/post-commit hook | None | None | JSONL on disk |
-| Origin | Captured at commit time | Line | Git hook | None | None | Local |
-| Git AI | Attribution metadata | Line | Git hook + Agent Trace alliance | None | None | Git notes |
-| BlamePrompt | Prompt-only | Line | Git hook | None | None | Local |
+| Question | Evidence to look for | Where to start |
+|---|---|---|
+| Who or what contributed this line? | Attribution linked to the actual line and commit | [Git AI comparison](/compare/selvedge-vs-git-ai/) and [git blame comparison](/compare/git-blame/) |
+| What context accompanied the change? | The saved prompt or session, with its source and capture limits | Inspect your attribution tool's current capture and retrieval documentation |
+| Why did we reject an approach? | An explicit decision, stated reason and recorded outcome | [Selvedge prior attempts](/prior-attempts/) |
+| Which changes belong to one feature? | A stable identifier joining the relevant records | [Selvedge changesets](/concepts/changeset/) |
+| How do we exchange records? | A documented format and a check of fields preserved by the recipient | [Agent Trace interchange](/compare/agent-trace/) |
+
+Git AI, for example, documents both `git ai blame` and `git ai stats --json` in its
+[README snapshot](https://github.com/git-ai-project/git-ai/blob/8a6184a3a8fc4e997ccfff3b16d79688e4255af4/README.md),
+reviewed October 22, 2026. Selvedge also provides queries, but its inputs are the
+entity decisions that an agent or person explicitly saved. Having a query CLI is
+not, by itself, a distinction between the tools.
 
 ## Why "captured live" matters
 
-AgentDiff and Origin generate reasoning *after* the change is made, by feeding the diff
-back to a second LLM call. That second call is making a guess: it sees the diff but
-not the prompt that produced the diff, not the conversation history, not the
-constraints the agent was working under.
+Recording an explanation during the work preserves the account available in that
+session. Inferring an explanation later from a diff produces a different kind of
+evidence. Keep the source and timing clear; neither method proves the explanation
+is accurate.
 
-Selvedge's reasoning is the agent's **own intent**, written from the same context
-window that produced the change. There's no inference step — and crucially, an empty
-`reasoning` field is itself a useful signal: the agent didn't have one.
-
-This isn't a hypothetical concern. The post-hoc-inference approach has a built-in
-failure mode: when the diff has multiple plausible explanations, the second LLM picks
-one. Sometimes wrongly. Sometimes confidently wrongly. By the time someone six months
-later reads "this column was added to support multi-tenancy," they have no way to know
-that it was actually added for a billing migration that touched a tangentially-related
-table — and the LLM that wrote the explanation never saw the billing context.
+Selvedge stores **stated reasoning**, not a direct observation of an agent's internal
+intent. A missing explanation is a gap in the record. It does not establish that
+there was no reason for the change. See [recorded versus inferred reasoning](/concepts/captured-live-vs-inferred/).
 
 ## Why "entity-level" matters
 
-Most tools attribute lines. Selvedge attributes things you actually search for:
-`users.email`, `env/STRIPE_SECRET_KEY`, `api/v1/checkout`, `deps/stripe`.
+Use an entity when the question concerns a project concept rather than a line
+number: a function such as `src/auth.py::login`, a column such as `users.email`, or
+a dependency such as `deps/stripe`. The [entity path reference](/reference/entity-paths/)
+shows the supported forms and matching rules.
 
-The first question after `git blame` is usually *"what's the history of this
-column?"*, not *"what's the history of lines 40–48 of users.py?"* Lines move.
-Symbols persist (until they're renamed, in which case Selvedge models the rename
-explicitly). Tooling that only thinks in lines makes you do the symbol-tracking by
-hand.
+An entity query returns recorded history for that key. It is not a code index that
+automatically discovers every reference or every previous name. Use code navigation
+and Git history alongside the decision record.
 
 ## Why "changesets" matter
 
-A Stripe billing rollout touches:
-
-- The `users` table (add `stripe_customer_id` column)
-- Two new env vars (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`)
-- Three new API routes (`/api/v1/billing/*`)
-- One new dependency (`deps/stripe`)
-- Four functions across four files
-
-Tag every event with `changeset:add-stripe-billing` and you can pull the entire scope
-back later — even if the original PR was broken into eight smaller ones over a month.
-Line-level tools have no way to express "these unrelated-looking changes are part of
-the same feature."
+A billing feature can touch a table, environment variables, routes and functions.
+Recording those events under `changeset:add-stripe-billing` lets you retrieve their
+shared context later. The grouping covers the events that were recorded with that
+tag; it does not prove that every change in the feature was captured.
 
 ## Why "prior attempts" matters
 
-Line attribution answers *"who wrote this, and roughly why."* It can't answer the
-question an agent actually has **before** it starts: *"has this been tried before, and
-how did it turn out?"* Selvedge's `prior_attempts` tool (v0.3.7) answers exactly that —
-given an entity, it returns the **alternatives that were tried and the paths that got
-rejected**, each with the original reasoning *and* the reason it was reverted. An agent
-about to re-add a column that was already pulled for a good reason finds out first, and
-changes its plan.
+Before repeating an approach, query the relevant entity for recorded rejections,
+reversions and their reasons. Selvedge's `prior_attempts` returns matching evidence
+from the store; the [tool reference](/reference/mcp-tools/) describes its filters
+and confidence labels.
 
-It's deliberately conservative: the default returns only the clear "tried, then
-reverted" signal, so an empty result is a trustworthy "nothing to worry about" rather
-than noise. No second LLM is involved — it's a templated query over the reasoning agents
-wrote live. None of the line-attribution tools surface rejected paths at all.
+**An empty result means no matching recorded evidence was found.** It is not a
+safety check, proof that the approach was never tried, or permission to ignore code,
+tests, issues and review. Check that you used the right project database and entity
+before treating the result as useful.
 
-For the worked example — an agent about to re-add a reverted auth-token column, the
-exact tool call, and the plan it chose instead — see
-[stop your agent repeating reverted mistakes](/prior-attempts/).
+The [rejection-and-revisit walkthrough](/guides/revisit-a-rejected-approach/) shows
+how to record a constraint, retrieve it, and revise the decision when the constraint
+changes. The examples illustrate the workflow; they are not customer outcomes.
 
-## What Selvedge isn't trying to be
+## Verify the workflow before relying on it
 
-Selvedge **is not**:
+1. Save one real decision with its entity, stated reason and outcome.
+2. Start a fresh session in the same project and ask for that entity's prior history.
+3. Compare the retrieved record with the saved decision and its supporting evidence.
+4. Change a constraint and check how the decision is revised or superseded.
+5. Check which records would be visible to collaborators or sent to your model provider.
 
-- **A replacement for AgentDiff if you already have it.** AgentDiff's post-hoc
-  inference is fine for codebases where you can't change the agent's tooling. If you
-  *can* — if you control the system prompt — Selvedge captures the same thing better.
-- **A code review tool.** Review-time quality is a different problem; tools like
-  CodeRabbit, Greptile, and humans are better at that.
-- **An LLM observability platform.** Call traces, token costs, model versions — those
-  are LangSmith, Helicone, etc.
-- **A code-host AI assistant.** GitHub Copilot's PR summaries answer a different
-  question than `selvedge blame`.
-
-Selvedge is the **layer that records _why_** — the thing those tools can point at but
-don't capture themselves.
-
-## What Selvedge is uniquely better at
-
-- **Knowing the agent's actual reason.** Live capture, no second-LLM guess.
-- **Surfacing what was already tried and rejected.** `prior_attempts` warns an agent
-  off a path the team already abandoned — with the reason why. No line-attribution tool
-  has an analogue.
-- **Surviving an agent session ending.** The reasoning is in your SQLite file, not in a
-  conversation that's been GC'd.
-- **Cross-file feature scope.** Changesets group changes that touch unrelated-looking
-  files.
-- **Empty-state diagnosis.** `selvedge stats` tells you which agents are silently
-  skipping `log_change`. No other tool in the category surfaces this — but it's the
-  most actionable signal you have for "is the system working".
-
-## Where the category is going
-
-[Agent Trace](https://agent-trace.dev/) (Cursor, RFC Jan 2026) is an open wire
-format for AI code attribution traces. Its original GitHub home went 404 in
-August 2026 and the multi-vendor momentum behind it faded, but the spec survives
-frozen at v0.1.0. Selvedge emits and reads it — a portable interchange format,
-not a live standard it tracks. See the [Agent Trace interop page](/compare/agent-trace/).
+Use [first-decision verification](/guides/verify-first-decision/) for the complete
+Selvedge procedure. `selvedge stats` reports observed tool calls and reasoning-quality
+signals; it cannot count edits or decisions that were never recorded. A successful
+check verifies this example and configuration, not reliable capture of all future work.
 
 ## Next
 
-- [**Agent Trace interop →**](/compare/agent-trace/)
-- [**git blame vs. selvedge blame →**](/compare/git-blame/)
-- [**Stop your agent repeating reverted mistakes →**](/prior-attempts/)
+- [Compare codebase memory servers →](/compare/codebase-memory-mcp-servers/)
+- [Compare instructions and ADRs →](/compare/instructions-and-adrs/)
+- [Connect a compatible agent →](/start/quickstart/)
+- [Review storage and sharing →](/privacy/)

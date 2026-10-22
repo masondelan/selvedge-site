@@ -62,6 +62,7 @@ function clientPage(c) {
     BANNER,
     `title: ${c.name} MCP setup`,
     `description: ${y(c.description)}`,
+    ...(c.lastUpdated ? [`lastUpdated: ${c.lastUpdated}`] : []),
     "structuredData:",
     "  type: howto",
     "  steps:",
@@ -153,6 +154,7 @@ function comparePage(cmp) {
     BANNER,
     `title: Selvedge vs. ${cmp.tool}`,
     `description: ${y(cmp.description)}`,
+    ...(cmp.lastUpdated ? [`lastUpdated: ${cmp.lastUpdated}`] : []),
     "---",
   ].join("\n");
 

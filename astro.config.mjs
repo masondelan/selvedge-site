@@ -123,7 +123,7 @@ export default defineConfig({
           items: [
             { label: "Selvedge vs. git blame", link: "/compare/git-blame/" },
             { label: "Instruction files and ADRs", link: "/compare/instructions-and-adrs/" },
-            { label: "Selvedge vs. AgentDiff & friends", link: "/compare/agent-tools/" },
+            { label: "Attribution and decision memory", link: "/compare/agent-tools/" },
             { label: "Codebase-memory servers", link: "/compare/codebase-memory-mcp-servers/" },
             { label: "Agent Trace interop", link: "/compare/agent-trace/" },
             ...compareItems,
@@ -139,7 +139,9 @@ export default defineConfig({
           ],
         },
       ],
-      lastUpdated: true,
+      // Explicit editorial dates only. Shallow deployment clones can attribute
+      // every document to the checkout commit instead of its actual update.
+      lastUpdated: false,
       pagination: true,
       tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
     }),
