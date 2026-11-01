@@ -11,14 +11,14 @@ Origin ([opsworks-co/origin-cli](https://github.com/opsworks-co/origin-cli)) cap
 |---|---|---|
 | **Reasoning source** | Explanation supplied by an agent or person; timing depends on when it was recorded | Prompt receipts, captured live per turn — prompt, diff, tokens; no stated rationale |
 | **Granularity** | **Entity** — DB column, table, env var, dep, API route, function | Line |
-| **Mechanism** | **MCP server** — the agent calls it as work happens | Agent lifecycle hooks + global git post-commit hook |
+| **Mechanism** | **MCP server** — an agent or person explicitly logs a change | Agent lifecycle hooks + global git post-commit hook |
 | **Grouping** | **Changesets** — named feature/task slugs across many entities | Branch-level `trail` view; no entity-spanning changesets |
 | **Prior attempts** | **Yes** — `prior_attempts` surfaces tried-and-rejected paths | None — `rework` flags reverted AI code post-hoc, without rationale |
 | **Storage** | SQLite | Git notes (`refs/notes/origin`) + a sessions branch; optional cloud sync |
 
 ## Where Selvedge is different
 
-- **Receipts vs. testimony.** Origin records what the prompt and the diff were — automatically, across a dozen-plus agents. Selvedge records what the agent *said it was doing and why*, from the context that had the reasoning. A receipt can tell you a change followed a prompt; it can't tell you which alternatives were weighed and killed.
+- **Receipts vs. testimony.** Origin records what the prompt and the diff were — automatically, across a dozen-plus agents. Selvedge stores a stated explanation when an agent or person records a change; its timing and source depend on that logging workflow. A receipt can tell you a change followed a prompt; it can't tell you which alternatives were weighed and killed.
 - **Rejected paths.** Origin's `rework` command detects AI code that was later reverted or heavily modified — a post-hoc diff heuristic yielding a rework-rate report, with no rationale attached and no queryable record of *why* the approach died. Selvedge's `prior_attempts` returns the tried → reverted → re-opened trail with the stated reason at each step.
 - **Entity-level granularity.** Selvedge's unit is the column / env var / route / dependency / function, with prefix queries — not lines that drift as the file evolves.
 - **Read path for the agent.** `prior_attempts`, `blame`, `diff`, and `stale_decisions` are callable by the agent mid-task, and the SessionStart digest pushes standing verdicts into new sessions. Origin's queries (`origin why`, `origin blame`, session search) are developer-facing; nothing pushes a prior verdict back into the agent's context.

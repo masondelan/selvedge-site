@@ -240,7 +240,7 @@ export const comparisons = [
     },
     differences: [
       "**Determinism is shared ground here, not a differentiator.** Against most of this category Selvedge leads on having no model in the storage or retrieval path. OpenLore is deterministic-native too \u2014 its own description is \"no LLM in the hot path\" \u2014 so that argument doesn't separate the two, and we won't pretend it does.",
-      "**Testimony vs. derivation.** OpenLore derives what it knows from the code as it stands: a static analysis can always be recomputed, so it can only ever describe the state that survived. Selvedge stores what the agent *said* at the time. Testimony is not re-derivable from the repository, which is exactly why it's worth keeping.",
+      "**Testimony vs. derivation.** OpenLore derives what it knows from the code as it stands: a static analysis can always be recomputed, so it can only ever describe the state that survived. Selvedge stores the explanation an agent or person supplied when recording a change; the record may be written during or after the work. Testimony is not re-derivable from the repository, which is exactly why it's worth keeping.",
       "**What happens to a rejected decision.** This is the sharp one. In OpenLore, `rejected` is one of the inactive statuses, and `purgeInactiveDecisions` drops those from the store after every decision sync \u2014 the annotation survives in the synced spec markdown, but the *queryable record* does not. In Selvedge the store is append-only: a rejection is a first-class, permanent, queryable fact, and `prior_attempts` is built to return it. Nothing in a purged store can answer \"has this been tried, and how did it turn out?\"",
       "**Entity granularity vs. AST node.** OpenLore's node coverage is broader across languages. Selvedge's entities are the things you search for six months later that have no AST node at all \u2014 `users.email`, `env/STRIPE_SECRET_KEY`, `deps/stripe`.",
     ],
@@ -256,9 +256,9 @@ export const comparisons = [
     // cross-agent provenance. An unfalsifiable comparison row is worse
     // than no row.
     description:
-      "Selvedge vs. AgentDiff: captured-live reasoning from the agent's own context vs. reasoning inferred post-hoc by a second LLM from the diff. Entity-level vs. line-level.",
+      "Selvedge vs. AgentDiff: explicitly recorded explanations vs. reasoning inferred afterward from a diff. Compare entity-level and line-level records.",
     summary:
-      "Both answer \"why did the agent write this?\" — but they capture the answer at opposite ends of the change. AgentDiff infers it *afterward* from the diff; Selvedge records it *as it happens*, from the agent itself.",
+      "Both address \"why did the agent write this?\" AgentDiff infers an answer afterward from the diff. Selvedge stores an explanation explicitly supplied by an agent or person, during or after the work.",
     them: {
       reasoning: "Inferred post-hoc by Claude Haiku from the diff at session end ([sunilmallya/agentdiff](https://github.com/sunilmallya/agentdiff); not to be confused with [codeprakhar25/agentdiff](https://github.com/codeprakhar25/agentdiff), which does signed cross-agent provenance)",
       granularity: "Line",
@@ -268,7 +268,7 @@ export const comparisons = [
       storage: "JSONL on disk",
     },
     differences: [
-      "**Testimony, not reconstruction.** AgentDiff feeds the finished diff to a second LLM that never saw the original prompt. What it returns may well be right — the problem is that it is *unverifiable and nonreproducible*: nothing distinguishes an accurate reconstruction from a merely plausible one, and re-running it can categorise the same change differently. Selvedge's reasoning is the agent's own words from the context that produced the change, and an empty `reasoning` is itself an honest signal.",
+      "**Testimony, not reconstruction.** AgentDiff feeds the finished diff to a second LLM that never saw the original prompt. What it returns may well be right — the problem is that it is *unverifiable and nonreproducible*: nothing distinguishes an accurate reconstruction from a merely plausible one, and re-running it can categorise the same change differently. Selvedge stores the explanation supplied with a record. It does not verify that the explanation came from the original editing context; an empty `reasoning` means no explanation was supplied.",
       "**Entity-level, not line-level.** Selvedge attributes the things you actually search for — `users.email`, `env/STRIPE_SECRET_KEY`, `deps/stripe` — so six months later you query the column, not a line range that has since moved.",
       "**Changesets.** Selvedge groups every event in a multi-file feature under one slug (`add-stripe-billing`); AgentDiff has no grouping.",
       "**It reads, too.** `prior_attempts` lets the agent ask \"was this tried and reverted?\" *before* it edits. A post-hoc capture tool only ever writes.",
@@ -295,7 +295,7 @@ export const comparisons = [
       storage: "Git notes (`refs/notes/origin`) + a sessions branch; optional cloud sync",
     },
     differences: [
-      "**Receipts vs. testimony.** Origin records what the prompt and the diff were — automatically, across a dozen-plus agents. Selvedge records what the agent *said it was doing and why*, from the context that had the reasoning. A receipt can tell you a change followed a prompt; it can't tell you which alternatives were weighed and killed.",
+      "**Receipts vs. testimony.** Origin records what the prompt and the diff were — automatically, across a dozen-plus agents. Selvedge stores a stated explanation when an agent or person records a change; its timing and source depend on that logging workflow. A receipt can tell you a change followed a prompt; it can't tell you which alternatives were weighed and killed.",
       "**Rejected paths.** Origin's `rework` command detects AI code that was later reverted or heavily modified — a post-hoc diff heuristic yielding a rework-rate report, with no rationale attached and no queryable record of *why* the approach died. Selvedge's `prior_attempts` returns the tried → reverted → re-opened trail with the stated reason at each step.",
       "**Entity-level granularity.** Selvedge's unit is the column / env var / route / dependency / function, with prefix queries — not lines that drift as the file evolves.",
       "**Read path for the agent.** `prior_attempts`, `blame`, `diff`, and `stale_decisions` are callable by the agent mid-task, and the SessionStart digest pushes standing verdicts into new sessions. Origin's queries (`origin why`, `origin blame`, session search) are developer-facing; nothing pushes a prior verdict back into the agent's context.",
@@ -308,9 +308,9 @@ export const comparisons = [
     lastUpdated: "2026-11-01",
     tool: "Git AI",
     description:
-      "Selvedge vs. Git AI: a live capture + query layer vs. git-notes attribution metadata. Selvedge adds reasoning, a query layer, and changesets, and emits the Agent Trace v0.1.0 format.",
+      "Selvedge vs. Git AI: explicitly recorded entity decisions and changesets alongside git-notes attribution metadata. See Selvedge's Agent Trace interchange support.",
     summary:
-      "Git AI stores attribution metadata in git notes under its own Git AI standard. Selvedge is complementary: it adds live reasoning capture, a query layer, and changesets, and can also emit the Agent Trace v0.1.0 record format.",
+      "Git AI stores attribution metadata in git notes under its own Git AI standard. Selvedge is complementary: it adds explicitly recorded explanations, a query layer, and changesets, and can also emit the Agent Trace v0.1.0 record format.",
     them: {
       reasoning: "Attribution metadata",
       granularity: "Line",
@@ -320,9 +320,9 @@ export const comparisons = [
       storage: "Git notes",
     },
     differences: [
-      "**Reasoning, not just attribution.** Git AI records *who/what* touched a line. Selvedge records *why*, in the agent's own words, captured live.",
+      "**Reasoning, not just attribution.** Git AI records *who/what* touched a line. Selvedge stores a supplied explanation of *why* alongside an explicitly logged change; it does not guarantee when that explanation was written.",
       "**A query layer.** `selvedge blame`, `diff`, `history`, `changeset`, and `search` are first-class. Git-notes attribution has no equivalent CLI you can pipe.",
-      "**Continuous vs. cooperative.** Git AI's own README states it does *not* rely on git hooks: the agent calls `git-ai checkpoint`, and attribution lands in git notes at commit time. That is cooperative snapshotting \u2014 it records what the agent chose to check point, when it chose to. Selvedge captures at the moment of each change.",
+      "**Capture workflow.** Git AI's own README states it does *not* rely on git hooks: the agent calls `git-ai checkpoint`, and attribution lands in git notes at commit time. That is cooperative snapshotting \u2014 it records what the agent chose to check point, when it chose to. Selvedge also depends on explicit logging; the record may be written during or after the change.",
       "**Agent Trace interop.** Selvedge also emits [Agent Trace](https://agent-trace.dev/) v0.1.0 records — see the [Agent Trace interop page](/compare/agent-trace/). (Git AI itself has since moved to its own Git AI standard rather than Agent Trace.)",
       "**Entity-level + changesets** for querying the history of a column or a whole feature, not a line.",
     ],
@@ -334,7 +334,7 @@ export const comparisons = [
     lastUpdated: "2026-11-01",
     tool: "BlamePrompt",
     description:
-      "Selvedge vs. BlamePrompt: full structured change events (entity, diff, reasoning, changeset) captured live vs. prompt-only line attribution from a git hook.",
+      "Selvedge vs. BlamePrompt: explicitly logged entity changes with supplied reasoning and changesets vs. prompt-only line attribution from a git hook.",
     summary:
       "BlamePrompt records the prompt behind a line. Selvedge records the full structured change event — entity, change type, diff, the agent's reasoning, and the changeset it belongs to — and lets the agent query it back.",
     them: {

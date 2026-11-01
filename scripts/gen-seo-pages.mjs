@@ -141,7 +141,7 @@ function clientPage(c) {
 const SELVEDGE_ROW = {
   reasoning: "Explanation supplied by an agent or person; timing depends on when it was recorded",
   granularity: "**Entity** — DB column, table, env var, dep, API route, function",
-  mechanism: "**MCP server** — the agent calls it as work happens",
+  mechanism: "**MCP server** — an agent or person explicitly logs a change",
   grouping: "**Changesets** — named feature/task slugs across many entities",
   priorAttempts: "**Yes** — `prior_attempts` surfaces tried-and-rejected paths",
   storage: "SQLite",
