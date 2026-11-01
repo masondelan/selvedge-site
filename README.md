@@ -225,9 +225,12 @@ renders it with HTTP 404 for both direct and missing-page requests. After changi
 error routing, start `npm run preview` and run
 `npm run check:not-found -- http://127.0.0.1:8787` against that local preview.
 
-The sitemap includes the same last-updated dates displayed on documentation pages;
-rebuilding does not assign today's date to every URL. The undated homepage stays
-undated. Maintain explicit `lastUpdated` values when changing a page that sets one.
+The sitemap and article metadata use the explicit `lastUpdated: YYYY-MM-DD`
+frontmatter date displayed on documentation pages. Automatic Git dates are disabled:
+a shallow checkout can make unchanged documents look newly updated. Add or update
+the date for substantive content changes; leave unknown dates unset. For generated
+comparison pages, set `lastUpdated` in the corresponding `src/data/seo.mjs` entry.
+The homepage has no visible update date and stays undated in the sitemap.
 
 After editing concepts, run `npm run sync:llms` to refresh their summaries and full
 text in `public/llms.txt` and `public/llms-full.txt`. The curated introduction remains

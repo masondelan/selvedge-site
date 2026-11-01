@@ -3,13 +3,14 @@ import { pathToFileURL } from 'node:url';
 
 /** Copy the rendered page's visible update date into its sitemap entry. */
 export function withLastModified(entry, html) {
+  const undated = entry.replace(/<lastmod>.*?<\/lastmod>/gs, '');
   const timestamp = html.match(/Last updated:\s*<time\b[^>]*datetime="([^"]+)"/)?.[1];
   // Use the date already shown to readers, never the current build time.
   // The homepage has no visible update date and is deliberately left undated.
-  if (!timestamp) return entry;
+  if (!timestamp) return undated;
   const date = new Date(timestamp);
   if (!Number.isFinite(date.getTime())) throw new Error(`Invalid page update date: ${timestamp}`);
-  return entry.replace(/<lastmod>.*?<\/lastmod>/s, '')
+  return undated
     .replace('</url>', `<lastmod>${date.toISOString()}</lastmod></url>`);
 }
 

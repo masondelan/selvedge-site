@@ -139,7 +139,9 @@ export default defineConfig({
           ],
         },
       ],
-      lastUpdated: true,
+      // Use explicit editorial dates; shallow checkouts can give unchanged pages
+      // the checkout commit's date instead of their actual content update.
+      lastUpdated: false,
       pagination: true,
       tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
     }),
