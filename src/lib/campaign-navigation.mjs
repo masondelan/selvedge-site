@@ -1,4 +1,4 @@
-import { campaignLabels, placementCampaigns } from './campaigns.mjs';
+import { browserEventAllowed, campaignLabels, placementCampaigns } from './campaigns.mjs';
 import { legacyDestination } from '../data/homepage.mjs';
 
 /** Carry only fixed labels to same-origin documentation pages, retaining the target's state. */
@@ -20,7 +20,7 @@ export function campaignLink(href, pageUrl) {
 
 const initializedPages = new WeakSet();
 
-/** One tagged page-view attempt per document, without visitor or session state. */
+/** Carry fixed labels; count only campaigns that allow automatic page views. */
 export function initializeCampaignPage(page, pageUrl, doNotTrack, track) {
   if (initializedPages.has(page)) return;
   initializedPages.add(page);
@@ -44,5 +44,7 @@ export function initializeCampaignPage(page, pageUrl, doNotTrack, track) {
     page.addEventListener(event, interaction => tagLink(interaction.target?.closest?.('a[href]')), true);
   }
   // Existing launch campaigns retain their historical homepage-only metric.
-  if (placement || current.pathname === '/') void track('landing_view', 'none');
+  if ((placement || current.pathname === '/') && browserEventAllowed(campaign, 'landing_view')) {
+    void track('landing_view', 'none');
+  }
 }

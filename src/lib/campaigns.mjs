@@ -19,19 +19,38 @@ export const placementCampaigns = Object.freeze({
   'placement-devhunt': 'DevHunt',
   'placement-cline': 'Cline',
   'placement-github-mcp-registry': 'GitHub MCP registry',
+  'placement-reddit-nov26': 'Reddit paid test — November 2026',
 });
 
 export const campaigns = new Set(['agents-sep26', 'aug26_test', 'organic', ...Object.keys(placementCampaigns)]);
-export const creatives = new Set(['next-agent', 'revisit', 'why-column', 'argument', 'wordmark', 'none']);
+const novemberCreatives = new Set(['decision-reasons', 'rejected-approaches', 'switch-tools']);
+export const creatives = new Set(['next-agent', 'revisit', 'why-column', 'argument', 'wordmark', 'none',
+  ...novemberCreatives]);
+
+/** New creative labels must not expand historical campaigns' automatic counts. */
+export function creativeAllowed(campaign, creative) {
+  return creatives.has(creative)
+    && (!novemberCreatives.has(creative) || campaign === 'placement-reddit-nov26');
+}
+
+/** November measurement is limited to a deliberately submitted recall report.
+ * Optional installation receipts have their own explicit-consent endpoint.
+ * Leave historical campaigns unchanged; this is not a whole-site consent policy.
+ */
+export function browserEventAllowed(campaign, event, consent = false) {
+  return campaign !== 'placement-reddit-nov26'
+    || (event === 'activation_reported' && consent === true);
+}
 
 export function campaignLabels(search) {
   const query = new URLSearchParams(search);
   const value = query.get('utm_campaign');
   // This fixed alias is still published on DevHunt. Normalize future browser events only.
   const campaign = value === 'launch_2026_10_06' ? 'placement-devhunt' : value;
+  const recognizedCampaign = campaigns.has(campaign) ? campaign : 'organic';
   const creative = query.get('utm_content');
   return {
-    campaign: campaigns.has(campaign) ? campaign : 'organic',
-    creative: creatives.has(creative) ? creative : 'none',
+    campaign: recognizedCampaign,
+    creative: creativeAllowed(recognizedCampaign, creative) ? creative : 'none',
   };
 }

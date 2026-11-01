@@ -26,7 +26,7 @@ function documentWithLinks(hrefs) {
 }
 
 test('placement campaign allowlist is shared, bounded and rejects arbitrary query labels', () => {
-  assert.equal(Object.keys(placementCampaigns).length, 19);
+  assert.equal(Object.keys(placementCampaigns).length, 20);
   for (const campaign of [...Object.keys(placementCampaigns), 'agents-sep26', 'aug26_test', 'organic']) {
     assert.ok(campaigns.has(campaign));
     assert.deepEqual(campaignLabels(`?utm_campaign=${campaign}&utm_content=revisit`), { campaign, creative: 'revisit' });
@@ -37,6 +37,55 @@ test('placement campaign allowlist is shared, bounded and rejects arbitrary quer
   assert.deepEqual(campaignLabels('?utm_campaign=placement-cline&utm_campaign=placement-devhunt&utm_content=arbitrary'), {
     campaign: 'placement-cline', creative: 'none',
   });
+});
+
+test('November labels propagate from homepage and direct docs without automatic page events', () => {
+  for (const creative of ['decision-reasons', 'rejected-approaches', 'switch-tools', 'none', 'revisit']) {
+    for (const path of ['/', '/start/quickstart/', '/guides/verify-first-decision/']) {
+      const campaign = 'placement-reddit-nov26';
+      const url = `${origin}${path}?utm_campaign=${campaign}&utm_content=${creative}&private=never-copy`;
+      assert.deepEqual(campaignLabels(new URL(url).search), { campaign, creative });
+      const events = [];
+      const page = documentWithLinks(['/guides/verify-first-decision/#save', 'https://github.com/masondelan/selvedge', '/api/install-receipt']);
+      const track = (event, agent) => events.push({ event, agent, ...campaignLabels(new URL(url).search) });
+      initializeCampaignPage(page, url, '0', track);
+      initializeCampaignPage(page, url, '0', track);
+      assert.deepEqual(events, []);
+      const guide = new URL(page.links[0].getAttribute('href'), origin);
+      const returned = new URL(campaignLink('/start/quickstart/?agent=codex#install', guide), origin);
+      for (const target of [guide, returned]) {
+        assert.deepEqual(campaignLabels(target.search), { campaign, creative });
+        assert.equal(target.searchParams.has('private'), false);
+      }
+      assert.equal(returned.searchParams.get('agent'), 'codex');
+      assert.equal(returned.hash, '#install');
+      assert.equal(page.links[1].getAttribute('href'), 'https://github.com/masondelan/selvedge');
+      assert.equal(page.links[2].getAttribute('href'), '/api/install-receipt');
+      for (const event of ['click', 'auxclick', 'contextmenu']) {
+        const result = documentWithLinks(['/reference/compatibility/']).links[0];
+        page.dispatch(event, result);
+        assert.deepEqual(campaignLabels(new URL(result.getAttribute('href'), origin).search), { campaign, creative });
+      }
+      assert.deepEqual(events, [], 'dynamic link propagation must not send events');
+
+      const privatePage = documentWithLinks(['/guides/verify-first-decision/']);
+      initializeCampaignPage(privatePage, url, '1', () => assert.fail('DNT must suppress Reddit events'));
+      assert.equal(privatePage.links[0].getAttribute('href'), '/guides/verify-first-decision/');
+    }
+    const redirect = legacyDestination('#choose-your-agent', `?utm_campaign=placement-reddit-nov26&utm_content=${creative}`);
+    for (const url of [`${origin}/?utm_campaign=placement-reddit-nov26&utm_content=${creative}#choose-your-agent`, new URL(redirect, origin)]) {
+      initializeCampaignPage(documentWithLinks([]), url, '0', () => assert.fail('November redirects must not send page events'));
+    }
+  }
+  for (const campaign of ['placement-reddit-nov27', 'Placement-reddit-nov26', 'placement-reddit-nov26-extra']) {
+    assert.equal(campaignLabels(`?utm_campaign=${campaign}`).campaign, 'organic');
+    initializeCampaignPage(documentWithLinks([]), `${origin}/start/quickstart/?utm_campaign=${campaign}`, '0', () => assert.fail('Unknown campaigns must not emit page-view events'));
+  }
+  for (const creative of ['decision-reasons-extra', 'Rejected-approaches', 'switch_tools']) {
+    assert.deepEqual(campaignLabels(`?utm_campaign=placement-reddit-nov26&utm_content=${creative}`), {
+      campaign: 'placement-reddit-nov26', creative: 'none',
+    });
+  }
 });
 
 test('same-origin setup and verification links retain target state and only carry fixed source labels', () => {
@@ -61,6 +110,16 @@ test('same-origin setup and verification links retain target state and only carr
   assert.equal(campaignLink(explicit, tagged), explicit);
   assert.equal(campaignLink('/start/quickstart/', `${origin}/?utm_campaign=untrusted&utm_content=revisit`), '/start/quickstart/');
   assert.equal(campaignLink('/start/quickstart/', `${origin}/?utm_campaign=placement-cline&utm_content=untrusted`), '/start/quickstart/?utm_campaign=placement-cline');
+});
+
+test('November creatives do not create new automatic attribution on legacy or unknown campaigns', () => {
+  for (const campaign of [...campaigns].filter(value => value !== 'placement-reddit-nov26').concat('unlisted')) {
+    for (const creative of ['decision-reasons', 'rejected-approaches', 'switch-tools']) {
+      assert.deepEqual(campaignLabels(`?utm_campaign=${campaign}&utm_content=${creative}`), {
+        campaign: campaign === 'unlisted' ? 'organic' : campaign, creative: 'none',
+      });
+    }
+  }
 });
 
 test('the published DevHunt alias becomes a canonical placement on home and direct quickstart visits', () => {

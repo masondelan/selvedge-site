@@ -98,7 +98,8 @@ test('all fixed placements retain attribution across optional confirmation and s
   const { db, sql } = database();
   for (const campaign of Object.keys(placementCampaigns)) {
     const placement = { ...labels, campaign };
-    assert.equal((await browserEvent(request({ ...placement, event: 'landing_view', agent: 'none' }), db)).status, 204);
+    const november = campaign === 'placement-reddit-nov26';
+    assert.equal((await browserEvent(request({ ...placement, event: 'landing_view', agent: 'none' }), db)).status, november ? 400 : 204);
     for (const consent of [undefined, false]) {
       assert.equal((await browserEvent(request({ ...placement, consent }), db, true)).status, 400);
     }
@@ -109,11 +110,11 @@ test('all fixed placements retain attribution across optional confirmation and s
     assert.equal(sql.prepare("SELECT COUNT(*) AS n FROM daily_events WHERE campaign=? AND event='install_completed'").get(campaign).n, 0);
     assert.equal((await confirmInstall(request({ token }, false, { DNT: '1' }), db)).status, 403);
     for (let i = 0; i < 2; i++) assert.equal((await confirmInstall(request({ token }, false), db)).status, 204);
-    assert.equal((await browserEvent(request({ ...placement, event: 'activation_reported' }), db)).status, 204);
+    assert.equal((await browserEvent(request({ ...placement, event: 'activation_reported', ...(november ? { consent: true } : {}) }), db)).status, 204);
     assert.deepEqual(sql.prepare('SELECT event, agent, count FROM daily_events WHERE campaign=? ORDER BY event').all(campaign).map(row => ({ ...row })), [
       { event: 'activation_reported', agent: 'codex', count: 1 },
       { event: 'install_completed', agent: 'codex', count: 1 },
-      { event: 'landing_view', agent: 'none', count: 1 },
+      ...(november ? [] : [{ event: 'landing_view', agent: 'none', count: 1 }]),
     ]);
   }
   const before = sql.prepare('SELECT COUNT(*) AS n FROM install_receipts').get().n;
@@ -141,6 +142,83 @@ test('placement report reads event totals without changing data or attributing h
   ]);
   assert.equal(sql.prepare('SELECT total_changes() AS n').get().n, before);
   sql.close();
+});
+
+test('November stores only explicitly requested confirmations and recall reports, never automatic events', async () => {
+  const { db, sql } = database();
+  const automaticEvents = ['landing_view', 'start_click', 'demo_click', 'agent_select', 'install_copy', 'setup_copy', 'prompt_copy', 'agent_docs'];
+  for (const creative of ['decision-reasons', 'rejected-approaches', 'switch-tools', 'none', 'revisit']) {
+    const reddit = { agent: 'codex', campaign: 'placement-reddit-nov26', creative };
+    const before = sql.prepare('SELECT total_changes() AS n').get().n;
+    for (const event of automaticEvents) {
+      for (const consent of [undefined, false, true]) {
+        assert.equal((await browserEvent(request({ ...reddit, event, consent }), db)).status, 400);
+      }
+    }
+    for (const consent of [undefined, false, 'true', 1, [], {}]) {
+      assert.equal((await browserEvent(request({ ...reddit, consent }), db, true)).status, 400);
+      assert.equal((await browserEvent(request({ ...reddit, event: 'activation_reported', consent }), db)).status, 400);
+    }
+    for (const headers of [{ DNT: '1' }, { Origin: 'https://other.example' }]) {
+      assert.equal((await browserEvent(request({ ...reddit, event: 'activation_reported', consent: true }, true, headers), db)).status, 403);
+      assert.equal((await browserEvent(request({ ...reddit, consent: true }, true, headers), db, true)).status, 403);
+    }
+    for (const invalid of [{ campaign: 'placement-reddit-nov27' }, { creative: `${creative}-extra` }]) {
+      assert.equal((await browserEvent(request({ ...reddit, ...invalid, event: 'activation_reported', consent: true }), db)).status, 400);
+      assert.equal((await browserEvent(request({ ...reddit, ...invalid, consent: true }), db, true)).status, 400);
+    }
+    assert.equal((await browserEvent(request({ ...reddit, agent: 'none', consent: true }), db, true)).status, 400);
+    assert.equal((await browserEvent(request({ ...reddit, event: 'install_completed' }), db)).status, 400);
+    assert.equal(sql.prepare('SELECT total_changes() AS n').get().n, before, 'rejected requests must not write events or receipts');
+
+    const issued = await browserEvent(request({ ...reddit, consent: true }), db, true);
+    assert.equal(issued.status, 200);
+    const { token } = await issued.json();
+    assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM daily_events WHERE creative=?').get(creative).n, 0, 'preparation must not count as installation or recall');
+    assert.deepEqual({ ...sql.prepare('SELECT agent, campaign, creative FROM install_receipts WHERE token=?').get(token) }, reddit);
+    const prepared = sql.prepare('SELECT total_changes() AS n').get().n;
+    for (const event of automaticEvents) {
+      assert.equal((await browserEvent(request({ ...reddit, event, consent: true }), db)).status, 400);
+    }
+    assert.equal(sql.prepare('SELECT total_changes() AS n').get().n, prepared, 'receipt preparation must not authorize automatic events');
+    assert.equal((await confirmInstall(request({ token }), db)).status, 403);
+    assert.equal((await confirmInstall(request({ token }, false, { DNT: '1' }), db)).status, 403);
+    for (let i = 0; i < 2; i++) assert.equal((await confirmInstall(request({ token }, false), db)).status, 204);
+    assert.equal(sql.prepare("SELECT COUNT(*) AS n FROM daily_events WHERE creative=? AND event='activation_reported'").get(creative).n, 0, 'confirmation must not imply recall');
+    assert.equal((await browserEvent(request({ ...reddit, event: 'activation_reported', consent: true }), db)).status, 204);
+    assert.deepEqual(sql.prepare('SELECT event, agent, campaign, creative, count FROM daily_events WHERE creative=? ORDER BY event').all(creative).map(row => ({ ...row })), [
+      { ...reddit, event: 'activation_reported', count: 1 },
+      { ...reddit, event: 'install_completed', count: 1 },
+    ]);
+    sql.prepare('UPDATE install_receipts SET expires_at = 0 WHERE token=?').run(token);
+    assert.equal((await confirmInstall(request({ token }, false), db)).status, 410);
+    assert.equal((await confirmInstall(request({ token: 'invalid' }, false), db)).status, 400);
+    assert.equal((await confirmInstall(request({ token: crypto.randomUUID() }, false), db)).status, 410);
+  }
+  assert.equal((await browserEvent(request({ agent: 'none', campaign: 'placement-reddit-nov26', creative: 'none', event: 'activation_reported', consent: true }), db)).status, 204, 'a voluntary recall report does not require a setup preset');
+  assert.equal(sql.prepare("SELECT COUNT(*) AS n FROM daily_events WHERE event NOT IN ('install_completed', 'activation_reported')").get().n, 0);
+  sql.close();
+});
+
+test('rejected November events never access D1, even when D1 is unavailable', async () => {
+  const forbidden = { prepare() { assert.fail('denied event reached D1'); }, batch() { assert.fail('denied event reached D1'); } };
+  for (const db of [forbidden, null]) {
+    for (const event of ['landing_view', 'start_click', 'demo_click', 'agent_select', 'install_copy', 'setup_copy', 'prompt_copy', 'agent_docs', 'install_completed']) {
+      assert.equal((await browserEvent(request({ agent: 'none', campaign: 'placement-reddit-nov26', creative: 'none', event, consent: true }), db)).status, 400);
+    }
+    assert.equal((await browserEvent(request({ agent: 'none', campaign: 'placement-reddit-nov26', creative: 'none', event: 'activation_reported' }), db)).status, 400);
+  }
+});
+
+test('new November creative labels cannot be written under historical or organic campaigns', async () => {
+  const forbidden = { prepare() { assert.fail('invalid creative/campaign pair reached D1'); }, batch() { assert.fail('invalid creative/campaign pair reached D1'); } };
+  for (const campaign of ['organic', 'agents-sep26', 'aug26_test', ...Object.keys(placementCampaigns).filter(value => value !== 'placement-reddit-nov26')]) {
+    for (const creative of ['decision-reasons', 'rejected-approaches', 'switch-tools']) {
+      const body = { agent: 'codex', campaign, creative, consent: true };
+      for (const event of ['setup_copy', 'activation_reported']) assert.equal((await browserEvent(request({ ...body, event }), forbidden)).status, 400);
+      assert.equal((await browserEvent(request(body), forbidden, true)).status, 400);
+    }
+  }
 });
 
 test('receipt issuance has a daily ceiling', async () => {

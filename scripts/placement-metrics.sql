@@ -2,6 +2,8 @@
 -- New tagged links only: there is no retroactive attribution of earlier submissions.
 -- Each tagged document load is a page-view event; navigation and reloads count again.
 -- These are not unique visitors, new users, or person-level conversion rates.
+-- November Reddit collects consented outcomes only: zero page views/copies means
+-- uncollected, not zero traffic; never use those columns as its denominator.
 SELECT day, campaign AS placement_campaign, agent,
   SUM(CASE WHEN event = 'landing_view' THEN count ELSE 0 END) AS tagged_page_view_events,
   SUM(CASE WHEN event = 'prompt_copy' THEN count ELSE 0 END) AS prompt_copy_events,

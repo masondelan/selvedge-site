@@ -137,8 +137,9 @@ Its data remains in Wrangler's local database; do not run it against production.
 Fixed public placement labels live in `src/lib/campaigns.mjs`. Use
 `https://selvedge.sh/?utm_campaign=placement-tensorblock` or the same label on
 `/start/quickstart/`. Recognized labels carry through same-origin documentation
-links without cookies or persistent browser storage. A tagged document load counts
-one page-view event for the new `placement-*` campaigns, including a direct
+links without cookies or persistent browser storage. Except for the November
+Reddit campaign described below, a tagged document load counts
+one page-view event for `placement-*` campaigns, including a direct
 quickstart visit; navigating or reloading counts another. Their legacy homepage
 redirects count only the destination. Existing launch campaigns retain their
 homepage-only `landing_view` behavior.
@@ -147,6 +148,24 @@ The known DevHunt URL label `launch_2026_10_06` is a fixed browser alias for
 `placement-devhunt`, so new visits through that published link use placement
 measurement. This does not reassign stored historical counts; other unknown
 labels remain `organic`.
+
+The November 2026 Reddit test uses `utm_campaign=placement-reddit-nov26` with
+one of three fixed `utm_content` labels: `decision-reasons`, `rejected-approaches`,
+or `switch-tools`. For example:
+`https://selvedge.sh/start/quickstart/?utm_campaign=placement-reddit-nov26&utm_content=decision-reasons`.
+These three creative labels are recognized only with this campaign.
+These links preserve labels for explicitly requested optional install/upgrade
+confirmations and voluntary recall reports only. The browser sends no automatic
+November page-view, click, selection or copy events, and the server rejects them
+even if they include a consent flag. A recall report requires explicit consent;
+preparing an optional install command does not enable other collection. DNT
+continues to suppress reporting. Other campaigns retain their existing behavior.
+
+There is no collected November site-visit denominator: zero page views in the
+reports means uncollected, not zero traffic. Optional outcomes are incomplete
+event signals, not unique new users, retention, verified activation or conversion
+rates. `scripts/launch-metrics.sql` separates counts by campaign and creative;
+no schema migration or historical data rewrite is needed for these labels.
 
 Read aggregate counts privately through an authenticated Wrangler session:
 
