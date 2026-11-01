@@ -222,6 +222,7 @@ args = ["--from", "selvedge", "selvedge-server"]`,
 export const comparisons = [
   {
     slug: "openlore",
+    lastUpdated: "2026-11-01",
     tool: "OpenLore",
     description:
       "Selvedge vs. OpenLore: two deterministic, local-first memory layers for coding agents. The split is testimony vs. derivation \u2014 and what each one does with a rejected decision.",
@@ -248,6 +249,7 @@ export const comparisons = [
   },
   {
     slug: "agentdiff",
+    lastUpdated: "2026-11-01",
     tool: "AgentDiff",
     // Two unrelated projects ship under this name. The row below describes
     // sunilmallya/agentdiff; codeprakhar25/agentdiff is ed25519-signed
@@ -276,6 +278,7 @@ export const comparisons = [
   },
   {
     slug: "origin",
+    lastUpdated: "2026-11-01",
     tool: "Origin",
     description:
       "Selvedge vs. Origin: stated reasoning captured through MCP vs. automatic prompt receipts from agent lifecycle hooks. Entity-level rejected paths vs. line-level git-notes attribution.",
@@ -302,6 +305,7 @@ export const comparisons = [
   },
   {
     slug: "git-ai",
+    lastUpdated: "2026-11-01",
     tool: "Git AI",
     description:
       "Selvedge vs. Git AI: a live capture + query layer vs. git-notes attribution metadata. Selvedge adds reasoning, a query layer, and changesets, and emits the Agent Trace v0.1.0 format.",
@@ -327,6 +331,7 @@ export const comparisons = [
   },
   {
     slug: "blameprompt",
+    lastUpdated: "2026-11-01",
     tool: "BlamePrompt",
     description:
       "Selvedge vs. BlamePrompt: full structured change events (entity, diff, reasoning, changeset) captured live vs. prompt-only line attribution from a git hook.",
