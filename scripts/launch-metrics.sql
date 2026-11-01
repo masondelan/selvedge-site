@@ -1,4 +1,6 @@
 -- Private operational report via authenticated Wrangler, never a public endpoint.
+-- November Reddit page views/copies are uncollected, not a traffic denominator.
+-- Optional outcomes do not establish new users, retention or conversion rates.
 SELECT day, campaign, creative,
   SUM(CASE WHEN event = 'landing_view' THEN count ELSE 0 END) AS landing_views,
   SUM(CASE WHEN event = 'setup_copy' THEN count ELSE 0 END) AS setup_copies,

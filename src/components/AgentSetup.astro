@@ -115,7 +115,7 @@ import { agents } from '../data/product.mjs';
       const button = event.currentTarget as HTMLButtonElement;
       const status = document.querySelector<HTMLElement>('[data-feedback-status]')!;
       button.disabled = true;
-      const sent = await track('activation_reported', root.dataset.selectedAgent || 'none');
+      const sent = await track('activation_reported', root.dataset.selectedAgent || 'none', true);
       status.textContent = sent ? 'Thank you — confirmation received.' : 'Could not send. Please try again.';
       button.disabled = sent;
     });

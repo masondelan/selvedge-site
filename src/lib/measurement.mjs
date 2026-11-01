@@ -1,5 +1,5 @@
 // Fixed labels only. No request headers, client addresses, URLs or project data.
-import { campaigns, creatives } from './campaigns.mjs';
+import { browserEventAllowed, campaigns, creativeAllowed } from './campaigns.mjs';
 export { campaigns, creatives } from './campaigns.mjs';
 export const agents = new Set(['none', 'codex', 'claude-code', 'cursor', 'copilot', 'gemini', 'windsurf']);
 export const events = new Set(['landing_view', 'start_click', 'demo_click', 'agent_select', 'install_copy', 'setup_copy', 'prompt_copy', 'agent_docs', 'activation_reported']);
@@ -27,7 +27,7 @@ async function readBody(request) {
 }
 
 function labels(body) {
-  return body && agents.has(body.agent) && campaigns.has(body.campaign) && creatives.has(body.creative);
+  return body && agents.has(body.agent) && campaigns.has(body.campaign) && creativeAllowed(body.campaign, body.creative);
 }
 
 const countSQL = `INSERT INTO daily_events (day, event, agent, campaign, creative, count)
@@ -41,6 +41,7 @@ export async function browserEvent(request, db, issueReceipt = false) {
   let body;
   try { body = await readBody(request); } catch (status) { return reply(typeof status === 'number' ? status : 400); }
   if (!labels(body) || (issueReceipt ? body.consent !== true || body.agent === 'none' : !events.has(body.event))) return reply(400);
+  if (!issueReceipt && !browserEventAllowed(body.campaign, body.event, body.consent)) return reply(400);
   if (!db) return reply(503);
   const day = new Date().toISOString().slice(0, 10);
   try {
