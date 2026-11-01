@@ -1,6 +1,7 @@
 ---
 title: Entity paths for code and decision history
 description: What counts as an entity, the canonical path conventions, and how prefix matching works across diff, history, and search.
+lastUpdated: 2026-11-01
 ---
 
 Most attribution tools work at the line level. Selvedge attributes things you actually
@@ -75,10 +76,15 @@ paths used to insert orphan rows that broke prefix queries. Now they fail loudly
 
 ## Renames emit two events
 
-A rename of `users.tier` to `users.subscription_tier` emits:
+Renaming code alone does not update Selvedge's entity paths. To record a rename
+from `users.tier` to `users.subscription_tier`, call `log_change` with the new path
+as `entity_path`, `change_type="rename"`, and `rename_from="users.tier"`.
+The [MCP tool reference](/reference/mcp-tools/#log_change) documents these fields.
+This writes:
 
 - A `rename` event on `users.tier`
-- A `create` event on `users.subscription_tier`
+- A `create` event on `users.subscription_tier` with `metadata.renamed_from`
+  linking it to the old path
 
 So `selvedge blame` works under both names — the new one points at the create, the old
 one points at the rename. Same pattern for SQL `RENAME COLUMN` and Alembic
@@ -87,10 +93,10 @@ actually produce a useful trail.
 
 ## Why this is at the entity level, not the line level
 
-The first question after `git blame` is usually *"what's the history of this column?"*,
-not *"what's the history of lines 40–48 of users.py?"*. Lines move. Symbols move
-between files. Columns get renamed. Selvedge follows the symbol through those moves —
-git follows the line.
+An entity path lets you ask *"what's the recorded history of this column?"* without
+knowing its current line number. Lines and symbols can move, so keep paths
+consistent and record rename relationships explicitly. Selvedge queries those
+records; it does not automatically discover every symbol move in your code.
 
 Selvedge isn't trying to replace `git blame`; the two answer different questions. The
 diff stays git's job. The why-and-where-of-the-thing stays Selvedge's.

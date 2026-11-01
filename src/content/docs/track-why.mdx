@@ -1,6 +1,7 @@
 ---
 title: The MCP server that tracks why your AI agent changed code
 description: Selvedge records stated reasoning for code decisions through MCP or CLI, stores it in local SQLite, and retrieves it later with blame and prior_attempts.
+lastUpdated: 2026-11-01
 structuredData:
   type: techarticle
   # Answers below are verbatim plain-text copies (markdown stripped) of the
@@ -9,26 +10,30 @@ structuredData:
   faq:
     - question: What MCP server tracks why an AI agent changed code?
       answer: >-
-        Selvedge. It's a local MCP server the agent calls as it works —
-        log_change records what changed and why, in the agent's own words, at
-        the moment of the change. Later, selvedge blame <entity> returns the
-        most recent change and its reasoning.
+        Selvedge records the change and explanation supplied to log_change
+        by an agent or person. Calling it during the work can preserve context
+        before the session ends. Later, selvedge blame <entity> returns the
+        most recent recorded change and its explanation.
     - question: Is the reasoning inferred from the diff by a second model?
       answer: >-
-        No. The agent writes the reasoning itself, live, from the same context
-        window that produced the change. Nothing is reconstructed after the
-        fact, and there is no LLM anywhere in Selvedge's core.
+        Selvedge's core does not use an LLM to infer an explanation from a diff.
+        It stores the explanation supplied by its caller. That explanation may
+        be recorded during the work, imported, or written later; preserve its
+        source and timing, and review it against the available evidence.
     - question: How is this different from git blame or line-attribution tools?
       answer: >-
-        git blame and line-attribution tools (Git AI, Entire, AgentDiff) answer
-        who or which model touched which line. Selvedge answers why the change
-        was made — reasoning is attached to entities like users.email, so it
-        survives reformatting and renames.
+        git blame connects lines to commits and authors. Attribution tools may
+        also retain prompts or session context; inspect what each tool records.
+        Selvedge stores supplied explanations against entities such as users.email.
+        To link history across a rename, explicitly record the new entity path
+        with change_type="rename" and rename_from set to the previous path.
     - question: What happens to changes made before Selvedge was installed?
       answer: >-
-        They have no logged reasoning — Selvedge doesn't guess. You can
-        backfill schema history with selvedge import, which reads SQL DDL,
-        Alembic migrations, and Agent Trace records.
+        Selvedge cannot recover reasoning that was never preserved. selvedge
+        import can read SQL DDL, Alembic migrations, and Agent Trace records.
+        Imported records and later explanations should retain their source
+        and timing; they are not evidence that a reason was recorded during
+        the original change.
     - question: Which AI coding tools does it work with?
       answer: >-
         Selvedge setup supports Claude Code, Codex, Copilot, Cursor, Gemini CLI,
@@ -38,7 +43,7 @@ structuredData:
         other MCP clients can be configured manually.
 ---
 
-Six months from now, someone will look at a change your AI agent made today and ask the only question that matters: *why is it like this?* The diff is in git. The prompt, the constraint that forced the approach, the alternative that was rejected — those lived in a chat window that no longer exists. Selvedge is an open-source MCP server that closes that gap: the agent logs the *why* at the moment it makes the change, and anyone (human or agent) can query it later.
+Six months from now, someone may look at a change your AI agent made today and ask: *why is it like this?* The diff is in git, while the constraint or rejected alternative may have stayed in a chat window. Selvedge is an open-source MCP server and CLI for preserving that stated context: an agent or person records an explanation, then retrieves it in a later session.
 
 ## The `_v2` nobody can explain
 
@@ -82,12 +87,12 @@ Here, reasoning means the explanation explicitly supplied by the agent or person
 
 ## Things people try first
 
-| Approach | What you get | Where it breaks |
+| Approach | What you get | What to check |
 |---|---|---|
-| Commit messages | Whatever the agent generated — usually `Update schema` | The why rarely survives; and it's keyed to commits, not to the entity you're staring at |
-| `git blame` | Who touched the line, when | Attribution, not intent — and it dies on reformat/rename |
-| [Line-attribution tools](/compare/agent-tools/) (Git AI, Entire, AgentDiff) | Which model wrote which line, sometimes a session pointer | Still answers *who/what*. The reasoning, if kept at all, is inferred post-hoc or buried in a transcript |
-| Selvedge | The agent's own reasoning, captured live, queryable per entity | Only knows what was logged — pre-install history needs `selvedge import` |
+| Commit messages | A committed explanation alongside the patch | Whether the message records the constraint and alternatives you need |
+| [`git blame`](/compare/git-blame/) | Line attribution to commits and authors, including whole-file rename tracking | Whether the linked commit contains an explanation; move and whitespace options can help trace changes |
+| [Attribution tools](/compare/agent-tools/) | Attribution and, depending on the tool, linked prompts or session context | What the integration captures, what can be queried later, and what is shared |
+| Selvedge | Supplied explanations and outcomes, queryable by entity | Whether the decision was logged, its source and timing, and whether the explanation is supported |
 
 ## What Selvedge is
 
@@ -108,19 +113,19 @@ Capture is half the loop. The other half: before editing an entity, the agent ca
 
 **What MCP server tracks why an AI agent changed code?**
 
-Selvedge. It's a local MCP server the agent calls as it works — `log_change` records what changed and why, in the agent's own words, at the moment of the change. Later, `selvedge blame <entity>` returns the most recent change and its reasoning.
+Selvedge records the change and explanation supplied to `log_change` by an agent or person. Calling it during the work can preserve context before the session ends. Later, `selvedge blame <entity>` returns the most recent recorded change and its explanation.
 
 **Is the reasoning inferred from the diff by a second model?**
 
-No. The agent writes the reasoning itself, live, from the same context window that produced the change. Nothing is reconstructed after the fact, and there is no LLM anywhere in Selvedge's core.
+Selvedge's core does not use an LLM to infer an explanation from a diff. It stores the explanation supplied by its caller. That explanation may be recorded during the work, imported, or written later; preserve its source and timing, and review it against the available evidence.
 
 **How is this different from git blame or line-attribution tools?**
 
-`git blame` and line-attribution tools (Git AI, Entire, AgentDiff) answer who or which model touched which line. Selvedge answers *why* the change was made — reasoning is attached to entities like `users.email`, so it survives reformatting and renames.
+`git blame` connects lines to commits and authors. Attribution tools may also retain prompts or session context; inspect what each tool records. Selvedge stores supplied explanations against entities such as `users.email`. To link history across a rename, explicitly record the new entity path with `change_type="rename"` and `rename_from` set to the previous path.
 
 **What happens to changes made before Selvedge was installed?**
 
-They have no logged reasoning — Selvedge doesn't guess. You can backfill schema history with `selvedge import`, which reads SQL DDL, Alembic migrations, and Agent Trace records.
+Selvedge cannot recover reasoning that was never preserved. `selvedge import` can read SQL DDL, Alembic migrations, and Agent Trace records. Imported records and later explanations should retain their source and timing; they are not evidence that a reason was recorded during the original change.
 
 **Which AI coding tools does it work with?**
 
